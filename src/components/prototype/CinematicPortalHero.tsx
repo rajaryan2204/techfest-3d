@@ -372,7 +372,7 @@ export default function CinematicPortalHero() {
       >
         {/* Stage 1: 3D Earth Globe Rotating to India & Locking Target */}
         <div
-          className={`absolute inset-0 w-full h-full transition-opacity duration-700 ${
+          className={`absolute inset-0 w-full h-full transition-opacity duration-500 ${
             currentStage === 1 ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
           }`}
         >
@@ -392,7 +392,7 @@ export default function CinematicPortalHero() {
           onTimeUpdate={handleDroneTimeUpdate}
           onEnded={handleDroneEnded}
           poster="/videos/hero/earth-zoom-drone-poster.jpg"
-          className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ${
+          className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-500 ${
             currentStage !== 1 ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
         >

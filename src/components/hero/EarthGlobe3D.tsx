@@ -23,32 +23,20 @@ export default function EarthGlobe3D({
   const rotationStateRef = useRef({
     hasLocked: false,
     indiaFacing: false,
-    isZoomingAnim: false,
   });
-
-  const zoomProgressRef = useRef(0);
-  const hasTriggeredParentRef = useRef(false);
 
   // Synchronize external isZooming prop
   useEffect(() => {
     if (isZooming && !isActiveZooming) {
       setIsActiveZooming(true);
       setIsLocked(true);
-      rotationStateRef.current.isZoomingAnim = true;
     }
   }, [isZooming, isActiveZooming]);
-
-  useEffect(() => {
-    if (isActiveZooming) {
-      rotationStateRef.current.isZoomingAnim = true;
-    }
-  }, [isActiveZooming]);
 
   const handleTriggerZoom = () => {
     if (isActiveZooming) return;
     setIsLocked(true);
     setIsActiveZooming(true);
-    rotationStateRef.current.isZoomingAnim = true;
     onInitiateZoom();
   };
 
@@ -182,25 +170,6 @@ export default function EarthGlobe3D({
       } else {
         // Very subtle micro-drift once locked so Earth feels alive but stays on India
         earthMesh.rotation.y = targetIndiaY + Math.sin(Date.now() * 0.0005) * 0.015;
-      }
-
-      // Smooth 3D Camera Zoom into India
-      if (rotationStateRef.current.isZoomingAnim) {
-        zoomProgressRef.current = Math.min(1.0, zoomProgressRef.current + 0.022);
-        const p = zoomProgressRef.current;
-        // Cubic ease-in-out
-        const ease = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-
-        camera.position.z = 6.8 - ease * 4.45; // Zooms from 6.8 down to 2.35
-        camera.position.y = 0.2 + ease * 0.28; // Tilts toward India's latitude
-        sunLight.intensity = 2.4 + ease * 1.5; // Brightens as entering atmosphere
-
-        if (p >= 1.0 && !hasTriggeredParentRef.current) {
-          hasTriggeredParentRef.current = true;
-          setTimeout(() => {
-            onInitiateZoom();
-          }, 250);
-        }
       }
 
       renderer.render(scene, camera);
