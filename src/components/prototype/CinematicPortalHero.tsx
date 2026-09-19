@@ -1,0 +1,936 @@
+"use client";
+
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import gsap from "gsap";
+import SampleEventsModal from "./SampleEventsModal";
+import SampleCampusTourModal from "./SampleCampusTourModal";
+import SampleScheduleModal from "./SampleScheduleModal";
+
+type ModalType = "register" | "events" | "tour" | "schedule" | null;
+
+export default function CinematicPortalHero() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sceneWrapRef = useRef<HTMLDivElement>(null);
+  const textGroupRef = useRef<HTMLDivElement>(null);
+  const topNavRef = useRef<HTMLElement>(null);
+  const scrollIndicatorRef = useRef<HTMLDivElement>(null);
+  const telemetryPillRef = useRef<HTMLDivElement>(null);
+  const altitudeTextRef = useRef<HTMLSpanElement>(null);
+  const stageBadgeRef = useRef<HTMLSpanElement>(null);
+
+  // Video references
+  const droneVideoRef = useRef<HTMLVideoElement>(null);
+  const preloaderVideoRef = useRef<HTMLVideoElement>(null);
+  const preloaderWrapRef = useRef<HTMLDivElement>(null);
+
+  // Preloader & Narrative Lifecycle States
+  const [isPreloaderActive, setIsPreloaderActive] = useState(true);
+  const [preloaderProgress, setPreloaderProgress] = useState(14);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasStartedStory, setHasStartedStory] = useState(false);
+  const [currentStage, setCurrentStage] = useState<1 | 2 | 3 | 4>(1);
+
+  // UI States
+  const [audioActive, setAudioActive] = useState(false);
+  const [activeModal, setActiveModal] = useState<ModalType>(null);
+  const [selectedEventForReg, setSelectedEventForReg] = useState<string>("");
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Toast notification helper
+  const showToast = useCallback((msg: string) => {
+    setToastMessage(msg);
+    const t = setTimeout(() => {
+      setToastMessage((prev) => (prev === msg ? null : prev));
+    }, 3200);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Preloader progress counter simulation with high responsiveness
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPreloaderProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setIsLoaded(true);
+          return 100;
+        }
+        const step = Math.floor(Math.random() * 20) + 12;
+        const next = prev + step;
+        if (next >= 100) {
+          setIsLoaded(true);
+          return 100;
+        }
+        return next;
+      });
+    }, 180);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Guarantee iOS Safari / Android muted autoplay on mount for both videos
+  useEffect(() => {
+    if (preloaderVideoRef.current) {
+      preloaderVideoRef.current.muted = true;
+      preloaderVideoRef.current.defaultMuted = true;
+      preloaderVideoRef.current.play().catch(() => {});
+    }
+    if (droneVideoRef.current) {
+      droneVideoRef.current.muted = true;
+      droneVideoRef.current.defaultMuted = true;
+    }
+  }, []);
+
+  const [isFadingOut, setIsFadingOut] = useState(false);
+
+  // Transition from Preloader to Main Story Video
+  const handleEnterExperience = useCallback(() => {
+    if (hasStartedStory) return;
+    setHasStartedStory(true);
+    setIsFadingOut(true);
+
+    const vid = droneVideoRef.current;
+    if (vid) {
+      vid.currentTime = 0;
+      vid.muted = !audioActive;
+      vid.play().catch(() => setIsPaused(true));
+    }
+
+    setTimeout(() => {
+      setIsPreloaderActive(false);
+    }, 650);
+
+    showToast("🚀 Initiating Earth Descent to SLIET Longowal");
+  }, [hasStartedStory, audioActive, showToast]);
+
+  // Auto-launch once loaded (gives user 1.4s to appreciate rotating Earth before smooth take-off)
+  useEffect(() => {
+    if (isLoaded && !hasStartedStory) {
+      const autoTimer = setTimeout(() => {
+        handleEnterExperience();
+      }, 1400);
+      return () => clearTimeout(autoTimer);
+    }
+  }, [isLoaded, hasStartedStory, handleEnterExperience]);
+
+  // Video playback & 4-Stage Telemetry tracking
+  const handleDroneTimeUpdate = () => {
+    const vid = droneVideoRef.current;
+    if (!vid) return;
+
+    if (isPaused) setIsPaused(false);
+
+    const t = vid.currentTime;
+
+    // Stage 1: Earth Orbit to India Subcontinent (0.0s - 1.8s)
+    if (t < 1.8) {
+      if (currentStage !== 1) setCurrentStage(1);
+      if (altitudeTextRef.current) {
+        const alt = Math.round(35786 - (t / 1.8) * 34500);
+        altitudeTextRef.current.textContent = `${alt.toLocaleString()} KM`;
+      }
+      if (stageBadgeRef.current) {
+        stageBadgeRef.current.textContent = "ORBITAL DESCENT";
+      }
+    }
+    // Stage 2: Atmosphere to Person Gazing at Sky & Cosmic Portal (1.8s - 3.2s)
+    else if (t < 3.2) {
+      if (currentStage !== 2) setCurrentStage(2);
+      if (altitudeTextRef.current) {
+        const progress = (t - 1.8) / 1.4;
+        const alt = Math.round(1286 - progress * 1036);
+        altitudeTextRef.current.textContent = `${alt.toLocaleString()} M`;
+      }
+      if (stageBadgeRef.current) {
+        stageBadgeRef.current.textContent = "HUMAN INTERFACE";
+      }
+    }
+    // Stage 3: Match-cut to SLIET Auditorium Campus Approach (3.2s - 4.6s)
+    else if (t < 4.6) {
+      if (currentStage !== 3) setCurrentStage(3);
+      if (altitudeTextRef.current) {
+        const progress = (t - 3.2) / 1.4;
+        const alt = Math.round(250 - progress * 155);
+        altitudeTextRef.current.textContent = `${alt.toLocaleString()} M AGL`;
+      }
+      if (stageBadgeRef.current) {
+        stageBadgeRef.current.textContent = "CAMPUS REVEAL";
+      }
+    }
+    // Stage 4: Live Sweeping Campus Airspace (4.6s - 6.5s)
+    else {
+      if (currentStage !== 4) setCurrentStage(4);
+      if (altitudeTextRef.current) {
+        altitudeTextRef.current.textContent = "45M AGL";
+      }
+      if (stageBadgeRef.current) {
+        stageBadgeRef.current.textContent = "LIVE CAMPUS NEXUS";
+      }
+    }
+
+    // Seamless campus aerial loop: 6.40s -> 4.60s (smooth continuous campus drone flight)
+    if (t >= 6.4) {
+      vid.currentTime = 4.6;
+      vid.play().catch(() => {});
+    }
+  };
+
+  const handleDroneEnded = () => {
+    const vid = droneVideoRef.current;
+    if (!vid) return;
+    vid.currentTime = 4.6;
+    vid.play().catch(() => {});
+  };
+
+  const replayZoom = () => {
+    const vid = droneVideoRef.current;
+    if (!vid) return;
+    vid.currentTime = 0;
+    vid.play().catch(() => {});
+    setIsPaused(false);
+    showToast("🚀 Replaying Hyper-Descent from Earth Orbit");
+  };
+
+  const handleResumePlayback = () => {
+    const vid = droneVideoRef.current;
+    if (!vid) return;
+    vid.play().then(() => setIsPaused(false)).catch(() => {});
+  };
+
+  // Audio Toggle
+  const toggleAudio = () => {
+    const newActive = !audioActive;
+    setAudioActive(newActive);
+
+    const vid = droneVideoRef.current;
+    if (vid) {
+      vid.muted = !newActive;
+      if (newActive) {
+        vid.volume = 0.85;
+        vid.play().catch(() => {});
+      }
+    }
+    showToast(newActive ? "🔊 Audio Active" : "🔇 Audio Muted");
+  };
+
+  const handleDownloadRulebook = () => {
+    showToast("📄 TechFEST'26 Official Rulebook Downloaded!");
+  };
+
+  const handleSelectEvent = (eventName: string) => {
+    setSelectedEventForReg(eventName);
+    setActiveModal("register");
+    showToast(`🏆 Pre-filling registration: ${eventName}`);
+  };
+
+  const handleFocusAuditorium = () => {
+    const vid = droneVideoRef.current;
+    if (!vid) return;
+    vid.currentTime = 4.6;
+    vid.play().catch(() => {});
+    showToast("🎯 Focused Drone Camera on SLIET Auditorium");
+  };
+
+  // =========================================================================
+  // ZERO RE-RENDER HARDWARE-ACCELERATED PARALLAX LOOP (60-120 FPS)
+  // Supports Desktop Mouse + Mobile Touch + Mobile Gyroscope + Ambient Drift!
+  // =========================================================================
+  useEffect(() => {
+    let currentX = 0;
+    let currentY = 0;
+    let targetX = 0;
+    let targetY = 0;
+    let animId: number;
+    let clock = 0;
+
+    const onMouseMove = (e: MouseEvent) => {
+      const { innerWidth, innerHeight } = window;
+      targetX = (e.clientX / innerWidth - 0.5) * 2;
+      targetY = (e.clientY / innerHeight - 0.5) * 2;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        targetX = (touch.clientX / window.innerWidth - 0.5) * 1.5;
+        targetY = (touch.clientY / window.innerHeight - 0.5) * 1.5;
+      }
+    };
+
+    const onTouchEnd = () => {
+      targetX = 0;
+      targetY = 0;
+    };
+
+    const onDeviceOrientation = (e: DeviceOrientationEvent) => {
+      if (e.gamma !== null && e.beta !== null) {
+        targetX = Math.max(-1, Math.min(1, e.gamma / 25));
+        targetY = Math.max(-1, Math.min(1, (e.beta - 40) / 25));
+      }
+    };
+
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    window.addEventListener("deviceorientation", onDeviceOrientation, { passive: true });
+
+    const timer = setTimeout(() => {
+      if (droneVideoRef.current && droneVideoRef.current.paused && !isPreloaderActive) {
+        setIsPaused(true);
+      }
+    }, 1500);
+
+    const lerp = () => {
+      clock += 0.02;
+      const driftX = Math.sin(clock * 0.6) * 0.12;
+      const driftY = Math.cos(clock * 0.45) * 0.09;
+
+      const finalX = targetX + driftX;
+      const finalY = targetY + driftY;
+
+      currentX += (finalX - currentX) * 0.05;
+      currentY += (finalY - currentY) * 0.05;
+
+      if (sceneWrapRef.current) {
+        sceneWrapRef.current.style.transform = `perspective(1000px) rotateX(${
+          currentY * -1.0
+        }deg) rotateY(${currentX * 1.3}deg) scale(1.02) translate3d(${
+          currentX * -5
+        }px, ${currentY * -4}px, 0)`;
+      }
+
+      if (textGroupRef.current) {
+        textGroupRef.current.style.transform = `translate3d(${
+          currentX * -10
+        }px, ${currentY * -7}px, 0)`;
+      }
+
+      animId = requestAnimationFrame(lerp);
+    };
+
+    animId = requestAnimationFrame(lerp);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
+      window.removeEventListener("deviceorientation", onDeviceOrientation);
+      cancelAnimationFrame(animId);
+    };
+  }, [isPreloaderActive]);
+
+  // Entrance animations are now handled via performant CSS transitions tied to !isPreloaderActive
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative w-full min-h-[100dvh] h-[100dvh] overflow-hidden bg-[#020817] text-white select-none font-sans"
+    >
+      {/* ========================================================================= */}
+      {/* 0. INTERACTIVE EARTH PRELOADER (Seamless Loop While Screen Loads)          */}
+      {/* ========================================================================= */}
+      {isPreloaderActive && (
+        <div
+          ref={preloaderWrapRef}
+          className={`fixed inset-0 z-50 flex flex-col justify-between p-5 sm:p-12 bg-[#020817] text-white overflow-hidden transition-all duration-700 select-none ${
+            isFadingOut ? "opacity-0 scale-105 pointer-events-none" : "opacity-100 scale-100"
+          }`}
+        >
+          {/* Seamless Looping Rotating Earth Video (Ultra-Lightweight ~186 KB) */}
+          <video
+            ref={preloaderVideoRef}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            poster="/videos/hero/earth-rotate-poster.jpg"
+            className="absolute inset-0 w-full h-full object-cover object-center opacity-85"
+          >
+            <source src="/videos/hero/earth-rotate-loop.mp4" type="video/mp4" />
+          </video>
+
+          {/* Sci-Fi Atmospheric Vignette Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#020817] via-transparent to-[#020817]/85 pointer-events-none" />
+          <div className="absolute inset-0 bg-radial from-transparent via-[#020817]/40 to-[#020817]/90 pointer-events-none" />
+
+          {/* Top HUD Telemetry */}
+          <div className="relative z-10 flex items-center justify-between w-full pt-[max(0.5rem,env(safe-area-inset-top))]">
+            <div className="flex items-center gap-3">
+              <div className="w-2.5 h-2.5 rounded-full bg-[#00D9FF] animate-ping" />
+              <span className="font-mono text-xs sm:text-sm tracking-[0.25em] text-[#00D9FF] uppercase font-bold">
+                TECHFEST&apos;26 // ORBITAL INITIALIZATION
+              </span>
+            </div>
+            <div className="font-mono text-[10px] sm:text-xs tracking-[0.2em] text-neutral-400 hidden sm:block">
+              30.7391° N, 76.6888° E • ALT 35,786 KM
+            </div>
+          </div>
+
+          {/* Center Reticle / Scanner Overlay */}
+          <div className="relative z-10 my-auto flex flex-col items-center text-center space-y-5 sm:space-y-6 max-w-lg mx-auto">
+            {/* Rotating Target HUD Reticle */}
+            <div className="relative w-44 h-44 sm:w-60 sm:h-60 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full border border-[#00D9FF]/30 animate-[spin_12s_linear_infinite]" />
+              <div className="absolute inset-2 rounded-full border border-dashed border-[#00D9FF]/50 animate-[spin_20s_linear_infinite_reverse]" />
+              <div className="absolute inset-6 rounded-full border border-white/10" />
+              <div className="absolute w-1.5 h-1.5 rounded-full bg-[#00D9FF] top-0 shadow-[0_0_12px_#00D9FF]" />
+              <div className="absolute w-1.5 h-1.5 rounded-full bg-[#00D9FF] bottom-0 shadow-[0_0_12px_#00D9FF]" />
+
+              {/* Centered Percentage Telemetry */}
+              <div className="flex flex-col items-center justify-center font-mono">
+                <span className="text-3xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-[#00D9FF] to-[#008CFF] drop-shadow-[0_0_20px_rgba(0,217,255,0.7)]">
+                  {Math.round(preloaderProgress)}%
+                </span>
+                <span className="text-[9px] sm:text-[10px] tracking-[0.25em] text-[#00D9FF]/90 uppercase mt-1">
+                  {preloaderProgress < 100 ? "ACQUIRING TELEMETRY" : "UPLINK ESTABLISHED"}
+                </span>
+              </div>
+            </div>
+
+            {/* Status Message & Progress Bar */}
+            <div className="w-full max-w-xs sm:max-w-sm space-y-2">
+              <div className="flex justify-between text-[10px] font-mono tracking-widest text-neutral-300">
+                <span>QUANTUM NEXUS</span>
+                <span className="text-[#00D9FF]">{preloaderProgress < 100 ? "SYNCING..." : "READY"}</span>
+              </div>
+              <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden border border-white/15">
+                <div
+                  className="h-full bg-gradient-to-r from-[#00D9FF] via-[#38bdf8] to-[#008CFF] transition-all duration-150 ease-out shadow-[0_0_10px_#00D9FF]"
+                  style={{ width: `${preloaderProgress}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Enter Nexus / Launch Button */}
+            <div className="pt-2">
+              {isLoaded ? (
+                <button
+                  onClick={handleEnterExperience}
+                  className="group inline-flex items-center gap-3 px-7 sm:px-10 py-3.5 sm:py-4 rounded-full bg-gradient-to-r from-[#00D9FF] to-[#008CFF] active:scale-95 text-[#020817] font-mono text-xs sm:text-sm font-extrabold tracking-[0.2em] uppercase shadow-[0_0_40px_rgba(0,217,255,0.8)] transition-all duration-200 cursor-pointer animate-pulse min-h-[48px]"
+                >
+                  <span>▶ ENTER TECHFEST&apos;26</span>
+                  <span className="group-hover:translate-x-1 transition-transform">→</span>
+                </button>
+              ) : (
+                <div className="text-[10px] sm:text-[11px] font-mono tracking-[0.2em] text-neutral-400 animate-pulse">
+                  SCANNING CONTINENTAL VECTOR...
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Bottom Telemetry Footer */}
+          <div className="relative z-10 flex items-center justify-between w-full text-[9px] sm:text-[10px] font-mono text-neutral-400 tracking-widest pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+            <span>SANT LONGOWAL INSTITUTE OF ENGINEERING &amp; TECHNOLOGY</span>
+            <span>09 • 10 OCTOBER 2026</span>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 1. CINEMATIC STORY VIDEO BACKGROUND (Ultra-Lightweight Master Streams)     */}
+      {/* ========================================================================= */}
+      <div
+        ref={sceneWrapRef}
+        style={{ willChange: "transform" }}
+        className="absolute inset-0 w-full h-full origin-center pointer-events-none overflow-hidden"
+      >
+        <video
+          ref={droneVideoRef}
+          autoPlay
+          muted={!audioActive}
+          playsInline
+          preload="auto"
+          onTimeUpdate={handleDroneTimeUpdate}
+          onEnded={handleDroneEnded}
+          poster="/videos/hero/techfest-story-poster.jpg?v=3"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        >
+          {/* Mobile receives ultra-lightweight 720p master stream (~1.9 MB) */}
+          <source
+            src="/videos/hero/techfest-story-master-720p.mp4?v=3"
+            media="(max-width: 768px)"
+            type="video/mp4"
+          />
+          {/* Desktop receives crisp 1080p master stream (~5.2 MB) */}
+          <source src="/videos/hero/techfest-story-master-1080p.mp4?v=3" type="video/mp4" />
+        </video>
+      </div>
+
+      {/* Low-Power Mode / Autoplay Blocked Fallback Tap-To-Play Button */}
+      {isPaused && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-auto bg-black/40 backdrop-blur-xs">
+          <button
+            onClick={handleResumePlayback}
+            className="flex items-center gap-3 px-6 py-3 rounded-full bg-[#00D9FF]/90 text-[#020817] font-mono text-xs font-bold tracking-widest uppercase shadow-[0_0_35px_rgba(0,217,255,0.7)] animate-bounce cursor-pointer"
+          >
+            <span>▶</span>
+            <span>TAP TO START LIVE STREAM</span>
+          </button>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 2. CINEMATIC GRADIENT OVERLAYS (Protects Contrast & Typography)             */}
+      {/* ========================================================================= */}
+      <div className="absolute inset-y-0 left-0 w-full sm:w-[52%] md:w-[44%] bg-gradient-to-r from-[#020817]/90 via-[#020817]/40 to-transparent pointer-events-none z-10" />
+      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#020817]/80 to-transparent pointer-events-none z-10" />
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#020817]/85 to-transparent pointer-events-none z-10" />
+
+      {/* ========================================================================= */}
+      {/* 3. MOBILE-OPTIMIZED PROFESSIONAL NAVBAR & DRAWER                          */}
+      {/* ========================================================================= */}
+      <header
+        ref={topNavRef}
+        className={`absolute top-0 left-0 right-0 z-30 px-4 sm:px-12 py-3 sm:py-4 flex items-center justify-between border-b border-white/10 bg-[#020817]/60 backdrop-blur-md transition-all duration-700 delay-150 ${
+          !isPreloaderActive ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
+        }`}
+      >
+        {/* Brand Mark */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#00D9FF]/10 border border-[#00D9FF]/30 flex items-center justify-center text-[#00D9FF] shadow-[0_0_15px_rgba(0,217,255,0.2)]">
+            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L14.5 8.5L21.5 9.5L16.5 14.5L18 21.5L12 17.5L6 21.5L7.5 14.5L2.5 9.5L9.5 8.5L12 2Z" />
+            </svg>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs sm:text-sm font-bold tracking-[0.2em] sm:tracking-[0.25em] text-white uppercase font-mono">
+              techFEST&apos;26
+            </span>
+            <span className="text-[8px] sm:text-[9px] tracking-[0.25em] sm:tracking-[0.3em] text-[#00D9FF]/80 uppercase font-mono">
+              SLIET LONGOWAL
+            </span>
+          </div>
+        </div>
+
+        {/* Center: Desktop Nav Links (Hidden on Mobile) */}
+        <nav className="hidden lg:flex items-center gap-7 text-xs font-mono tracking-[0.2em] uppercase">
+          <button
+            onClick={() => setActiveModal("events")}
+            className="text-neutral-300 hover:text-[#00D9FF] transition-colors cursor-pointer"
+          >
+            EVENTS
+          </button>
+          <button
+            onClick={() => setActiveModal("schedule")}
+            className="text-neutral-300 hover:text-[#00D9FF] transition-colors cursor-pointer"
+          >
+            SCHEDULE
+          </button>
+          <button
+            onClick={() => setActiveModal("tour")}
+            className="text-neutral-300 hover:text-[#00D9FF] transition-colors cursor-pointer"
+          >
+            CAMPUS TOUR
+          </button>
+          <button
+            onClick={handleDownloadRulebook}
+            className="text-neutral-300 hover:text-[#00D9FF] transition-colors cursor-pointer"
+          >
+            RULEBOOK
+          </button>
+        </nav>
+
+        {/* Right Actions: Audio Toggle, Register CTA, & Mobile Hamburger */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Audio Button */}
+          <button
+            onClick={toggleAudio}
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-white/15 bg-white/5 hover:bg-white/10 text-[9px] sm:text-[10px] font-mono tracking-wider text-neutral-300 hover:text-white transition-all cursor-pointer min-h-[36px]"
+            title="Toggle Live Audio"
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                audioActive ? "bg-emerald-400 animate-pulse" : "bg-neutral-500"
+              }`}
+            />
+            <span className="hidden xs:inline">{audioActive ? "SOUND ON" : "AUDIO"}</span>
+            <span className="xs:hidden">{audioActive ? "🔊" : "🔇"}</span>
+          </button>
+
+          {/* Quick Register CTA */}
+          <button
+            onClick={() => {
+              setSelectedEventForReg("");
+              setActiveModal("register");
+            }}
+            className="px-3.5 sm:px-5 py-1 sm:py-1.5 rounded-full border border-[#00D9FF]/80 bg-[#06152D]/80 hover:bg-[#008CFF]/30 text-[11px] sm:text-xs font-mono tracking-[0.15em] sm:tracking-[0.2em] uppercase text-[#00D9FF] hover:text-white shadow-[0_0_15px_rgba(0,217,255,0.25)] transition-all cursor-pointer min-h-[36px]"
+          >
+            REGISTER ↗
+          </button>
+
+          {/* Mobile Hamburger Drawer Trigger */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="w-9 h-9 rounded-lg border border-white/15 bg-white/5 flex flex-col items-center justify-center gap-1.5 text-white lg:hidden cursor-pointer active:bg-white/10"
+            aria-label="Toggle Navigation Menu"
+          >
+            <span
+              className={`w-4 h-[1.5px] bg-[#00D9FF] transition-all duration-200 ${
+                mobileMenuOpen ? "rotate-45 translate-y-[6px]" : ""
+              }`}
+            />
+            <span
+              className={`w-4 h-[1.5px] bg-white transition-all duration-200 ${
+                mobileMenuOpen ? "opacity-0" : ""
+              }`}
+            />
+            <span
+              className={`w-4 h-[1.5px] bg-[#00D9FF] transition-all duration-200 ${
+                mobileMenuOpen ? "-rotate-45 -translate-y-[6px]" : ""
+              }`}
+            />
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile Slide-out Menu Drawer */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-x-0 top-[52px] sm:top-[60px] z-40 bg-[#020817]/95 backdrop-blur-2xl border-b border-[#00D9FF]/30 p-5 flex flex-col gap-3.5 shadow-2xl lg:hidden animate-in slide-in-from-top-3 duration-200">
+          <div className="flex items-center justify-between pb-2.5 border-b border-white/10 text-[9px] font-mono tracking-widest text-[#00D9FF] uppercase">
+            <span>// TECHFEST QUICK ACCESS</span>
+            <span>09 • 10 OCT 2026</span>
+          </div>
+
+          <nav className="flex flex-col gap-2 font-mono text-xs tracking-wider">
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setActiveModal("events");
+              }}
+              className="flex items-center justify-between p-3 rounded-lg bg-white/5 active:bg-[#00D9FF]/20 text-left text-neutral-200 hover:text-white"
+            >
+              <span>🏆 COMPETITIONS &amp; EVENTS</span>
+              <span className="text-[#00D9FF]">↗</span>
+            </button>
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setActiveModal("schedule");
+              }}
+              className="flex items-center justify-between p-3 rounded-lg bg-white/5 active:bg-[#00D9FF]/20 text-left text-neutral-200 hover:text-white"
+            >
+              <span>📅 FESTIVAL SCHEDULE</span>
+              <span className="text-[#00D9FF]">↗</span>
+            </button>
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setActiveModal("tour");
+              }}
+              className="flex items-center justify-between p-3 rounded-lg bg-white/5 active:bg-[#00D9FF]/20 text-left text-neutral-200 hover:text-white"
+            >
+              <span>🧭 SLIET CAMPUS TOUR</span>
+              <span className="text-[#00D9FF]">↗</span>
+            </button>
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                handleDownloadRulebook();
+              }}
+              className="flex items-center justify-between p-3 rounded-lg bg-white/5 active:bg-[#00D9FF]/20 text-left text-neutral-200 hover:text-white"
+            >
+              <span>📄 OFFICIAL RULEBOOK</span>
+              <span className="text-[10px] text-neutral-400">PDF</span>
+            </button>
+          </nav>
+
+          <button
+            onClick={() => {
+              setMobileMenuOpen(false);
+              setSelectedEventForReg("");
+              setActiveModal("register");
+            }}
+            className="w-full py-3 rounded-full bg-gradient-to-r from-[#00D9FF] to-[#008CFF] text-[#020817] font-mono text-xs font-bold tracking-[0.2em] shadow-[0_0_20px_rgba(0,217,255,0.4)] text-center mt-1"
+          >
+            REGISTER FOR TECHFEST&apos;26 →
+          </button>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 4. MAIN HERO CONTENT & STREAMLINED TELEMETRY PILL                         */}
+      {/* ========================================================================= */}
+      <div className="relative z-20 w-full h-full flex flex-col justify-between pt-16 sm:pt-24 pb-3 sm:pb-7 px-4 sm:px-12 pointer-events-none">
+        {/* Top Floating Telemetry Pill (Minimalist Aerospace Status) */}
+        <div className="w-full flex justify-end pointer-events-auto mt-2 sm:mt-0">
+          <div
+            ref={telemetryPillRef}
+            className={`inline-flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-white/10 bg-[#020817]/75 backdrop-blur-md text-[9px] sm:text-[10px] font-mono text-neutral-300 shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all duration-700 delay-200 ${
+              !isPreloaderActive ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3 pointer-events-none"
+            }`}
+          >
+            <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-emerald-500" />
+            </span>
+            <span
+              ref={stageBadgeRef}
+              className="text-emerald-400 font-bold tracking-wider"
+            >
+              {currentStage === 1
+                ? "ORBITAL DESCENT"
+                : currentStage === 2
+                ? "HUMAN INTERFACE"
+                : currentStage === 3
+                ? "CAMPUS REVEAL"
+                : "LIVE CAMPUS NEXUS"}
+            </span>
+            <span className="text-white/20">•</span>
+            <span className="text-neutral-400 hidden md:inline">
+              30.7391° N, 76.6888° E
+            </span>
+            <span className="text-white/20 hidden md:inline">•</span>
+            <span
+              ref={altitudeTextRef}
+              className="text-[#00D9FF] font-semibold tracking-wider"
+            >
+              35,786 KM
+            </span>
+          </div>
+        </div>
+
+        {/* Hero Left Column Typography & Primary Action */}
+        <div
+          ref={textGroupRef}
+          style={{ willChange: "transform" }}
+          className={`max-w-xl space-y-3 sm:space-y-5 my-auto transition-all duration-700 delay-300 ${
+            !isPreloaderActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6 pointer-events-none"
+          }`}
+        >
+          {/* Eyebrow */}
+          <div className="hero-anim-item flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00D9FF] shadow-[0_0_8px_#00D9FF]" />
+            <span className="text-[10px] sm:text-xs font-mono tracking-[0.25em] sm:tracking-[0.35em] text-neutral-300 uppercase">
+              {currentStage <= 2 ? "PLANETARY RECON // TECHFEST'26" : "SLIET PRESENTS // TECHFEST'26"}
+            </span>
+          </div>
+
+          {/* Headline */}
+          <div className="hero-anim-item space-y-0.5 sm:space-y-1">
+            <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold tracking-tight text-white leading-[1.08] font-sans drop-shadow-2xl">
+              Where Ideas <br />
+              Become{" "}
+              <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00D9FF] via-[#7dd3fc] to-[#008CFF] drop-shadow-[0_0_35px_rgba(0,217,255,0.7)]">
+                REALITY
+              </span>
+            </h1>
+          </div>
+
+          {/* Subtitle */}
+          <div className="hero-anim-item">
+            <p className="text-xs sm:text-base font-light text-neutral-300 max-w-md leading-relaxed drop-shadow-md">
+              Technology and Sciences for a Sustainable Earth.
+            </p>
+          </div>
+
+          {/* Date & Location */}
+          <div className="hero-anim-item space-y-0.5">
+            <p className="text-[11px] sm:text-sm font-mono tracking-[0.25em] sm:tracking-[0.3em] text-[#00D9FF] uppercase font-semibold">
+              09 • 10 OCTOBER 2026
+            </p>
+            <p className="text-[10px] sm:text-xs font-mono tracking-[0.2em] text-neutral-400 uppercase">
+              SLIET LONGOWAL, PUNJAB
+            </p>
+          </div>
+
+          {/* Clean Streamlined CTAs (Full-width on mobile for easy tapping) */}
+          <div className="hero-anim-item pt-1 sm:pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 pointer-events-auto">
+            {/* Primary Action Button */}
+            <button
+              onClick={() => {
+                setSelectedEventForReg("");
+                setActiveModal("register");
+              }}
+              className="group inline-flex items-center justify-center gap-3 px-6 sm:px-8 py-3.5 rounded-full bg-gradient-to-r from-[#00D9FF] to-[#008CFF] active:scale-[0.98] hover:brightness-110 text-[#020817] font-mono text-xs sm:text-sm font-bold tracking-[0.18em] sm:tracking-[0.2em] shadow-[0_0_30px_rgba(0,217,255,0.45)] transition-all duration-200 cursor-pointer min-h-[48px]"
+            >
+              <span>REGISTER FOR TECHFEST&apos;26</span>
+              <span className="group-hover:translate-x-1 transition-transform duration-200 font-extrabold">
+                →
+              </span>
+            </button>
+
+            {/* Secondary Action Button */}
+            <button
+              onClick={() => setActiveModal("events")}
+              className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3.5 rounded-full border border-white/20 bg-white/5 active:scale-[0.98] hover:bg-white/10 text-white font-mono text-xs sm:text-sm tracking-wider transition-all duration-200 cursor-pointer backdrop-blur-sm min-h-[48px]"
+            >
+              <span>EXPLORE EVENTS</span>
+              <span className="text-[#00D9FF]">↗</span>
+            </button>
+          </div>
+
+          {/* Space Zoom Replay Link */}
+          <div className="hero-anim-item pt-0.5 sm:pt-1 pointer-events-auto">
+            <button
+              onClick={replayZoom}
+              className="text-[10px] sm:text-[11px] font-mono text-neutral-400 hover:text-[#00D9FF] transition-colors cursor-pointer flex items-center gap-1.5 py-1"
+            >
+              <span>↺</span>
+              <span className="hover:underline">Replay Hyper-Descent from Space</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Bottom Bar: Clean Scroll Prompt & Watermark */}
+        <div className="w-full flex items-center justify-between pt-2.5 sm:pt-4 border-t border-white/5 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+          <div
+            ref={scrollIndicatorRef}
+            className={`flex items-center gap-2 sm:gap-3 text-[9px] sm:text-[10px] font-mono tracking-[0.25em] sm:tracking-[0.3em] text-neutral-400 uppercase transition-opacity duration-700 delay-500 ${
+              !isPreloaderActive ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <span className="w-3 sm:w-4 h-[1px] bg-[#00D9FF]/60" />
+            <span>SCROLL TO EXPLORE ↓</span>
+          </div>
+
+          <div className="text-[9px] sm:text-[10px] font-mono tracking-[0.2em] text-neutral-400 uppercase hidden sm:block">
+            SANT LONGOWAL INSTITUTE OF ENGINEERING &amp; TECHNOLOGY
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 5. INTERACTIVE MODALS (Clean & Responsive)                                  */}
+      {/* ========================================================================= */}
+      {/* Events Catalog Modal */}
+      <SampleEventsModal
+        isOpen={activeModal === "events"}
+        onClose={() => setActiveModal(null)}
+        onSelectEvent={handleSelectEvent}
+      />
+
+      {/* Campus Tour Modal */}
+      <SampleCampusTourModal
+        isOpen={activeModal === "tour"}
+        onClose={() => setActiveModal(null)}
+        onFocusAuditorium={handleFocusAuditorium}
+      />
+
+      {/* Schedule Modal */}
+      <SampleScheduleModal
+        isOpen={activeModal === "schedule"}
+        onClose={() => setActiveModal(null)}
+      />
+
+      {/* Pre-Registration Modal (Mobile Bottom Sheet / Desktop Modal) */}
+      {activeModal === "register" && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-300">
+          <div className="relative w-full max-w-md max-h-[92dvh] overflow-y-auto p-5 sm:p-8 rounded-t-2xl sm:rounded-xl bg-[#06152D] border border-[#00D9FF]/40 shadow-[0_0_70px_rgba(0,217,255,0.35)] space-y-4 sm:space-y-5 overscroll-contain">
+            <button
+              onClick={() => setActiveModal(null)}
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/20 bg-white/5 flex items-center justify-center text-neutral-300 hover:text-white absolute top-4 right-4 text-sm font-mono cursor-pointer"
+            >
+              ✕
+            </button>
+
+            <div className="space-y-1 sm:space-y-1.5 pr-8">
+              <span className="text-[9px] sm:text-[10px] font-mono tracking-[0.25em] sm:tracking-[0.3em] text-[#00D9FF] uppercase block">
+                // OFFICIAL REGISTRATION PORTAL
+              </span>
+              <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white uppercase font-sans">
+                TechFEST&apos;26 Pass
+              </h3>
+              {selectedEventForReg ? (
+                <div className="p-2 rounded bg-[#00D9FF]/10 border border-[#00D9FF]/30 text-[11px] sm:text-xs font-mono text-[#00D9FF]">
+                  🎯 Selected Event: <strong>{selectedEventForReg}</strong>
+                </div>
+              ) : (
+                <p className="text-[11px] sm:text-xs text-neutral-400 font-light leading-relaxed">
+                  Join 10,000+ innovators at SLIET Longowal, Punjab on 09-10 October 2026.
+                </p>
+              )}
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                showToast("🎉 Pre-Registration confirmed! Welcome to TechFEST'26.");
+                setActiveModal(null);
+              }}
+              className="space-y-3 sm:space-y-3.5 text-xs font-mono"
+            >
+              <div>
+                <label className="block text-neutral-400 uppercase tracking-wider mb-1 text-[11px]">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Aryan Sharma"
+                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#020817] border border-white/15 text-white text-base sm:text-xs focus:outline-none focus:border-[#00D9FF] tracking-wider"
+                />
+              </div>
+
+              <div>
+                <label className="block text-neutral-400 uppercase tracking-wider mb-1 text-[11px]">
+                  College / Institute
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. SLIET Longowal / IIT / NIT"
+                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#020817] border border-white/15 text-white text-base sm:text-xs focus:outline-none focus:border-[#00D9FF] tracking-wider"
+                />
+              </div>
+
+              <div>
+                <label className="block text-neutral-400 uppercase tracking-wider mb-1 text-[11px]">
+                  Participation Role
+                </label>
+                <select className="w-full px-3.5 py-2.5 rounded-lg bg-[#020817] border border-white/15 text-white text-base sm:text-xs focus:outline-none focus:border-[#00D9FF] tracking-wider">
+                  <option>General Delegate / Attendee</option>
+                  <option>Hack-SLIET 36hr Hacker</option>
+                  <option>RoboWars Heavyweight Combatant</option>
+                  <option>CodeSprint Competitor</option>
+                  <option>Drone Grand Prix Pilot</option>
+                  <option>CyberClash Esports Gamer</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-neutral-400 uppercase tracking-wider mb-1 text-[11px]">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="e.g. aryan@sliet.ac.in"
+                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#020817] border border-white/15 text-white text-base sm:text-xs focus:outline-none focus:border-[#00D9FF] tracking-wider"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#00D9FF] to-[#008CFF] hover:from-[#38bdf8] hover:to-[#0284c7] text-[#020817] font-bold uppercase tracking-[0.2em] shadow-[0_0_25px_rgba(0,217,255,0.5)] transition-all cursor-pointer min-h-[44px]"
+              >
+                CONFIRM REGISTRATION →
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 6. SUBTLE CYBER TOAST NOTIFICATION                                        */}
+      {/* ========================================================================= */}
+      {toastMessage && (
+        <div className="fixed top-16 sm:top-20 left-4 right-4 sm:left-auto sm:right-6 z-50 flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg border border-[#00D9FF]/70 bg-[#06152D]/95 text-white font-mono text-xs shadow-[0_0_30px_rgba(0,217,255,0.35)] backdrop-blur-xl animate-in slide-in-from-top-2 duration-200 max-w-sm sm:max-w-md ml-auto">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-[#00D9FF] animate-ping shrink-0" />
+            <span className="tracking-wider">{toastMessage}</span>
+          </div>
+          <button
+            onClick={() => setToastMessage(null)}
+            className="text-neutral-400 hover:text-white cursor-pointer ml-2 text-sm"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
