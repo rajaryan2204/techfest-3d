@@ -5,6 +5,7 @@ import gsap from "gsap";
 import SampleEventsModal from "./SampleEventsModal";
 import SampleCampusTourModal from "./SampleCampusTourModal";
 import SampleScheduleModal from "./SampleScheduleModal";
+import HeroClipartBadges from "@/components/hero/HeroClipartBadges";
 
 type ModalType = "register" | "events" | "tour" | "schedule" | null;
 
@@ -479,6 +480,38 @@ export default function CinematicPortalHero() {
       <div className="absolute inset-y-0 left-0 w-full sm:w-[52%] md:w-[44%] bg-gradient-to-r from-[#020817]/90 via-[#020817]/40 to-transparent pointer-events-none z-10" />
       <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#020817]/80 to-transparent pointer-events-none z-10" />
       <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#020817]/85 to-transparent pointer-events-none z-10" />
+
+      {/* Vector Clipart Badges (ISRO Satellite, Bharat Chakra, Visor, Tech Stickers) */}
+      {!isPreloaderActive && <HeroClipartBadges />}
+
+      {/* Holographic India Targeting Reticle over the Earth Portal */}
+      {!isPreloaderActive && (
+        <div className="absolute top-[28%] sm:top-[30%] md:top-[32%] right-[16%] sm:right-[24%] md:right-[29%] z-20 pointer-events-none flex flex-col items-center animate-in fade-in duration-700">
+          {/* Target Reticle Centered on the Portal Earth */}
+          <div className="relative w-14 h-14 sm:w-20 sm:h-20 flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full border border-[#00D9FF]/40 animate-[spin_10s_linear_infinite]" />
+            <div className="absolute inset-2 rounded-full border border-dashed border-[#00D9FF]/60 animate-[spin_16s_linear_infinite_reverse]" />
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#00D9FF] shadow-[0_0_15px_#00D9FF] animate-ping absolute" />
+            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-white relative" />
+          </div>
+
+          {/* India Target Badge */}
+          <div className="mt-1.5 px-3 py-1 rounded-full bg-[#06152D]/85 border border-[#00D9FF]/50 backdrop-blur-md shadow-[0_0_20px_rgba(0,217,255,0.4)] flex items-center gap-2 text-[9px] sm:text-[10px] font-mono">
+            <span className="text-emerald-400 animate-pulse">●</span>
+            <span className="text-[#00D9FF] font-bold tracking-widest uppercase">
+              🇮🇳 INDIA // 30.22°N 75.83°E
+            </span>
+          </div>
+
+          {/* Observer Gaze Indicator pointing to the person standing at the base */}
+          <div className="hidden sm:flex flex-col items-center mt-1 text-[8px] font-mono tracking-widest text-[#00D9FF]/90 uppercase">
+            <span className="h-8 w-[1px] bg-gradient-to-b from-[#00D9FF]/70 to-transparent" />
+            <span className="bg-black/60 px-2 py-0.5 rounded border border-white/10 mt-0.5">
+              OBSERVER GAZING AT INDIA
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* 3. MOBILE-OPTIMIZED PROFESSIONAL NAVBAR & DRAWER                          */}
