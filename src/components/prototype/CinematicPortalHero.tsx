@@ -7,6 +7,7 @@ import SampleCampusTourModal from "./SampleCampusTourModal";
 import SampleScheduleModal from "./SampleScheduleModal";
 import HeroClipartBadges from "@/components/hero/HeroClipartBadges";
 import OrbitalSatelliteView from "@/components/hero/OrbitalSatelliteView";
+import EarthGlobe3D from "@/components/hero/EarthGlobe3D";
 
 type ModalType = "register" | "events" | "tour" | "schedule" | null;
 
@@ -22,7 +23,6 @@ export default function CinematicPortalHero() {
 
   // Video references
   const droneVideoRef = useRef<HTMLVideoElement>(null);
-  const earthVideoRef = useRef<HTMLVideoElement>(null);
 
   // Narrative Lifecycle States
   const [currentStage, setCurrentStage] = useState<1 | 2 | 3 | 4>(1);
@@ -44,15 +44,6 @@ export default function CinematicPortalHero() {
       setToastMessage((prev) => (prev === msg ? null : prev));
     }, 3200);
     return () => clearTimeout(t);
-  }, []);
-
-  // Guarantee muted autoplay on mount for Earth space loop
-  useEffect(() => {
-    if (earthVideoRef.current) {
-      earthVideoRef.current.muted = true;
-      earthVideoRef.current.defaultMuted = true;
-      earthVideoRef.current.play().catch(() => {});
-    }
   }, []);
 
   // Transition from Satellite Orbit to Hyper-Zoom into India
@@ -197,11 +188,6 @@ export default function CinematicPortalHero() {
     if (stageNum === 1) {
       const droneVid = droneVideoRef.current;
       if (droneVid) droneVid.pause();
-      const earthVid = earthVideoRef.current;
-      if (earthVid) {
-        earthVid.currentTime = 0;
-        earthVid.play().catch(() => {});
-      }
       setCurrentStage(1);
       setIsZooming(false);
       if (altitudeTextRef.current) {
@@ -210,7 +196,7 @@ export default function CinematicPortalHero() {
       if (stageBadgeRef.current) {
         stageBadgeRef.current.textContent = "SATELLITE ORBIT";
       }
-      showToast("🛰️ Chapter 1: Satellite Orbiting Earth");
+      showToast("🛰️ Chapter 1: Earth Orbit & India Lock");
       return;
     }
 
@@ -392,21 +378,15 @@ export default function CinematicPortalHero() {
         style={{ willChange: "transform" }}
         className="absolute inset-0 w-full h-full origin-center pointer-events-none overflow-hidden"
       >
-        {/* Stage 1: Seamless Looping Rotating Earth in Space (Ultra-Lightweight) */}
-        <video
-          ref={earthVideoRef}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          poster="/videos/hero/earth-rotate-poster.jpg"
-          className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ${
-            currentStage === 1 ? "opacity-90 scale-100" : "opacity-0 scale-105 pointer-events-none"
-          }`}
-        >
-          <source src="/videos/hero/earth-rotate-loop.mp4" type="video/mp4" />
-        </video>
+        {/* Stage 1: 3D Earth Globe Rotating to India & Locking Target */}
+        {currentStage === 1 && (
+          <div className="absolute inset-0 w-full h-full transition-opacity duration-700 opacity-100">
+            <EarthGlobe3D
+              onInitiateZoom={handleInitiateZoom}
+              isZooming={isZooming}
+            />
+          </div>
+        )}
 
         {/* Stages 2-4: Master Story Video (Hyper-Zoom into India -> Cosmic Portal -> SLIET Campus) */}
         <video
