@@ -658,12 +658,12 @@ export default function CinematicPortalHero() {
       {/* ========================================================================= */}
       {/* 4. MAIN HERO CONTENT & STREAMLINED TELEMETRY PILL                         */}
       {/* ========================================================================= */}
-      <div className="relative z-20 w-full h-full flex flex-col justify-between pt-16 sm:pt-24 pb-3 sm:pb-7 px-4 sm:px-12 pointer-events-none">
+      <div className="relative z-20 w-full h-full flex flex-col justify-between pt-[max(4.5rem,env(safe-area-inset-top))] sm:pt-24 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-7 px-4 sm:px-12 pointer-events-none">
         {/* Top Floating Telemetry Pill (Minimalist Aerospace Status) */}
-        <div className="w-full flex justify-end pointer-events-auto mt-2 sm:mt-0">
+        <div className="w-full flex justify-end pointer-events-auto mt-1 sm:mt-0">
           <div
             ref={telemetryPillRef}
-            className={`inline-flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-white/10 bg-[#020817]/75 backdrop-blur-md text-[9px] sm:text-[10px] font-mono text-neutral-300 shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all duration-700 delay-200 ${
+            className={`inline-flex items-center gap-1.5 sm:gap-2.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-white/10 bg-[#020817]/80 backdrop-blur-md text-[8px] sm:text-[10px] font-mono text-neutral-300 shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all duration-700 delay-200 ${
               !isPreloaderActive ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3 pointer-events-none"
             }`}
           >
@@ -683,11 +683,11 @@ export default function CinematicPortalHero() {
                 ? "CAMPUS REVEAL"
                 : "LIVE CAMPUS NEXUS"}
             </span>
-            <span className="text-white/20">•</span>
+            <span className="text-white/20 hidden sm:inline">•</span>
             <span className="text-neutral-400 hidden md:inline">
               30.7391° N, 76.6888° E
             </span>
-            <span className="text-white/20 hidden md:inline">•</span>
+            <span className="text-white/20 hidden sm:inline">•</span>
             <span
               ref={altitudeTextRef}
               className="text-[#00D9FF] font-semibold tracking-wider"
@@ -701,24 +701,24 @@ export default function CinematicPortalHero() {
         <div
           ref={textGroupRef}
           style={{ willChange: "transform" }}
-          className={`max-w-xl space-y-3 sm:space-y-5 my-auto transition-all duration-700 delay-300 ${
+          className={`max-w-xl space-y-2.5 sm:space-y-4 my-auto transition-all duration-700 delay-300 ${
             !isPreloaderActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6 pointer-events-none"
           }`}
         >
           {/* Eyebrow */}
           <div className="hero-anim-item flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-[#00D9FF] shadow-[0_0_8px_#00D9FF]" />
-            <span className="text-[10px] sm:text-xs font-mono tracking-[0.25em] sm:tracking-[0.35em] text-neutral-300 uppercase">
+            <span className="text-[9px] sm:text-xs font-mono tracking-[0.2em] sm:tracking-[0.3em] text-neutral-300 uppercase">
               {currentStage <= 2 ? "PLANETARY RECON // TECHFEST'26" : "SLIET PRESENTS // TECHFEST'26"}
             </span>
           </div>
 
           {/* Headline */}
-          <div className="hero-anim-item space-y-0.5 sm:space-y-1">
-            <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold tracking-tight text-white leading-[1.08] font-sans drop-shadow-2xl">
+          <div className="hero-anim-item space-y-0.5">
+            <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1] font-sans drop-shadow-2xl">
               Where Ideas <br />
               Become{" "}
-              <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00D9FF] via-[#7dd3fc] to-[#008CFF] drop-shadow-[0_0_35px_rgba(0,217,255,0.7)]">
+              <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00D9FF] via-[#7dd3fc] to-[#008CFF] drop-shadow-[0_0_25px_rgba(0,217,255,0.7)]">
                 REALITY
               </span>
             </h1>
@@ -726,17 +726,17 @@ export default function CinematicPortalHero() {
 
           {/* Subtitle */}
           <div className="hero-anim-item">
-            <p className="text-xs sm:text-base font-light text-neutral-300 max-w-md leading-relaxed drop-shadow-md">
+            <p className="text-xs sm:text-sm md:text-base font-light text-neutral-300 max-w-sm sm:max-w-md leading-relaxed drop-shadow-md">
               Technology and Sciences for a Sustainable Earth.
             </p>
           </div>
 
           {/* Date & Location */}
           <div className="hero-anim-item space-y-0.5">
-            <p className="text-[11px] sm:text-sm font-mono tracking-[0.25em] sm:tracking-[0.3em] text-[#00D9FF] uppercase font-semibold">
+            <p className="text-[11px] sm:text-sm font-mono tracking-[0.2em] sm:tracking-[0.3em] text-[#00D9FF] uppercase font-semibold">
               09 • 10 OCTOBER 2026
             </p>
-            <p className="text-[10px] sm:text-xs font-mono tracking-[0.2em] text-neutral-400 uppercase">
+            <p className="text-[9px] sm:text-xs font-mono tracking-[0.18em] sm:tracking-[0.2em] text-neutral-400 uppercase">
               SLIET LONGOWAL, PUNJAB
             </p>
           </div>
@@ -749,7 +749,7 @@ export default function CinematicPortalHero() {
                 setSelectedEventForReg("");
                 setActiveModal("register");
               }}
-              className="group inline-flex items-center justify-center gap-3 px-6 sm:px-8 py-3.5 rounded-full bg-gradient-to-r from-[#00D9FF] to-[#008CFF] active:scale-[0.98] hover:brightness-110 text-[#020817] font-mono text-xs sm:text-sm font-bold tracking-[0.18em] sm:tracking-[0.2em] shadow-[0_0_30px_rgba(0,217,255,0.45)] transition-all duration-200 cursor-pointer min-h-[48px]"
+              className="group inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#00D9FF] to-[#008CFF] active:scale-[0.98] hover:brightness-110 text-[#020817] font-mono text-xs sm:text-sm font-bold tracking-[0.16em] sm:tracking-[0.2em] shadow-[0_0_25px_rgba(0,217,255,0.4)] transition-all duration-200 cursor-pointer min-h-[46px] sm:min-h-[48px]"
             >
               <span>REGISTER FOR TECHFEST&apos;26</span>
               <span className="group-hover:translate-x-1 transition-transform duration-200 font-extrabold">
@@ -760,7 +760,7 @@ export default function CinematicPortalHero() {
             {/* Secondary Action Button */}
             <button
               onClick={() => setActiveModal("events")}
-              className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3.5 rounded-full border border-white/20 bg-white/5 active:scale-[0.98] hover:bg-white/10 text-white font-mono text-xs sm:text-sm tracking-wider transition-all duration-200 cursor-pointer backdrop-blur-sm min-h-[48px]"
+              className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-full border border-white/20 bg-white/5 active:scale-[0.98] hover:bg-white/10 text-white font-mono text-xs sm:text-sm tracking-wider transition-all duration-200 cursor-pointer backdrop-blur-sm min-h-[46px] sm:min-h-[48px]"
             >
               <span>EXPLORE EVENTS</span>
               <span className="text-[#00D9FF]">↗</span>
@@ -768,7 +768,7 @@ export default function CinematicPortalHero() {
           </div>
 
           {/* Space Zoom Replay Link */}
-          <div className="hero-anim-item pt-0.5 sm:pt-1 pointer-events-auto">
+          <div className="hero-anim-item pt-0.5 pointer-events-auto">
             <button
               onClick={replayZoom}
               className="text-[10px] sm:text-[11px] font-mono text-neutral-400 hover:text-[#00D9FF] transition-colors cursor-pointer flex items-center gap-1.5 py-1"
