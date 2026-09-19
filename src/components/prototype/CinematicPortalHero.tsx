@@ -6,6 +6,7 @@ import SampleEventsModal from "./SampleEventsModal";
 import SampleCampusTourModal from "./SampleCampusTourModal";
 import SampleScheduleModal from "./SampleScheduleModal";
 import HeroClipartBadges from "@/components/hero/HeroClipartBadges";
+import OrbitalSatelliteView from "@/components/hero/OrbitalSatelliteView";
 
 type ModalType = "register" | "events" | "tour" | "schedule" | null;
 
@@ -21,15 +22,12 @@ export default function CinematicPortalHero() {
 
   // Video references
   const droneVideoRef = useRef<HTMLVideoElement>(null);
-  const preloaderVideoRef = useRef<HTMLVideoElement>(null);
-  const preloaderWrapRef = useRef<HTMLDivElement>(null);
+  const earthVideoRef = useRef<HTMLVideoElement>(null);
 
-  // Preloader & Narrative Lifecycle States
-  const [isPreloaderActive, setIsPreloaderActive] = useState(true);
-  const [preloaderProgress, setPreloaderProgress] = useState(14);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [hasStartedStory, setHasStartedStory] = useState(false);
+  // Narrative Lifecycle States
   const [currentStage, setCurrentStage] = useState<1 | 2 | 3 | 4>(1);
+  const [isZooming, setIsZooming] = useState(false);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
 
   // UI States
   const [audioActive, setAudioActive] = useState(false);
@@ -48,48 +46,20 @@ export default function CinematicPortalHero() {
     return () => clearTimeout(t);
   }, []);
 
-  // Preloader progress counter simulation with high responsiveness
+  // Guarantee muted autoplay on mount for Earth space loop
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPreloaderProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsLoaded(true);
-          return 100;
-        }
-        const step = Math.floor(Math.random() * 20) + 12;
-        const next = prev + step;
-        if (next >= 100) {
-          setIsLoaded(true);
-          return 100;
-        }
-        return next;
-      });
-    }, 180);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Guarantee iOS Safari / Android muted autoplay on mount for both videos
-  useEffect(() => {
-    if (preloaderVideoRef.current) {
-      preloaderVideoRef.current.muted = true;
-      preloaderVideoRef.current.defaultMuted = true;
-      preloaderVideoRef.current.play().catch(() => {});
-    }
-    if (droneVideoRef.current) {
-      droneVideoRef.current.muted = true;
-      droneVideoRef.current.defaultMuted = true;
+    if (earthVideoRef.current) {
+      earthVideoRef.current.muted = true;
+      earthVideoRef.current.defaultMuted = true;
+      earthVideoRef.current.play().catch(() => {});
     }
   }, []);
 
-  const [isFadingOut, setIsFadingOut] = useState(false);
-
-  // Transition from Preloader to Main Story Video
-  const handleEnterExperience = useCallback(() => {
-    if (hasStartedStory) return;
-    setHasStartedStory(true);
-    setIsFadingOut(true);
+  // Transition from Satellite Orbit to Hyper-Zoom into India
+  const handleInitiateZoom = useCallback(() => {
+    setIsZooming(true);
+    setCurrentStage(2);
+    setHasUserInteracted(true);
 
     const vid = droneVideoRef.current;
     if (vid) {
@@ -98,22 +68,25 @@ export default function CinematicPortalHero() {
       vid.play().catch(() => setIsPaused(true));
     }
 
-    setTimeout(() => {
-      setIsPreloaderActive(false);
-    }, 650);
-
-    showToast("🚀 Initiating Earth Descent to SLIET Longowal");
-  }, [hasStartedStory, audioActive, showToast]);
-
-  // Auto-launch once loaded (gives user 1.4s to appreciate rotating Earth before smooth take-off)
-  useEffect(() => {
-    if (isLoaded && !hasStartedStory) {
-      const autoTimer = setTimeout(() => {
-        handleEnterExperience();
-      }, 1400);
-      return () => clearTimeout(autoTimer);
+    if (altitudeTextRef.current) {
+      altitudeTextRef.current.textContent = "35,786 KM";
     }
-  }, [isLoaded, hasStartedStory, handleEnterExperience]);
+    if (stageBadgeRef.current) {
+      stageBadgeRef.current.textContent = "HYPER-ZOOM TO INDIA";
+    }
+
+    showToast("🚀 Initiating Hyper-Descent to India (SLIET Longowal)");
+  }, [audioActive, showToast]);
+
+  // Auto-initiate zoom to India after 6s of satellite orbit if user hasn't interacted yet
+  useEffect(() => {
+    if (currentStage === 1 && !hasUserInteracted) {
+      const timer = setTimeout(() => {
+        handleInitiateZoom();
+      }, 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentStage, hasUserInteracted, handleInitiateZoom]);
 
   // Video playback & 4-Stage Telemetry tracking
   const handleDroneTimeUpdate = () => {
@@ -124,18 +97,18 @@ export default function CinematicPortalHero() {
 
     const t = vid.currentTime;
 
-    // Stage 1: Earth Orbit to India Subcontinent (0.0s - 1.8s)
+    // Stage 1 & Zoom: Earth Orbit to India Subcontinent (0.0s - 1.8s)
     if (t < 1.8) {
-      if (currentStage !== 1) setCurrentStage(1);
+      if (currentStage !== 2) setCurrentStage(2);
       if (altitudeTextRef.current) {
         const alt = Math.round(35786 - (t / 1.8) * 34500);
         altitudeTextRef.current.textContent = `${alt.toLocaleString()} KM`;
       }
       if (stageBadgeRef.current) {
-        stageBadgeRef.current.textContent = "ORBITAL DESCENT";
+        stageBadgeRef.current.textContent = "HYPER-ZOOM TO INDIA";
       }
     }
-    // Stage 2: Atmosphere to Person Gazing at Sky & Cosmic Portal (1.8s - 3.2s)
+    // Stage 2: Cosmic Portal / Observer gazing at Earth with Waterfall (1.8s - 3.2s)
     else if (t < 3.2) {
       if (currentStage !== 2) setCurrentStage(2);
       if (altitudeTextRef.current) {
@@ -144,7 +117,7 @@ export default function CinematicPortalHero() {
         altitudeTextRef.current.textContent = `${alt.toLocaleString()} M`;
       }
       if (stageBadgeRef.current) {
-        stageBadgeRef.current.textContent = "HUMAN INTERFACE";
+        stageBadgeRef.current.textContent = "COSMIC PORTAL";
       }
     }
     // Stage 3: Match-cut to SLIET Auditorium Campus Approach (3.2s - 4.6s)
@@ -187,39 +160,65 @@ export default function CinematicPortalHero() {
   const STORY_STAGES = [
     {
       stage: 1 as const,
-      time: 0.1,
-      label: "01 // ORBITAL DESCENT",
-      short: "01 SPACE",
+      time: 0,
+      label: "01 // SATELLITE ORBIT",
+      short: "01 ORBIT",
       alt: "35,786 KM",
-      caption: "Orbital Recon: Scanning continental vector towards India.",
+      caption: "🛰️ Satellite Orbit: Scanning continental vector towards India (30.22°N, 75.83°E).",
     },
     {
       stage: 2 as const,
-      time: 2.0,
-      label: "02 // COSMIC PORTAL",
-      short: "02 PORTAL",
+      time: 0.1,
+      label: "02 // ZOOM TO INDIA",
+      short: "02 ZOOM",
       alt: "1,286 M",
-      caption: "The Portal: Observer gazes at Earth as waterfall cascades.",
+      caption: "🚀 Hyper-Descent: Plunging from space orbit to India & Cosmic Portal.",
     },
     {
       stage: 3 as const,
       time: 3.4,
-      label: "03 // CAMPUS APPROACH",
+      label: "03 // CAMPUS REVEAL",
       short: "03 CAMPUS",
       alt: "250 M AGL",
-      caption: "Descent to SLIET: 451-acre campus of national excellence.",
+      caption: "🏛️ SLIET Longowal: 451-acre campus of national technical excellence.",
     },
     {
       stage: 4 as const,
       time: 4.8,
-      label: "04 // FESTIVAL NEXUS",
+      label: "04 // FESTIVAL ARENA",
       short: "04 NEXUS",
       alt: "45 M AGL",
-      caption: "Welcome to TechFEST'26: Where Ideas Become Reality.",
+      caption: "⚡ TechFEST'26 Live: Competitions, Robowars, Hackathons & Innovation.",
     },
   ];
 
   const jumpToStage = (stageNum: 1 | 2 | 3 | 4) => {
+    setHasUserInteracted(true);
+    if (stageNum === 1) {
+      const droneVid = droneVideoRef.current;
+      if (droneVid) droneVid.pause();
+      const earthVid = earthVideoRef.current;
+      if (earthVid) {
+        earthVid.currentTime = 0;
+        earthVid.play().catch(() => {});
+      }
+      setCurrentStage(1);
+      setIsZooming(false);
+      if (altitudeTextRef.current) {
+        altitudeTextRef.current.textContent = "35,786 KM";
+      }
+      if (stageBadgeRef.current) {
+        stageBadgeRef.current.textContent = "SATELLITE ORBIT";
+      }
+      showToast("🛰️ Chapter 1: Satellite Orbiting Earth");
+      return;
+    }
+
+    if (stageNum === 2) {
+      handleInitiateZoom();
+      return;
+    }
+
     const vid = droneVideoRef.current;
     if (!vid) return;
     const target = STORY_STAGES.find((s) => s.stage === stageNum);
@@ -243,12 +242,12 @@ export default function CinematicPortalHero() {
   };
 
   const replayZoom = () => {
-    const vid = droneVideoRef.current;
-    if (!vid) return;
-    vid.currentTime = 0;
-    vid.play().catch(() => {});
-    setIsPaused(false);
-    showToast("🚀 Replaying Hyper-Descent from Earth Orbit");
+    setHasUserInteracted(true);
+    jumpToStage(1);
+    showToast("🛰️ Reset to Orbit: Commencing Satellite Scan & Zoom");
+    setTimeout(() => {
+      handleInitiateZoom();
+    }, 2400);
   };
 
   const handleResumePlayback = () => {
@@ -335,7 +334,7 @@ export default function CinematicPortalHero() {
     window.addEventListener("deviceorientation", onDeviceOrientation, { passive: true });
 
     const timer = setTimeout(() => {
-      if (droneVideoRef.current && droneVideoRef.current.paused && !isPreloaderActive) {
+      if (droneVideoRef.current && droneVideoRef.current.paused && currentStage !== 1) {
         setIsPaused(true);
       }
     }, 1500);
@@ -378,9 +377,7 @@ export default function CinematicPortalHero() {
       window.removeEventListener("deviceorientation", onDeviceOrientation);
       cancelAnimationFrame(animId);
     };
-  }, [isPreloaderActive]);
-
-  // Entrance animations are now handled via performant CSS transitions tied to !isPreloaderActive
+  }, [currentStage]);
 
   return (
     <div
@@ -388,125 +385,42 @@ export default function CinematicPortalHero() {
       className="relative w-full min-h-[100dvh] h-[100dvh] overflow-hidden bg-[#020817] text-white select-none font-sans"
     >
       {/* ========================================================================= */}
-      {/* 0. INTERACTIVE EARTH PRELOADER (Seamless Loop While Screen Loads)          */}
-      {/* ========================================================================= */}
-      {isPreloaderActive && (
-        <div
-          ref={preloaderWrapRef}
-          className={`fixed inset-0 z-50 flex flex-col justify-between p-5 sm:p-12 bg-[#020817] text-white overflow-hidden transition-all duration-700 select-none ${
-            isFadingOut ? "opacity-0 scale-105 pointer-events-none" : "opacity-100 scale-100"
-          }`}
-        >
-          {/* Seamless Looping Rotating Earth Video (Ultra-Lightweight ~186 KB) */}
-          <video
-            ref={preloaderVideoRef}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-            poster="/videos/hero/earth-rotate-poster.jpg"
-            className="absolute inset-0 w-full h-full object-cover object-center opacity-85"
-          >
-            <source src="/videos/hero/earth-rotate-loop.mp4" type="video/mp4" />
-          </video>
-
-          {/* Sci-Fi Atmospheric Vignette Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#020817] via-transparent to-[#020817]/85 pointer-events-none" />
-          <div className="absolute inset-0 bg-radial from-transparent via-[#020817]/40 to-[#020817]/90 pointer-events-none" />
-
-          {/* Top HUD Telemetry */}
-          <div className="relative z-10 flex items-center justify-between w-full pt-[max(0.5rem,env(safe-area-inset-top))]">
-            <div className="flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#00D9FF] animate-ping" />
-              <span className="font-mono text-xs sm:text-sm tracking-[0.25em] text-[#00D9FF] uppercase font-bold">
-                TECHFEST&apos;26 // ORBITAL INITIALIZATION
-              </span>
-            </div>
-            <div className="font-mono text-[10px] sm:text-xs tracking-[0.2em] text-neutral-400 hidden sm:block">
-              30.7391° N, 76.6888° E • ALT 35,786 KM
-            </div>
-          </div>
-
-          {/* Center Reticle / Scanner Overlay */}
-          <div className="relative z-10 my-auto flex flex-col items-center text-center space-y-5 sm:space-y-6 max-w-lg mx-auto">
-            {/* Rotating Target HUD Reticle */}
-            <div className="relative w-44 h-44 sm:w-60 sm:h-60 flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full border border-[#00D9FF]/30 animate-[spin_12s_linear_infinite]" />
-              <div className="absolute inset-2 rounded-full border border-dashed border-[#00D9FF]/50 animate-[spin_20s_linear_infinite_reverse]" />
-              <div className="absolute inset-6 rounded-full border border-white/10" />
-              <div className="absolute w-1.5 h-1.5 rounded-full bg-[#00D9FF] top-0 shadow-[0_0_12px_#00D9FF]" />
-              <div className="absolute w-1.5 h-1.5 rounded-full bg-[#00D9FF] bottom-0 shadow-[0_0_12px_#00D9FF]" />
-
-              {/* Centered Percentage Telemetry */}
-              <div className="flex flex-col items-center justify-center font-mono">
-                <span className="text-3xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-[#00D9FF] to-[#008CFF] drop-shadow-[0_0_20px_rgba(0,217,255,0.7)]">
-                  {Math.round(preloaderProgress)}%
-                </span>
-                <span className="text-[9px] sm:text-[10px] tracking-[0.25em] text-[#00D9FF]/90 uppercase mt-1">
-                  {preloaderProgress < 100 ? "ACQUIRING TELEMETRY" : "UPLINK ESTABLISHED"}
-                </span>
-              </div>
-            </div>
-
-            {/* Status Message & Progress Bar */}
-            <div className="w-full max-w-xs sm:max-w-sm space-y-2">
-              <div className="flex justify-between text-[10px] font-mono tracking-widest text-neutral-300">
-                <span>QUANTUM NEXUS</span>
-                <span className="text-[#00D9FF]">{preloaderProgress < 100 ? "SYNCING..." : "READY"}</span>
-              </div>
-              <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden border border-white/15">
-                <div
-                  className="h-full bg-gradient-to-r from-[#00D9FF] via-[#38bdf8] to-[#008CFF] transition-all duration-150 ease-out shadow-[0_0_10px_#00D9FF]"
-                  style={{ width: `${preloaderProgress}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Enter Nexus / Launch Button */}
-            <div className="pt-2">
-              {isLoaded ? (
-                <button
-                  onClick={handleEnterExperience}
-                  className="group inline-flex items-center gap-3 px-7 sm:px-10 py-3.5 sm:py-4 rounded-full bg-gradient-to-r from-[#00D9FF] to-[#008CFF] active:scale-95 text-[#020817] font-mono text-xs sm:text-sm font-extrabold tracking-[0.2em] uppercase shadow-[0_0_40px_rgba(0,217,255,0.8)] transition-all duration-200 cursor-pointer animate-pulse min-h-[48px]"
-                >
-                  <span>▶ ENTER TECHFEST&apos;26</span>
-                  <span className="group-hover:translate-x-1 transition-transform">→</span>
-                </button>
-              ) : (
-                <div className="text-[10px] sm:text-[11px] font-mono tracking-[0.2em] text-neutral-400 animate-pulse">
-                  SCANNING CONTINENTAL VECTOR...
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Bottom Telemetry Footer */}
-          <div className="relative z-10 flex items-center justify-between w-full text-[9px] sm:text-[10px] font-mono text-neutral-400 tracking-widest pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-            <span>SANT LONGOWAL INSTITUTE OF ENGINEERING &amp; TECHNOLOGY</span>
-            <span>09 • 10 OCTOBER 2026</span>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* 1. CINEMATIC STORY VIDEO BACKGROUND (Ultra-Lightweight Master Streams)     */}
+      {/* 1. CINEMATIC STORY VIDEO BACKGROUND (Dual Master Streams)                  */}
       {/* ========================================================================= */}
       <div
         ref={sceneWrapRef}
         style={{ willChange: "transform" }}
         className="absolute inset-0 w-full h-full origin-center pointer-events-none overflow-hidden"
       >
+        {/* Stage 1: Seamless Looping Rotating Earth in Space (Ultra-Lightweight) */}
+        <video
+          ref={earthVideoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          poster="/videos/hero/earth-rotate-poster.jpg"
+          className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ${
+            currentStage === 1 ? "opacity-90 scale-100" : "opacity-0 scale-105 pointer-events-none"
+          }`}
+        >
+          <source src="/videos/hero/earth-rotate-loop.mp4" type="video/mp4" />
+        </video>
+
+        {/* Stages 2-4: Master Story Video (Hyper-Zoom into India -> Cosmic Portal -> SLIET Campus) */}
         <video
           ref={droneVideoRef}
-          autoPlay
+          autoPlay={false}
           muted={!audioActive}
           playsInline
           preload="auto"
           onTimeUpdate={handleDroneTimeUpdate}
           onEnded={handleDroneEnded}
           poster="/videos/hero/techfest-story-poster.jpg?v=3"
-          className="absolute inset-0 w-full h-full object-cover object-center"
+          className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ${
+            currentStage !== 1 ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
         >
           {/* Mobile receives ultra-lightweight 720p master stream (~1.9 MB) */}
           <source
@@ -539,17 +453,23 @@ export default function CinematicPortalHero() {
       <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#020817]/80 to-transparent pointer-events-none z-10" />
       <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#020817]/85 to-transparent pointer-events-none z-10" />
 
-      {/* Vector Clipart Badges (ISRO Satellite, Bharat Chakra, Visor, Tech Stickers) */}
-      {!isPreloaderActive && <HeroClipartBadges />}
+      {/* Stage 1: Active Satellite Orbiting Earth & Scanning India */}
+      {currentStage === 1 && (
+        <OrbitalSatelliteView
+          onInitiateZoom={handleInitiateZoom}
+          isZooming={isZooming}
+        />
+      )}
+
+      {/* Stages 2-4: Clipart Badges (ISRO Satellite, Bharat Chakra, Tech Badges) */}
+      {currentStage !== 1 && <HeroClipartBadges />}
 
       {/* ========================================================================= */}
       {/* 3. MOBILE-OPTIMIZED PROFESSIONAL NAVBAR & DRAWER                          */}
       {/* ========================================================================= */}
       <header
         ref={topNavRef}
-        className={`absolute top-0 left-0 right-0 z-30 px-4 sm:px-12 py-3 sm:py-4 flex items-center justify-between border-b border-white/10 bg-[#020817]/60 backdrop-blur-md transition-all duration-700 delay-150 ${
-          !isPreloaderActive ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
-        }`}
+        className="absolute top-0 left-0 right-0 z-30 px-4 sm:px-12 py-3 sm:py-4 flex items-center justify-between border-b border-white/10 bg-[#020817]/60 backdrop-blur-md transition-all duration-700 opacity-100 translate-y-0"
       >
         {/* Brand Mark */}
         <div className="flex items-center gap-2.5 sm:gap-3">
@@ -721,9 +641,7 @@ export default function CinematicPortalHero() {
         <div className="w-full flex justify-end pointer-events-auto mt-1 sm:mt-0">
           <div
             ref={telemetryPillRef}
-            className={`inline-flex items-center gap-1.5 sm:gap-2.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-white/10 bg-[#020817]/80 backdrop-blur-md text-[8px] sm:text-[10px] font-mono text-neutral-300 shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all duration-700 delay-200 ${
-              !isPreloaderActive ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3 pointer-events-none"
-            }`}
+            className="inline-flex items-center gap-1.5 sm:gap-2.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-white/10 bg-[#020817]/80 backdrop-blur-md text-[8px] sm:text-[10px] font-mono text-neutral-300 shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all duration-700 opacity-100 translate-y-0"
           >
             <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -734,9 +652,9 @@ export default function CinematicPortalHero() {
               className="text-emerald-400 font-bold tracking-wider"
             >
               {currentStage === 1
-                ? "ORBITAL DESCENT"
+                ? "SATELLITE ORBIT"
                 : currentStage === 2
-                ? "HUMAN INTERFACE"
+                ? "HYPER-ZOOM TO INDIA"
                 : currentStage === 3
                 ? "CAMPUS REVEAL"
                 : "LIVE CAMPUS NEXUS"}
@@ -750,7 +668,7 @@ export default function CinematicPortalHero() {
               ref={altitudeTextRef}
               className="text-[#00D9FF] font-semibold tracking-wider"
             >
-              35,786 KM
+              {currentStage === 1 ? "35,786 KM" : "1,286 M"}
             </span>
           </div>
         </div>
@@ -759,15 +677,13 @@ export default function CinematicPortalHero() {
         <div
           ref={textGroupRef}
           style={{ willChange: "transform" }}
-          className={`max-w-xl space-y-2.5 sm:space-y-4 my-auto transition-all duration-700 delay-300 ${
-            !isPreloaderActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6 pointer-events-none"
-          }`}
+          className="max-w-xl space-y-2.5 sm:space-y-4 my-auto transition-all duration-700 opacity-100 translate-y-0"
         >
           {/* Eyebrow */}
           <div className="hero-anim-item flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-[#00D9FF] shadow-[0_0_8px_#00D9FF]" />
             <span className="text-[9px] sm:text-xs font-mono tracking-[0.2em] sm:tracking-[0.3em] text-neutral-300 uppercase">
-              {currentStage <= 2 ? "PLANETARY RECON // TECHFEST'26" : "SLIET PRESENTS // TECHFEST'26"}
+              {currentStage === 1 ? "🛰️ SATELLITE ORBIT // TECHFEST'26" : "SLIET PRESENTS // TECHFEST'26"}
             </span>
           </div>
 
@@ -801,28 +717,57 @@ export default function CinematicPortalHero() {
 
           {/* Clean Streamlined CTAs (Full-width on mobile for easy tapping) */}
           <div className="hero-anim-item pt-1 sm:pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 pointer-events-auto">
-            {/* Primary Action Button */}
-            <button
-              onClick={() => {
-                setSelectedEventForReg("");
-                setActiveModal("register");
-              }}
-              className="group inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#00D9FF] to-[#008CFF] active:scale-[0.98] hover:brightness-110 text-[#020817] font-mono text-xs sm:text-sm font-bold tracking-[0.16em] sm:tracking-[0.2em] shadow-[0_0_25px_rgba(0,217,255,0.4)] transition-all duration-200 cursor-pointer min-h-[46px] sm:min-h-[48px]"
-            >
-              <span>REGISTER FOR TECHFEST&apos;26</span>
-              <span className="group-hover:translate-x-1 transition-transform duration-200 font-extrabold">
-                →
-              </span>
-            </button>
+            {currentStage === 1 ? (
+              <>
+                {/* Primary: Zoom to India Button */}
+                <button
+                  onClick={handleInitiateZoom}
+                  className="group inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#00D9FF] to-[#008CFF] active:scale-[0.98] hover:brightness-110 text-[#020817] font-mono text-xs sm:text-sm font-bold tracking-[0.16em] sm:tracking-[0.2em] shadow-[0_0_30px_rgba(0,217,255,0.5)] transition-all duration-200 cursor-pointer min-h-[46px] sm:min-h-[48px] animate-pulse"
+                >
+                  <span>▶ ZOOM TO INDIA (SLIET)</span>
+                  <span className="group-hover:translate-x-1 transition-transform duration-200 font-extrabold">
+                    →
+                  </span>
+                </button>
 
-            {/* Secondary Action Button */}
-            <button
-              onClick={() => setActiveModal("events")}
-              className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-full border border-white/20 bg-white/5 active:scale-[0.98] hover:bg-white/10 text-white font-mono text-xs sm:text-sm tracking-wider transition-all duration-200 cursor-pointer backdrop-blur-sm min-h-[46px] sm:min-h-[48px]"
-            >
-              <span>EXPLORE EVENTS</span>
-              <span className="text-[#00D9FF]">↗</span>
-            </button>
+                {/* Secondary: Register */}
+                <button
+                  onClick={() => {
+                    setSelectedEventForReg("");
+                    setActiveModal("register");
+                  }}
+                  className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-full border border-white/20 bg-white/5 active:scale-[0.98] hover:bg-white/10 text-white font-mono text-xs sm:text-sm tracking-wider transition-all duration-200 cursor-pointer backdrop-blur-sm min-h-[46px] sm:min-h-[48px]"
+                >
+                  <span>REGISTER</span>
+                  <span className="text-[#00D9FF]">↗</span>
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Primary Action Button */}
+                <button
+                  onClick={() => {
+                    setSelectedEventForReg("");
+                    setActiveModal("register");
+                  }}
+                  className="group inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#00D9FF] to-[#008CFF] active:scale-[0.98] hover:brightness-110 text-[#020817] font-mono text-xs sm:text-sm font-bold tracking-[0.16em] sm:tracking-[0.2em] shadow-[0_0_25px_rgba(0,217,255,0.4)] transition-all duration-200 cursor-pointer min-h-[46px] sm:min-h-[48px]"
+                >
+                  <span>REGISTER FOR TECHFEST&apos;26</span>
+                  <span className="group-hover:translate-x-1 transition-transform duration-200 font-extrabold">
+                    →
+                  </span>
+                </button>
+
+                {/* Secondary Action Button */}
+                <button
+                  onClick={() => setActiveModal("events")}
+                  className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-full border border-white/20 bg-white/5 active:scale-[0.98] hover:bg-white/10 text-white font-mono text-xs sm:text-sm tracking-wider transition-all duration-200 cursor-pointer backdrop-blur-sm min-h-[46px] sm:min-h-[48px]"
+                >
+                  <span>EXPLORE EVENTS</span>
+                  <span className="text-[#00D9FF]">↗</span>
+                </button>
+              </>
+            )}
           </div>
 
           {/* Space Zoom Replay Link */}
@@ -832,7 +777,7 @@ export default function CinematicPortalHero() {
               className="text-[10px] sm:text-[11px] font-mono text-neutral-400 hover:text-[#00D9FF] transition-colors cursor-pointer flex items-center gap-1.5 py-1"
             >
               <span>↺</span>
-              <span className="hover:underline">Replay Hyper-Descent from Space</span>
+              <span className="hover:underline">Replay Satellite Orbit &amp; Hyper-Descent</span>
             </button>
           </div>
         </div>
@@ -924,9 +869,7 @@ export default function CinematicPortalHero() {
         <div className="w-full flex items-center justify-between pt-2.5 sm:pt-4 border-t border-white/5 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
           <div
             ref={scrollIndicatorRef}
-            className={`flex items-center gap-2 sm:gap-3 text-[9px] sm:text-[10px] font-mono tracking-[0.25em] sm:tracking-[0.3em] text-neutral-400 uppercase transition-opacity duration-700 delay-500 ${
-              !isPreloaderActive ? "opacity-100" : "opacity-0"
-            }`}
+            className="flex items-center gap-2 sm:gap-3 text-[9px] sm:text-[10px] font-mono tracking-[0.25em] sm:tracking-[0.3em] text-neutral-400 uppercase transition-opacity duration-700 opacity-100"
           >
             <span className="w-3 sm:w-4 h-[1px] bg-[#00D9FF]/60" />
             <span>SCROLL TO EXPLORE ↓</span>
