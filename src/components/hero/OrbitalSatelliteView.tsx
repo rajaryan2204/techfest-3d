@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 interface OrbitalSatelliteViewProps {
   onInitiateZoom: () => void;
@@ -12,18 +12,159 @@ export default function OrbitalSatelliteView({
   isZooming = false,
 }: OrbitalSatelliteViewProps) {
   const [isLocked, setIsLocked] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Direct DOM references for 60-120 FPS zero-rerender animation loop
+  const satelliteGroupRef = useRef<SVGGElement>(null);
+  const radarBeamRef = useRef<SVGPolygonElement>(null);
+  const radarLineRef = useRef<SVGLineElement>(null);
+  const telemetryTagRef = useRef<SVGGElement>(null);
+  const telemetryAltRef = useRef<SVGTextElement>(null);
+  const telemetryVelRef = useRef<SVGTextElement>(null);
+  const orbitParticleRef = useRef<SVGCircleElement>(null);
 
   const handleTrigger = () => {
+    if (isLocked) return;
     setIsLocked(true);
     setTimeout(() => {
       onInitiateZoom();
-    }, 400);
+    }, 450);
   };
 
+  // =========================================================================
+  // 60-120 FPS HARDWARE ACCELERATED 3D ORBIT TRAJECTORY SIMULATION
+  // =========================================================================
+  useEffect(() => {
+    let animId: number;
+    let angle = 0;
+    const speed = 0.007; // Smooth, realistic orbital period (~15-18s full orbit)
+
+    // Orbital Ellipse Parameters
+    // Center of Earth is around (500, 300) in 1000x600 viewBox
+    const cx = 500;
+    const cy = 300;
+    const a = 410; // Semi-major axis
+    const b = 155; // Semi-minor axis
+    const tilt = -16 * (Math.PI / 180); // -16 degree orbital plane tilt
+    const cosTilt = Math.cos(tilt);
+    const sinTilt = Math.sin(tilt);
+
+    // Target coordinates on Earth (India - SLIET Longowal)
+    const targetX = 500;
+    const targetY = 295;
+
+    const render = () => {
+      angle += speed;
+      if (angle >= Math.PI * 2) angle -= Math.PI * 2;
+
+      // Calculate unrotated elliptical position
+      const x0 = a * Math.cos(angle);
+      const y0 = b * Math.sin(angle);
+
+      // Rotate by orbital tilt angle
+      const x = cx + x0 * cosTilt - y0 * sinTilt;
+      const y = cy + x0 * sinTilt + y0 * cosTilt;
+
+      // z-depth: sin(angle) determines foreground vs background
+      // z > 0: In front of Earth (closer to camera, larger, brighter)
+      // z < 0: Behind Earth (smaller, dimmer, atmospheric occlusion)
+      const z = Math.sin(angle);
+
+      // 3D Perspective Scaling: 0.85x in back -> 1.35x in front
+      const scale = 1.1 + 0.28 * z;
+
+      // Realistic opacity: Dims when orbiting the far side of the planet
+      const opacity = z < -0.2 ? Math.max(0.35, 1.0 + z * 0.9) : 1.0;
+
+      // Calculate satellite orientation angle so dish points toward Earth center (cx, cy)
+      const dxToEarth = cx - x;
+      const dyToEarth = cy - y;
+      const angleToEarth = Math.atan2(dyToEarth, dxToEarth) * (180 / Math.PI);
+
+      // Velocity tangent angle for thruster exhaust orientation
+      const vx = -a * Math.sin(angle);
+      const vy = b * Math.cos(angle);
+      const vxRot = vx * cosTilt - vy * sinTilt;
+      const vyRot = vx * sinTilt + vy * cosTilt;
+      const velocityAngle = Math.atan2(vyRot, vxRot) * (180 / Math.PI);
+
+      // Apply 3D Transform to Satellite Group
+      if (satelliteGroupRef.current) {
+        satelliteGroupRef.current.setAttribute(
+          "transform",
+          `translate(${x}, ${y}) scale(${scale})`
+        );
+        satelliteGroupRef.current.style.opacity = `${opacity}`;
+        satelliteGroupRef.current.style.zIndex = z > 0 ? "30" : "10";
+      }
+
+      // Dynamic Radar Beam connecting Satellite Dish to India
+      if (radarBeamRef.current) {
+        // Calculate beam width at target
+        const beamSpread = 32;
+        radarBeamRef.current.setAttribute(
+          "points",
+          `${x},${y} ${targetX - beamSpread},${targetY} ${targetX + beamSpread},${targetY}`
+        );
+        radarBeamRef.current.style.opacity = z < -0.4 ? "0.15" : `${0.75 * Math.max(0.3, z + 0.5)}`;
+      }
+
+      if (radarLineRef.current) {
+        radarLineRef.current.setAttribute("x1", `${x}`);
+        radarLineRef.current.setAttribute("y1", `${y}`);
+        radarLineRef.current.setAttribute("x2", `${targetX}`);
+        radarLineRef.current.setAttribute("y2", `${targetY}`);
+        radarLineRef.current.style.opacity = z < -0.4 ? "0.2" : "0.7";
+      }
+
+      // Dynamic Telemetry HUD Tag position (tracks alongside the satellite)
+      if (telemetryTagRef.current) {
+        // Position tag slightly above-right if on right side, above-left if on left side
+        const tagOffsetX = x > cx ? 28 : -180;
+        const tagOffsetY = -42;
+        telemetryTagRef.current.setAttribute(
+          "transform",
+          `translate(${x + tagOffsetX}, ${y + tagOffsetY})`
+        );
+        telemetryTagRef.current.style.opacity = z < -0.3 ? "0.4" : "1.0";
+      }
+
+      // Live Telemetry Numbers
+      if (telemetryAltRef.current) {
+        const alt = Math.round(35786 + z * 180);
+        telemetryAltRef.current.textContent = `ALT: ${alt.toLocaleString()} KM // GEO-SYNC`;
+      }
+
+      if (telemetryVelRef.current) {
+        const vel = (3.074 + Math.sin(angle * 2) * 0.015).toFixed(3);
+        telemetryVelRef.current.textContent = `VEL: ${vel} KM/S // INCL: 18.4°`;
+      }
+
+      // Orbit particle pulse traveling along trajectory
+      if (orbitParticleRef.current) {
+        const pulseAngle = (angle + 1.2) % (Math.PI * 2);
+        const px0 = a * Math.cos(pulseAngle);
+        const py0 = b * Math.sin(pulseAngle);
+        const px = cx + px0 * cosTilt - py0 * sinTilt;
+        const py = cy + px0 * sinTilt + py0 * cosTilt;
+        orbitParticleRef.current.setAttribute("cx", `${px}`);
+        orbitParticleRef.current.setAttribute("cy", `${py}`);
+      }
+
+      animId = requestAnimationFrame(render);
+    };
+
+    animId = requestAnimationFrame(render);
+    return () => cancelAnimationFrame(animId);
+  }, []);
+
   return (
-    <div className="absolute inset-0 z-20 pointer-events-none select-none flex items-center justify-center overflow-hidden">
+    <div
+      ref={containerRef}
+      className="absolute inset-0 z-20 pointer-events-none select-none flex items-center justify-center overflow-hidden"
+    >
       {/* ========================================================================= */}
-      {/* 1. HARDWARE-ACCELERATED SVG ORBITAL SATELLITE & SCANNING RADAR SYSTEM    */}
+      {/* 1. CINEMATIC SVG 3D ORBITAL SATELLITE SYSTEM                             */}
       {/* ========================================================================= */}
       <svg
         viewBox="0 0 1000 600"
@@ -31,58 +172,84 @@ export default function OrbitalSatelliteView({
         className="w-full h-full max-w-[1400px] max-h-[100dvh] transition-opacity duration-700"
       >
         <defs>
-          {/* Cyan/Blue Orbit Glow Gradient */}
-          <linearGradient id="orbitGlowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#00D9FF" stopOpacity="0.85" />
-            <stop offset="50%" stopColor="#38bdf8" stopOpacity="0.5" />
-            <stop offset="100%" stopColor="#0284c7" stopOpacity="0.15" />
+          {/* Cyan Glowing Orbit Trajectory Gradient */}
+          <linearGradient id="orbitLineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#00D9FF" stopOpacity="0.9" />
+            <stop offset="35%" stopColor="#38bdf8" stopOpacity="0.6" />
+            <stop offset="70%" stopColor="#0284c7" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#00D9FF" stopOpacity="0.8" />
           </linearGradient>
 
-          {/* Radar Scanning Beam Gradient */}
-          <linearGradient id="radarBeamGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#00D9FF" stopOpacity="0.35" />
-            <stop offset="60%" stopColor="#00D9FF" stopOpacity="0.08" />
-            <stop offset="100%" stopColor="#00D9FF" stopOpacity="0" />
+          {/* Dynamic Radar Beam Gradient from Satellite to Earth */}
+          <linearGradient id="radarBeamLinearGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#00D9FF" stopOpacity="0.65" />
+            <stop offset="60%" stopColor="#00D9FF" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#00D9FF" stopOpacity="0.0" />
           </linearGradient>
 
-          {/* Solar Panel Cells Gradient */}
-          <linearGradient id="solarCellGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#0369a1" />
-            <stop offset="50%" stopColor="#0284c7" />
+          {/* Photorealistic Solar Panel Cells Gradient */}
+          <linearGradient id="solarPanelDeepGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#0c4a6e" />
+            <stop offset="30%" stopColor="#0369a1" />
+            <stop offset="70%" stopColor="#0284c7" />
             <stop offset="100%" stopColor="#082f49" />
           </linearGradient>
 
-          {/* Satellite Metallic Bus Gradient */}
-          <linearGradient id="satChassisGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          {/* Solar Panel Specular Glint Reflection */}
+          <linearGradient id="solarGlintGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.0" />
+            <stop offset="50%" stopColor="#ffffff" stopOpacity="0.55" />
+            <stop offset="100%" stopColor="#ffffff" stopOpacity="0.0" />
+          </linearGradient>
+
+          {/* Golden Thermal Blanket / MLI Foil Gradient */}
+          <linearGradient id="goldMLIFoilGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#fef08a" />
+            <stop offset="25%" stopColor="#eab308" />
+            <stop offset="65%" stopColor="#ca8a04" />
+            <stop offset="100%" stopColor="#713f12" />
+          </linearGradient>
+
+          {/* Metallic Avionics Bus Gradient */}
+          <linearGradient id="avionicsMetalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#ffffff" />
+            <stop offset="40%" stopColor="#e2e8f0" />
+            <stop offset="75%" stopColor="#94a3b8" />
+            <stop offset="100%" stopColor="#475569" />
+          </linearGradient>
+
+          {/* High-Gain Dish Antenna Metallic Gradient */}
+          <linearGradient id="dishGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#f8fafc" />
             <stop offset="50%" stopColor="#cbd5e1" />
             <stop offset="100%" stopColor="#64748b" />
           </linearGradient>
 
-          {/* Gold Thermal Foil Gradient */}
-          <linearGradient id="goldFoilGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#fef08a" />
-            <stop offset="50%" stopColor="#eab308" />
-            <stop offset="100%" stopColor="#854d0e" />
+          {/* Ion Thruster Cyan Plasma Exhaust Gradient */}
+          <linearGradient id="ionExhaustGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
+            <stop offset="35%" stopColor="#00D9FF" stopOpacity="0.9" />
+            <stop offset="75%" stopColor="#0284c7" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#00D9FF" stopOpacity="0" />
           </linearGradient>
 
-          {/* Glow Filter */}
-          <filter id="cyanGlow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
+          {/* Glow Filters */}
+          <filter id="cyanGlowHigh" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
-
-          {/* Elliptical Orbital Path (Tilted -12° around center 500, 300) */}
-          <path
-            id="satOrbitPath"
-            d="M 130 310 A 370 145 -12 1 0 870 310 A 370 145 -12 1 0 130 310"
-            fill="none"
-          />
+          <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
         </defs>
 
-        {/* Back Half of Orbit (Dashed Deep Space Path) */}
+        {/* ========================================================================= */}
+        {/* 3D ELLIPTICAL ORBIT TRACK                                                */}
+        {/* ========================================================================= */}
+        {/* Back Arc of Orbit (Behind the Globe) */}
         <path
-          d="M 870 310 A 370 145 -12 0 0 130 310"
+          d="M 885 245 A 410 155 -16 0 0 115 355"
           fill="none"
           stroke="#00D9FF"
           strokeOpacity="0.25"
@@ -90,255 +257,416 @@ export default function OrbitalSatelliteView({
           strokeDasharray="4 8"
         />
 
-        {/* Front Half of Orbit (Illuminated Glowing Path) */}
+        {/* Front Arc of Orbit (Glowing in Space Foreground) */}
         <path
-          d="M 130 310 A 370 145 -12 0 0 870 310"
+          d="M 115 355 A 410 155 -16 0 0 885 245"
           fill="none"
-          stroke="url(#orbitGlowGrad)"
-          strokeWidth="1.8"
+          stroke="url(#orbitLineGrad)"
+          strokeWidth="2.2"
           strokeDasharray="8 6"
-          filter="url(#cyanGlow)"
+          filter="url(#cyanGlowHigh)"
+        />
+
+        {/* Orbit Signal Particle Pulse */}
+        <circle
+          ref={orbitParticleRef}
+          r="3"
+          fill="#00D9FF"
+          filter="url(#cyanGlowHigh)"
+          className="animate-ping"
+          opacity="0.85"
         />
 
         {/* ========================================================================= */}
-        {/* TARGETING RETICLE OVER INDIA (Center 500, 290)                           */}
+        {/* DYNAMIC RADAR BEAM CONE (Connecting Satellite to India)                  */}
+        {/* ========================================================================= */}
+        <polygon
+          ref={radarBeamRef}
+          points="500,150 460,295 540,295"
+          fill="url(#radarBeamLinearGrad)"
+          className="pointer-events-none transition-opacity duration-300"
+        />
+        <line
+          ref={radarLineRef}
+          x1="500"
+          y1="150"
+          x2="500"
+          y2="295"
+          stroke="#00D9FF"
+          strokeWidth="1.2"
+          strokeDasharray="4 4"
+          className="pointer-events-none"
+        />
+
+        {/* ========================================================================= */}
+        {/* TARGETING RETICLE OVER INDIA (Center 500, 295 - SLIET Longowal)          */}
         {/* ========================================================================= */}
         <g
-          transform="translate(500, 290)"
+          transform="translate(500, 295)"
           className="pointer-events-auto cursor-pointer"
           onClick={handleTrigger}
         >
-          {/* Pulsing Outer Range Ring */}
+          {/* Pulsing Outer Scanning Ring */}
           <circle
-            r="44"
+            r="48"
             fill="none"
             stroke="#00D9FF"
-            strokeOpacity={isLocked ? "0.9" : "0.35"}
-            strokeWidth="1"
-            strokeDasharray="4 4"
-            className="animate-[spin_18s_linear_infinite]"
+            strokeOpacity={isLocked ? "0.95" : "0.35"}
+            strokeWidth="1.2"
+            strokeDasharray="5 5"
+            className="animate-[spin_20s_linear_infinite]"
           />
 
-          {/* Target Corner Ticks */}
-          <path
-            d="M -32 -20 L -32 -32 L -20 -32  M 20 -32 L 32 -32 L 32 -20  M 32 20 L 32 32 L 20 32  M -20 32 L -32 32 L -32 20"
+          {/* Inner High-Precision Reticle Ring */}
+          <circle
+            r="28"
             fill="none"
             stroke={isLocked ? "#10b981" : "#00D9FF"}
-            strokeWidth="1.8"
+            strokeOpacity="0.75"
+            strokeWidth="1.4"
+            strokeDasharray="8 4"
+            className="animate-[spin_12s_linear_infinite_reverse]"
           />
 
-          {/* Center Target Crosshair & Blinking Ping */}
+          {/* Precision Target Brackets */}
+          <path
+            d="M -36 -24 L -36 -36 L -24 -36  M 24 -36 L 36 -36 L 36 -24  M 36 24 L 36 36 L 24 36  M -24 36 L -36 36 L -36 24"
+            fill="none"
+            stroke={isLocked ? "#10b981" : "#00D9FF"}
+            strokeWidth="2"
+            filter="url(#softGlow)"
+          />
+
+          {/* Center Target Acquisition Beacon */}
           <circle
-            r="4"
+            r="6"
             fill={isLocked ? "#10b981" : "#00D9FF"}
             className="animate-ping"
-            opacity="0.75"
+            opacity="0.8"
           />
           <circle
-            r="2.5"
+            r="3"
             fill={isLocked ? "#10b981" : "#ffffff"}
+            filter="url(#softGlow)"
           />
-          <line x1="-12" y1="0" x2="-4" y2="0" stroke="#00D9FF" strokeWidth="1" />
-          <line x1="4" y1="0" x2="12" y2="0" stroke="#00D9FF" strokeWidth="1" />
-          <line x1="0" y1="-12" x2="0" y2="-4" stroke="#00D9FF" strokeWidth="1" />
-          <line x1="0" y1="4" x2="0" y2="12" stroke="#00D9FF" strokeWidth="1" />
 
-          {/* Target Telemetry Label */}
-          <g transform="translate(42, -18)">
+          {/* Crosshairs */}
+          <line x1="-16" y1="0" x2="-6" y2="0" stroke="#00D9FF" strokeWidth="1.2" />
+          <line x1="6" y1="0" x2="16" y2="0" stroke="#00D9FF" strokeWidth="1.2" />
+          <line x1="0" y1="-16" x2="0" y2="-6" stroke="#00D9FF" strokeWidth="1.2" />
+          <line x1="0" y1="6" x2="0" y2="16" stroke="#00D9FF" strokeWidth="1.2" />
+
+          {/* Target HUD Information Card */}
+          <g transform="translate(46, -24)">
             <rect
               x="0"
               y="-10"
-              width="145"
-              height="28"
+              width="165"
+              height="36"
               rx="4"
               fill="#020817"
-              fillOpacity="0.85"
+              fillOpacity="0.9"
               stroke={isLocked ? "#10b981" : "#00D9FF"}
-              strokeOpacity="0.6"
-              strokeWidth="0.8"
+              strokeOpacity="0.7"
+              strokeWidth="1"
+              filter="url(#softGlow)"
             />
+            {/* Header Status */}
             <text
-              x="8"
-              y="2"
+              x="10"
+              y="4"
               fill={isLocked ? "#10b981" : "#00D9FF"}
-              fontSize="8"
+              fontSize="9"
               fontFamily="monospace"
               fontWeight="bold"
-              letterSpacing="1"
+              letterSpacing="1.2"
             >
               {isLocked ? "● TARGET LOCKED" : "TARGET: INDIA (SLIET)"}
             </text>
+            {/* Coordinates */}
             <text
-              x="8"
-              y="12"
-              fill="#94a3b8"
-              fontSize="6.5"
+              x="10"
+              y="16"
+              fill="#e2e8f0"
+              fontSize="7.5"
               fontFamily="monospace"
               letterSpacing="0.8"
             >
               30.7391° N, 76.6888° E
             </text>
+            <text
+              x="10"
+              y="23"
+              fill="#94a3b8"
+              fontSize="6.5"
+              fontFamily="monospace"
+              letterSpacing="0.6"
+            >
+              PUNJAB • CONTINENTAL SECTOR 4
+            </text>
           </g>
         </g>
 
         {/* ========================================================================= */}
-        {/* RECONNAISSANCE SATELLITE (Active Motion Along Orbital Trajectory)         */}
+        {/* RECONNAISSANCE SATELLITE (Fully Articulated 3D Model Group)                */}
         {/* ========================================================================= */}
-        <g className="pointer-events-auto cursor-pointer" onClick={handleTrigger}>
-          {/* Animate Motion Along satOrbitPath */}
-          <animateMotion
-            dur="18s"
-            repeatCount="indefinite"
-            rotate="auto"
-          >
-            <mpath href="#satOrbitPath" />
-          </animateMotion>
-
-          {/* Radar Scanning Beam Projecting Toward Earth Surface */}
-          <polygon
-            points="0,-6 -140,-120 140,-120"
-            fill="url(#radarBeamGrad)"
-            opacity="0.8"
-            className="animate-pulse"
+        <g
+          ref={satelliteGroupRef}
+          className="pointer-events-auto cursor-pointer"
+          onClick={handleTrigger}
+        >
+          {/* Click Hitbox */}
+          <rect
+            x="-70"
+            y="-45"
+            width="140"
+            height="90"
+            fill="transparent"
+            className="cursor-pointer"
           />
 
-          {/* Satellite Structure Group (Scale & Details) */}
-          <g transform="scale(0.85)">
-            {/* Left Solar Array Wing */}
-            <g transform="translate(-46, -10)">
-              <rect
-                x="0"
-                y="0"
-                width="34"
-                height="20"
-                rx="2"
-                fill="url(#solarCellGrad)"
-                stroke="#38bdf8"
-                strokeWidth="1"
-              />
-              {/* Solar Cell Grid Lines */}
-              <line x1="11" y1="0" x2="11" y2="20" stroke="#38bdf8" strokeWidth="0.6" />
-              <line x1="22" y1="0" x2="22" y2="20" stroke="#38bdf8" strokeWidth="0.6" />
-              <line x1="0" y1="10" x2="34" y2="10" stroke="#38bdf8" strokeWidth="0.6" />
-              {/* Solar Array Boom */}
-              <line x1="34" y1="10" x2="46" y2="10" stroke="#cbd5e1" strokeWidth="2.5" />
-            </g>
-
-            {/* Satellite Central Chassis / Bus */}
-            <rect
-              x="-14"
-              y="-12"
-              width="28"
-              height="24"
-              rx="4"
-              fill="url(#goldFoilGrad)"
-              stroke="#ffffff"
-              strokeWidth="1.2"
-              filter="url(#cyanGlow)"
+          {/* Ion Propulsion Engine Cyan Plasma Plume */}
+          <g transform="translate(-42, 0) rotate(180)">
+            <polygon
+              points="0,-5 28,-10 38,0 28,10 0,5"
+              fill="url(#ionExhaustGrad)"
+              filter="url(#cyanGlowHigh)"
+              className="animate-pulse"
             />
-
-            {/* Avionics Core Panel */}
-            <rect
-              x="-10"
-              y="-8"
-              width="20"
-              height="16"
-              rx="2"
-              fill="url(#satChassisGrad)"
-              stroke="#38bdf8"
-              strokeWidth="0.8"
-            />
-            <circle cx="0" cy="0" r="3.5" fill="#00D9FF" />
-
-            {/* Right Solar Array Wing */}
-            <g transform="translate(12, -10)">
-              {/* Solar Array Boom */}
-              <line x1="0" y1="10" x2="12" y2="10" stroke="#cbd5e1" strokeWidth="2.5" />
-              <rect
-                x="12"
-                y="0"
-                width="34"
-                height="20"
-                rx="2"
-                fill="url(#solarCellGrad)"
-                stroke="#38bdf8"
-                strokeWidth="1"
-              />
-              {/* Solar Cell Grid Lines */}
-              <line x1="23" y1="0" x2="23" y2="20" stroke="#38bdf8" strokeWidth="0.6" />
-              <line x1="34" y1="0" x2="34" y2="20" stroke="#38bdf8" strokeWidth="0.6" />
-              <line x1="12" y1="10" x2="46" y2="10" stroke="#38bdf8" strokeWidth="0.6" />
-            </g>
-
-            {/* High-Gain Parabolic Communications Dish (Pointing to Earth) */}
-            <path
-              d="M -10 12 Q 0 24 10 12"
-              fill="none"
-              stroke="#f8fafc"
-              strokeWidth="2"
-            />
-            <line x1="0" y1="12" x2="0" y2="21" stroke="#00D9FF" strokeWidth="1.5" />
-            <circle cx="0" cy="21" r="2" fill="#00D9FF" />
-
-            {/* Pulsing LED Beacon */}
-            <circle cx="0" cy="-14" r="2.5" fill="#00D9FF" className="animate-ping" />
-            <circle cx="0" cy="-14" r="1.5" fill="#ffffff" />
+            <line x1="0" y1="0" x2="35" y2="0" stroke="#ffffff" strokeWidth="2" />
           </g>
 
-          {/* Floating Satellite Telemetry Tag */}
-          <g transform="translate(24, -30)">
+          {/* Left Deployable Solar Array Wing */}
+          <g transform="translate(-62, -18)">
+            {/* Solar Array Boom Bracket */}
+            <line x1="38" y1="18" x2="48" y2="18" stroke="#cbd5e1" strokeWidth="3" />
+            <circle cx="48" cy="18" r="2.5" fill="#64748b" />
+
+            {/* Main Solar Wing Frame */}
             <rect
               x="0"
-              y="0"
-              width="105"
-              height="22"
-              rx="3"
-              fill="#020817"
-              fillOpacity="0.85"
-              stroke="#00D9FF"
-              strokeOpacity="0.6"
-              strokeWidth="0.8"
+              y="2"
+              width="38"
+              height="32"
+              rx="2.5"
+              fill="url(#solarPanelDeepGrad)"
+              stroke="#38bdf8"
+              strokeWidth="1.2"
+              filter="url(#softGlow)"
             />
-            <text
-              x="6"
-              y="9"
-              fill="#00D9FF"
-              fontSize="6.5"
-              fontFamily="monospace"
-              fontWeight="bold"
-              letterSpacing="0.8"
-            >
-              🛰️ ISRO-TF26 RECON
-            </text>
-            <text
-              x="6"
-              y="17"
-              fill="#94a3b8"
-              fontSize="5.5"
-              fontFamily="monospace"
-              letterSpacing="0.5"
-            >
-              ALT: 35,786 KM • GEO-SYNC
-            </text>
+
+            {/* Solar Cell Grid Circuitry */}
+            <line x1="12" y1="2" x2="12" y2="34" stroke="#38bdf8" strokeWidth="0.8" opacity="0.8" />
+            <line x1="25" y1="2" x2="25" y2="34" stroke="#38bdf8" strokeWidth="0.8" opacity="0.8" />
+            <line x1="0" y1="12" x2="38" y2="12" stroke="#38bdf8" strokeWidth="0.8" opacity="0.8" />
+            <line x1="0" y1="23" x2="38" y2="23" stroke="#38bdf8" strokeWidth="0.8" opacity="0.8" />
+
+            {/* Specular Sun Glint Shimmer */}
+            <rect
+              x="0"
+              y="2"
+              width="38"
+              height="32"
+              rx="2.5"
+              fill="url(#solarGlintGrad)"
+              opacity="0.6"
+            />
+
+            {/* Starboard Green Navigation LED */}
+            <circle cx="2" cy="4" r="1.5" fill="#22c55e" />
           </g>
+
+          {/* Central Satellite Chassis / Golden MLI Blanket Bus */}
+          <rect
+            x="-18"
+            y="-18"
+            width="36"
+            height="36"
+            rx="5"
+            fill="url(#goldMLIFoilGrad)"
+            stroke="#ffffff"
+            strokeWidth="1.4"
+            filter="url(#softGlow)"
+          />
+
+          {/* Foil Multi-Layer Insulation Diamond Texture Lines */}
+          <line x1="-18" y1="0" x2="0" y2="-18" stroke="#713f12" strokeWidth="0.8" opacity="0.45" />
+          <line x1="0" y1="-18" x2="18" y2="0" stroke="#713f12" strokeWidth="0.8" opacity="0.45" />
+          <line x1="-18" y1="0" x2="0" y2="18" stroke="#713f12" strokeWidth="0.8" opacity="0.45" />
+          <line x1="0" y1="18" x2="18" y2="0" stroke="#713f12" strokeWidth="0.8" opacity="0.45" />
+
+          {/* Avionics Core Equipment Deck */}
+          <rect
+            x="-12"
+            y="-12"
+            width="24"
+            height="24"
+            rx="3"
+            fill="url(#avionicsMetalGrad)"
+            stroke="#00D9FF"
+            strokeWidth="0.9"
+          />
+
+          {/* Optical Camera / Sensor Aperture */}
+          <circle cx="0" cy="0" r="5.5" fill="#020817" stroke="#00D9FF" strokeWidth="1.2" />
+          <circle cx="0" cy="0" r="3.2" fill="#00D9FF" filter="url(#cyanGlowHigh)" />
+          <circle cx="1.2" cy="-1.2" r="1" fill="#ffffff" />
+
+          {/* Right Deployable Solar Array Wing */}
+          <g transform="translate(14, -18)">
+            {/* Solar Array Boom Bracket */}
+            <line x1="0" y1="18" x2="10" y2="18" stroke="#cbd5e1" strokeWidth="3" />
+            <circle cx="0" cy="18" r="2.5" fill="#64748b" />
+
+            {/* Main Solar Wing Frame */}
+            <rect
+              x="10"
+              y="2"
+              width="38"
+              height="32"
+              rx="2.5"
+              fill="url(#solarPanelDeepGrad)"
+              stroke="#38bdf8"
+              strokeWidth="1.2"
+              filter="url(#softGlow)"
+            />
+
+            {/* Solar Cell Grid Circuitry */}
+            <line x1="22" y1="2" x2="22" y2="34" stroke="#38bdf8" strokeWidth="0.8" opacity="0.8" />
+            <line x1="35" y1="2" x2="35" y2="34" stroke="#38bdf8" strokeWidth="0.8" opacity="0.8" />
+            <line x1="10" y1="12" x2="48" y2="12" stroke="#38bdf8" strokeWidth="0.8" opacity="0.8" />
+            <line x1="10" y1="23" x2="48" y2="23" stroke="#38bdf8" strokeWidth="0.8" opacity="0.8" />
+
+            {/* Specular Sun Glint Shimmer */}
+            <rect
+              x="10"
+              y="2"
+              width="38"
+              height="32"
+              rx="2.5"
+              fill="url(#solarGlintGrad)"
+              opacity="0.6"
+            />
+
+            {/* Port Red Navigation LED */}
+            <circle cx="46" cy="4" r="1.5" fill="#ef4444" />
+          </g>
+
+          {/* High-Gain Steerable Communications Dish Antenna (Facing Earth) */}
+          <g transform="translate(0, 18)">
+            <line x1="0" y1="0" x2="0" y2="8" stroke="#cbd5e1" strokeWidth="2.5" />
+            <path
+              d="M -14 8 Q 0 22 14 8"
+              fill="url(#dishGrad)"
+              stroke="#ffffff"
+              strokeWidth="1.6"
+              filter="url(#softGlow)"
+            />
+            {/* Feed Horn & Sub-reflector */}
+            <line x1="0" y1="8" x2="0" y2="20" stroke="#00D9FF" strokeWidth="1.8" />
+            <circle cx="0" cy="20" r="2.8" fill="#00D9FF" filter="url(#cyanGlowHigh)" />
+            <circle cx="0" cy="20" r="1.2" fill="#ffffff" />
+          </g>
+
+          {/* Omni Telemetry Antenna & Blinking Beacon Strobe */}
+          <g transform="translate(0, -18)">
+            <line x1="0" y1="0" x2="0" y2="-12" stroke="#cbd5e1" strokeWidth="1.5" />
+            <circle cx="0" cy="-12" r="3.5" fill="#00D9FF" className="animate-ping" opacity="0.9" />
+            <circle cx="0" cy="-12" r="2" fill="#ffffff" />
+          </g>
+        </g>
+
+        {/* ========================================================================= */}
+        {/* SATELLITE TELEMETRY LEADER HUD BOX (Tracks With Satellite)               */}
+        {/* ========================================================================= */}
+        <g
+          ref={telemetryTagRef}
+          className="pointer-events-auto cursor-pointer"
+          onClick={handleTrigger}
+        >
+          {/* Angled Cybernetic Leader Line */}
+          <polyline
+            points="0,35 25,18 60,18"
+            fill="none"
+            stroke="#00D9FF"
+            strokeWidth="1.2"
+            strokeDasharray="3 3"
+            opacity="0.8"
+          />
+
+          {/* Telemetry Card Background */}
+          <rect
+            x="30"
+            y="-6"
+            width="175"
+            height="46"
+            rx="5"
+            fill="#020817"
+            fillOpacity="0.9"
+            stroke="#00D9FF"
+            strokeOpacity="0.75"
+            strokeWidth="1"
+            filter="url(#softGlow)"
+          />
+
+          {/* Header Title */}
+          <text
+            x="40"
+            y="9"
+            fill="#00D9FF"
+            fontSize="8.5"
+            fontFamily="monospace"
+            fontWeight="bold"
+            letterSpacing="1"
+          >
+            🛰️ ISRO-TF26 RECON SATELLITE
+          </text>
+
+          {/* Altitude Readout */}
+          <text
+            ref={telemetryAltRef}
+            x="40"
+            y="21"
+            fill="#f8fafc"
+            fontSize="7.5"
+            fontFamily="monospace"
+            letterSpacing="0.8"
+          >
+            ALT: 35,786 KM // GEO-SYNC
+          </text>
+
+          {/* Velocity & Status Readout */}
+          <text
+            ref={telemetryVelRef}
+            x="40"
+            y="31"
+            fill="#94a3b8"
+            fontSize="6.8"
+            fontFamily="monospace"
+            letterSpacing="0.6"
+          >
+            VEL: 3.074 KM/S // SCANNING INDIA
+          </text>
         </g>
       </svg>
 
       {/* ========================================================================= */}
-      {/* 2. SLEEK SCANNER STATUS HUD CHIP (Non-intrusive on Mobile)               */}
+      {/* 2. PROMINENT & SLEEK SCANNER STATUS HUD CHIP                             */}
       {/* ========================================================================= */}
       <div className="absolute top-20 sm:top-24 inset-x-0 flex flex-col items-center justify-center gap-1.5 pointer-events-auto px-4 z-20">
         <button
           onClick={handleTrigger}
-          className={`inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full border border-[#00D9FF]/40 bg-[#020817]/85 backdrop-blur-md text-[9px] sm:text-[11px] font-mono text-neutral-300 hover:text-white shadow-[0_0_20px_rgba(0,217,255,0.25)] active:scale-95 transition-all cursor-pointer ${
-            isLocked ? "border-emerald-400 text-emerald-400 bg-emerald-950/80" : ""
+          className={`inline-flex items-center gap-2.5 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-[#00D9FF]/60 bg-[#020817]/90 backdrop-blur-md text-[10px] sm:text-xs font-mono text-neutral-200 hover:text-white shadow-[0_0_25px_rgba(0,217,255,0.35)] active:scale-95 hover:scale-105 transition-all cursor-pointer ${
+            isLocked ? "border-emerald-400 text-emerald-300 bg-emerald-950/90 shadow-[0_0_30px_rgba(16,185,129,0.5)]" : ""
           }`}
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-[#00D9FF] animate-ping" />
-          <span className="font-bold tracking-wider">
-            {isLocked ? "LOCK CONFIRMED • COMMENCING DESCENT" : "🛰️ SATELLITE ORBITING EARTH // TAP TO ZOOM TO INDIA"}
+          <span className="w-2 h-2 rounded-full bg-[#00D9FF] animate-ping" />
+          <span className="font-bold tracking-wider uppercase">
+            {isLocked
+              ? "🎯 TARGET LOCKED: INDIA // COMMENCING HYPER-DESCENT..."
+              : "🛰️ SATELLITE ORBITING EARTH • TAP TO ZOOM TO INDIA"}
           </span>
-          <span className="text-[#00D9FF]">→</span>
+          <span className="text-[#00D9FF] font-bold">→</span>
         </button>
       </div>
     </div>
