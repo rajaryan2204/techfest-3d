@@ -17,19 +17,38 @@ export default function EarthGlobe3D({
   const mountRef = useRef<HTMLDivElement>(null);
   const [isLocked, setIsLocked] = useState(false);
   const [indiaFacing, setIndiaFacing] = useState(false);
+  const [isActiveZooming, setIsActiveZooming] = useState(false);
 
-  // Direct reference to track rotation state
+  // Direct reference to track rotation and zoom state
   const rotationStateRef = useRef({
     hasLocked: false,
     indiaFacing: false,
+    isZoomingAnim: false,
   });
 
+  const zoomProgressRef = useRef(0);
+  const hasTriggeredParentRef = useRef(false);
+
+  // Synchronize external isZooming prop
+  useEffect(() => {
+    if (isZooming && !isActiveZooming) {
+      setIsActiveZooming(true);
+      setIsLocked(true);
+      rotationStateRef.current.isZoomingAnim = true;
+    }
+  }, [isZooming, isActiveZooming]);
+
+  useEffect(() => {
+    if (isActiveZooming) {
+      rotationStateRef.current.isZoomingAnim = true;
+    }
+  }, [isActiveZooming]);
+
   const handleTriggerZoom = () => {
-    if (isLocked) return;
+    if (isActiveZooming) return;
     setIsLocked(true);
-    setTimeout(() => {
-      onInitiateZoom();
-    }, 450);
+    setIsActiveZooming(true);
+    rotationStateRef.current.isZoomingAnim = true;
   };
 
   useEffect(() => {
@@ -149,20 +168,37 @@ export default function EarthGlobe3D({
             onIndiaLocked();
           }
 
-          // Auto-trigger zoom after 2.8s of holding on India if not clicked
+          // Auto-trigger zoom after 2.4s of holding on India if not clicked
           setTimeout(() => {
             if (!rotationStateRef.current.hasLocked) {
               rotationStateRef.current.hasLocked = true;
               setIsLocked(true);
-              setTimeout(() => {
-                onInitiateZoom();
-              }, 500);
+              setIsActiveZooming(true);
             }
-          }, 2800);
+          }, 2400);
         }
       } else {
         // Very subtle micro-drift once locked so Earth feels alive but stays on India
         earthMesh.rotation.y = targetIndiaY + Math.sin(Date.now() * 0.0005) * 0.015;
+      }
+
+      // Smooth 3D Camera Zoom into India
+      if (rotationStateRef.current.isZoomingAnim) {
+        zoomProgressRef.current = Math.min(1.0, zoomProgressRef.current + 0.022);
+        const p = zoomProgressRef.current;
+        // Cubic ease-in-out
+        const ease = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+
+        camera.position.z = 6.8 - ease * 4.45; // Zooms from 6.8 down to 2.35
+        camera.position.y = 0.2 + ease * 0.28; // Tilts toward India's latitude
+        sunLight.intensity = 2.4 + ease * 1.5; // Brightens as entering atmosphere
+
+        if (p >= 1.0 && !hasTriggeredParentRef.current) {
+          hasTriggeredParentRef.current = true;
+          setTimeout(() => {
+            onInitiateZoom();
+          }, 250);
+        }
       }
 
       renderer.render(scene, camera);
@@ -203,12 +239,21 @@ export default function EarthGlobe3D({
       {/* Three.js 3D Earth Canvas Container */}
       <div ref={mountRef} className="absolute inset-0 w-full h-full pointer-events-auto" />
 
+      {/* Atmospheric Cloud & Hyper-Descent Penetration Veil */}
+      <div
+        className={`absolute inset-0 bg-radial from-[#00D9FF]/25 via-[#020817]/60 to-[#020817] pointer-events-none transition-opacity duration-700 ${
+          isActiveZooming ? "opacity-90" : "opacity-0"
+        }`}
+      />
+
       {/* ========================================================================= */}
       {/* TARGET RETICLE DIRECTLY ON INDIA (Appears & Locks when India is Front)   */}
       {/* ========================================================================= */}
       <div
         className={`absolute top-[44%] left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto cursor-pointer transition-all duration-700 ${
-          indiaFacing ? "opacity-100 scale-100" : "opacity-0 scale-75 pointer-events-none"
+          indiaFacing && !isActiveZooming
+            ? "opacity-100 scale-100"
+            : "opacity-0 scale-150 pointer-events-none"
         }`}
         onClick={handleTriggerZoom}
       >
@@ -216,7 +261,7 @@ export default function EarthGlobe3D({
           {/* Outer Pulsing Reticle Ring */}
           <div
             className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full border border-dashed transition-all duration-300 animate-[spin_12s_linear_infinite] ${
-              isLocked ? "border-emerald-400" : "border-[#00D9FF]"
+              isLocked ? "border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.5)]" : "border-[#00D9FF]"
             }`}
           />
 
@@ -259,32 +304,6 @@ export default function EarthGlobe3D({
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Top Status Prompt */}
-      <div className="absolute top-20 sm:top-24 inset-x-0 flex flex-col items-center justify-center gap-1.5 pointer-events-auto px-4 z-20">
-        <button
-          onClick={handleTriggerZoom}
-          className={`inline-flex items-center gap-2.5 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-[#00D9FF]/60 bg-[#020817]/90 backdrop-blur-md text-[10px] sm:text-xs font-mono text-neutral-200 hover:text-white shadow-[0_0_25px_rgba(0,217,255,0.35)] active:scale-95 hover:scale-105 transition-all cursor-pointer ${
-            isLocked
-              ? "border-emerald-400 text-emerald-300 bg-emerald-950/90 shadow-[0_0_30px_rgba(16,185,129,0.5)]"
-              : ""
-          }`}
-        >
-          <span
-            className={`w-2 h-2 rounded-full ${
-              isLocked ? "bg-emerald-400 animate-ping" : "bg-[#00D9FF] animate-ping"
-            }`}
-          />
-          <span className="font-bold tracking-wider uppercase">
-            {isLocked
-              ? "🎯 TARGET LOCKED: INDIA // COMMENCING DESCENT..."
-              : indiaFacing
-              ? "🎯 INDIA IN SIGHT • CLICK TO ZOOM INTO SLIET"
-              : "🌍 EARTH ROTATING TO INDIA... // ORBIT ACTIVE"}
-          </span>
-          <span className="text-[#00D9FF] font-bold">→</span>
-        </button>
       </div>
     </div>
   );

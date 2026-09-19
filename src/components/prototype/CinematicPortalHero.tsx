@@ -47,6 +47,7 @@ export default function CinematicPortalHero() {
   }, []);
 
   // Transition from Satellite Orbit to Hyper-Zoom into India
+  // Transition from Satellite Orbit to Hyper-Zoom into India and Campus Reveal
   const handleInitiateZoom = useCallback(() => {
     setIsZooming(true);
     setCurrentStage(2);
@@ -54,32 +55,33 @@ export default function CinematicPortalHero() {
 
     const vid = droneVideoRef.current;
     if (vid) {
-      vid.currentTime = 0;
+      // Start directly at 3.2s (SLIET Campus Approach) to bypass redundant second Earth video
+      vid.currentTime = 3.2;
       vid.muted = !audioActive;
       vid.play().catch(() => setIsPaused(true));
     }
 
     if (altitudeTextRef.current) {
-      altitudeTextRef.current.textContent = "35,786 KM";
+      altitudeTextRef.current.textContent = "500 M AGL";
     }
     if (stageBadgeRef.current) {
-      stageBadgeRef.current.textContent = "HYPER-ZOOM TO INDIA";
+      stageBadgeRef.current.textContent = "CAMPUS REVEAL";
     }
 
-    showToast("🚀 Initiating Hyper-Descent to India (SLIET Longowal)");
+    showToast("🚀 India Locked: Arriving at SLIET Longowal Campus");
   }, [audioActive, showToast]);
 
-  // Auto-initiate zoom to India after 6s of satellite orbit if user hasn't interacted yet
+  // Auto-initiate zoom to India after 7s of satellite orbit if user hasn't interacted yet
   useEffect(() => {
     if (currentStage === 1 && !hasUserInteracted) {
       const timer = setTimeout(() => {
         handleInitiateZoom();
-      }, 6000);
+      }, 7000);
       return () => clearTimeout(timer);
     }
   }, [currentStage, hasUserInteracted, handleInitiateZoom]);
 
-  // Video playback & 4-Stage Telemetry tracking
+  // Video playback & Telemetry tracking
   const handleDroneTimeUpdate = () => {
     const vid = droneVideoRef.current;
     if (!vid) return;
@@ -88,20 +90,31 @@ export default function CinematicPortalHero() {
 
     const t = vid.currentTime;
 
-    // Stage 1 & Zoom: Earth Orbit to India Subcontinent (0.0s - 1.8s)
-    if (t < 1.8) {
+    // Stage 2: Campus Reveal & Aerial Approach (3.2s - 4.6s)
+    if (t >= 3.2 && t < 4.6) {
       if (currentStage !== 2) setCurrentStage(2);
       if (altitudeTextRef.current) {
-        const alt = Math.round(35786 - (t / 1.8) * 34500);
-        altitudeTextRef.current.textContent = `${alt.toLocaleString()} KM`;
+        const progress = (t - 3.2) / 1.4;
+        const alt = Math.round(500 - progress * 420);
+        altitudeTextRef.current.textContent = `${alt.toLocaleString()} M AGL`;
       }
       if (stageBadgeRef.current) {
-        stageBadgeRef.current.textContent = "HYPER-ZOOM TO INDIA";
+        stageBadgeRef.current.textContent = "CAMPUS REVEAL";
       }
     }
-    // Stage 2: Cosmic Portal / Observer gazing at Earth with Waterfall (1.8s - 3.2s)
-    else if (t < 3.2) {
-      if (currentStage !== 2) setCurrentStage(2);
+    // Stage 3: Live Sweeping Campus Airspace / Festival Nexus (4.6s - 6.5s)
+    else if (t >= 4.6) {
+      if (currentStage !== 3) setCurrentStage(3);
+      if (altitudeTextRef.current) {
+        altitudeTextRef.current.textContent = "45M AGL";
+      }
+      if (stageBadgeRef.current) {
+        stageBadgeRef.current.textContent = "LIVE CAMPUS NEXUS";
+      }
+    }
+    // Stage 4: Cosmic Portal (1.8s - 3.2s)
+    else if (t >= 1.8 && t < 3.2) {
+      if (currentStage !== 4) setCurrentStage(4);
       if (altitudeTextRef.current) {
         const progress = (t - 1.8) / 1.4;
         const alt = Math.round(1286 - progress * 1036);
@@ -109,28 +122,6 @@ export default function CinematicPortalHero() {
       }
       if (stageBadgeRef.current) {
         stageBadgeRef.current.textContent = "COSMIC PORTAL";
-      }
-    }
-    // Stage 3: Match-cut to SLIET Auditorium Campus Approach (3.2s - 4.6s)
-    else if (t < 4.6) {
-      if (currentStage !== 3) setCurrentStage(3);
-      if (altitudeTextRef.current) {
-        const progress = (t - 3.2) / 1.4;
-        const alt = Math.round(250 - progress * 155);
-        altitudeTextRef.current.textContent = `${alt.toLocaleString()} M AGL`;
-      }
-      if (stageBadgeRef.current) {
-        stageBadgeRef.current.textContent = "CAMPUS REVEAL";
-      }
-    }
-    // Stage 4: Live Sweeping Campus Airspace (4.6s - 6.5s)
-    else {
-      if (currentStage !== 4) setCurrentStage(4);
-      if (altitudeTextRef.current) {
-        altitudeTextRef.current.textContent = "45M AGL";
-      }
-      if (stageBadgeRef.current) {
-        stageBadgeRef.current.textContent = "LIVE CAMPUS NEXUS";
       }
     }
 
@@ -159,27 +150,27 @@ export default function CinematicPortalHero() {
     },
     {
       stage: 2 as const,
-      time: 0.1,
-      label: "02 // ZOOM TO INDIA",
-      short: "02 ZOOM",
-      alt: "1,286 M",
-      caption: "🚀 Hyper-Descent: Plunging from space orbit to India & Cosmic Portal.",
+      time: 3.2,
+      label: "02 // CAMPUS REVEAL",
+      short: "02 CAMPUS",
+      alt: "500 M AGL",
+      caption: "🏛️ SLIET Longowal: 451-acre national campus of technical excellence.",
     },
     {
       stage: 3 as const,
-      time: 3.4,
-      label: "03 // CAMPUS REVEAL",
-      short: "03 CAMPUS",
-      alt: "250 M AGL",
-      caption: "🏛️ SLIET Longowal: 451-acre campus of national technical excellence.",
+      time: 4.8,
+      label: "03 // FESTIVAL ARENA",
+      short: "03 ARENA",
+      alt: "45 M AGL",
+      caption: "⚡ TechFEST'26 Live: 40+ Competitions, Robowars, Hackathons & Innovation.",
     },
     {
       stage: 4 as const,
-      time: 4.8,
-      label: "04 // FESTIVAL ARENA",
-      short: "04 NEXUS",
-      alt: "45 M AGL",
-      caption: "⚡ TechFEST'26 Live: Competitions, Robowars, Hackathons & Innovation.",
+      time: 1.8,
+      label: "04 // COSMIC PORTAL",
+      short: "04 PORTAL",
+      alt: "DIMENSIONAL",
+      caption: "🌀 Cosmic Portal: Where Ideas Become Reality.",
     },
   ];
 
@@ -200,21 +191,17 @@ export default function CinematicPortalHero() {
       return;
     }
 
-    if (stageNum === 2) {
-      handleInitiateZoom();
-      return;
+    const droneVid = droneVideoRef.current;
+    if (droneVid) {
+      const target = STORY_STAGES.find((s) => s.stage === stageNum);
+      droneVid.currentTime = target ? target.time : 3.2;
+      droneVid.muted = !audioActive;
+      droneVid.play().catch(() => setIsPaused(true));
+      showToast(`🎬 Story Chapter ${stageNum}: ${target?.short}`);
     }
-
-    const vid = droneVideoRef.current;
-    if (!vid) return;
-    const target = STORY_STAGES.find((s) => s.stage === stageNum);
-    if (target) {
-      vid.currentTime = target.time;
-      vid.play().catch(() => {});
-      setCurrentStage(stageNum);
-      setIsPaused(false);
-      showToast(`🎬 Story Chapter ${stageNum}: ${target.short}`);
-    }
+    setCurrentStage(stageNum);
+    setIsZooming(true);
+    setIsPaused(false);
   };
 
   const nextStage = () => {
@@ -678,11 +665,31 @@ export default function CinematicPortalHero() {
             </h1>
           </div>
 
-          {/* Subtitle */}
+          {/* Subtitle / Dynamic Fest Stats */}
           <div className="hero-anim-item">
-            <p className="text-xs sm:text-sm md:text-base font-light text-neutral-300 max-w-sm sm:max-w-md leading-relaxed drop-shadow-md">
-              Technology and Sciences for a Sustainable Earth.
-            </p>
+            {currentStage === 1 ? (
+              <p className="text-xs sm:text-sm md:text-base font-light text-neutral-300 max-w-sm sm:max-w-md leading-relaxed drop-shadow-md">
+                Technology and Sciences for a Sustainable Earth.
+              </p>
+            ) : (
+              <div className="space-y-2 max-w-md">
+                <p className="text-xs sm:text-sm font-light text-neutral-300 leading-relaxed drop-shadow-md">
+                  Northern India&apos;s Largest Technical Festival at SLIET Longowal.
+                </p>
+                {/* Key Fest Stat Badges */}
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-0.5">
+                  <span className="px-2.5 py-1 rounded-md bg-[#00D9FF]/10 border border-[#00D9FF]/30 text-[9px] sm:text-[10px] font-mono text-[#00D9FF] font-semibold">
+                    🏆 ₹5,00,000+ PRIZES
+                  </span>
+                  <span className="px-2.5 py-1 rounded-md bg-white/5 border border-white/15 text-[9px] sm:text-[10px] font-mono text-neutral-200">
+                    ⚡ 40+ EVENTS
+                  </span>
+                  <span className="px-2.5 py-1 rounded-md bg-white/5 border border-white/15 text-[9px] sm:text-[10px] font-mono text-neutral-200 hidden xs:inline-block">
+                    👥 10,000+ INNOVATORS
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Date & Location */}
@@ -691,7 +698,7 @@ export default function CinematicPortalHero() {
               09 • 10 OCTOBER 2026
             </p>
             <p className="text-[9px] sm:text-xs font-mono tracking-[0.18em] sm:tracking-[0.2em] text-neutral-400 uppercase">
-              SLIET LONGOWAL, PUNJAB
+              SLIET LONGOWAL, PUNJAB • 451-ACRE CAMPUS
             </p>
           </div>
 
@@ -740,10 +747,17 @@ export default function CinematicPortalHero() {
 
                 {/* Secondary Action Button */}
                 <button
-                  onClick={() => setActiveModal("events")}
+                  onClick={() => {
+                    const el = document.getElementById("events-section");
+                    if (el) {
+                      el.scrollIntoView({ behavior: "smooth" });
+                    } else {
+                      setActiveModal("events");
+                    }
+                  }}
                   className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-full border border-white/20 bg-white/5 active:scale-[0.98] hover:bg-white/10 text-white font-mono text-xs sm:text-sm tracking-wider transition-all duration-200 cursor-pointer backdrop-blur-sm min-h-[46px] sm:min-h-[48px]"
                 >
-                  <span>EXPLORE EVENTS</span>
+                  <span>EXPLORE 40+ EVENTS</span>
                   <span className="text-[#00D9FF]">↗</span>
                 </button>
               </>
@@ -845,15 +859,20 @@ export default function CinematicPortalHero() {
           </div>
         </div>
 
-        {/* Bottom Bar: Clean Scroll Prompt & Watermark */}
+        {/* Bottom Bar: Clean Scroll Prompt & University Brand */}
         <div className="w-full flex items-center justify-between pt-2.5 sm:pt-4 border-t border-white/5 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-          <div
-            ref={scrollIndicatorRef}
-            className="flex items-center gap-2 sm:gap-3 text-[9px] sm:text-[10px] font-mono tracking-[0.25em] sm:tracking-[0.3em] text-neutral-400 uppercase transition-opacity duration-700 opacity-100"
+          <button
+            onClick={() => {
+              const el = document.getElementById("events-section");
+              if (el) {
+                el.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+            className="flex items-center gap-2 sm:gap-3 text-[9px] sm:text-[10px] font-mono tracking-[0.25em] sm:tracking-[0.3em] text-neutral-300 hover:text-[#00D9FF] uppercase transition-all duration-300 cursor-pointer pointer-events-auto group"
           >
-            <span className="w-3 sm:w-4 h-[1px] bg-[#00D9FF]/60" />
-            <span>SCROLL TO EXPLORE ↓</span>
-          </div>
+            <span className="w-3 sm:w-4 h-[1px] bg-[#00D9FF]/60 group-hover:w-6 transition-all" />
+            <span>SCROLL TO EXPLORE FESTIVAL ↓</span>
+          </button>
 
           <div className="text-[9px] sm:text-[10px] font-mono tracking-[0.2em] text-neutral-400 uppercase hidden sm:block">
             SANT LONGOWAL INSTITUTE OF ENGINEERING &amp; TECHNOLOGY
