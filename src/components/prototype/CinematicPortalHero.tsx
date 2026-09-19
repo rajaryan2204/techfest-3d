@@ -184,6 +184,64 @@ export default function CinematicPortalHero() {
     vid.play().catch(() => {});
   };
 
+  const STORY_STAGES = [
+    {
+      stage: 1 as const,
+      time: 0.1,
+      label: "01 // ORBITAL DESCENT",
+      short: "01 SPACE",
+      alt: "35,786 KM",
+      caption: "Orbital Recon: Scanning continental vector towards India.",
+    },
+    {
+      stage: 2 as const,
+      time: 2.0,
+      label: "02 // COSMIC PORTAL",
+      short: "02 PORTAL",
+      alt: "1,286 M",
+      caption: "The Portal: Observer gazes at Earth as waterfall cascades.",
+    },
+    {
+      stage: 3 as const,
+      time: 3.4,
+      label: "03 // CAMPUS APPROACH",
+      short: "03 CAMPUS",
+      alt: "250 M AGL",
+      caption: "Descent to SLIET: 451-acre campus of national excellence.",
+    },
+    {
+      stage: 4 as const,
+      time: 4.8,
+      label: "04 // FESTIVAL NEXUS",
+      short: "04 NEXUS",
+      alt: "45 M AGL",
+      caption: "Welcome to TechFEST'26: Where Ideas Become Reality.",
+    },
+  ];
+
+  const jumpToStage = (stageNum: 1 | 2 | 3 | 4) => {
+    const vid = droneVideoRef.current;
+    if (!vid) return;
+    const target = STORY_STAGES.find((s) => s.stage === stageNum);
+    if (target) {
+      vid.currentTime = target.time;
+      vid.play().catch(() => {});
+      setCurrentStage(stageNum);
+      setIsPaused(false);
+      showToast(`🎬 Story Chapter ${stageNum}: ${target.short}`);
+    }
+  };
+
+  const nextStage = () => {
+    const next = (currentStage === 4 ? 1 : currentStage + 1) as 1 | 2 | 3 | 4;
+    jumpToStage(next);
+  };
+
+  const prevStage = () => {
+    const prev = (currentStage === 1 ? 4 : currentStage - 1) as 1 | 2 | 3 | 4;
+    jumpToStage(prev);
+  };
+
   const replayZoom = () => {
     const vid = droneVideoRef.current;
     if (!vid) return;
@@ -776,6 +834,89 @@ export default function CinematicPortalHero() {
               <span>↺</span>
               <span className="hover:underline">Replay Hyper-Descent from Space</span>
             </button>
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* INTERACTIVE STORY MODE CONTROLLER (Chapters, Navigation & Captions)       */}
+        {/* ========================================================================= */}
+        <div className="w-full flex flex-col gap-1.5 sm:gap-2 pointer-events-auto py-1 sm:py-2">
+          {/* Story Narrative Caption & Current Chapter Status */}
+          <div className="flex items-center justify-between gap-3 text-[10px] sm:text-xs font-mono">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#00D9FF] animate-pulse" />
+              <span className="text-[#00D9FF] font-bold uppercase tracking-wider text-[10px] sm:text-xs">
+                🎬 STORY MODE:
+              </span>
+              <span className="text-neutral-200 hidden sm:inline text-xs">
+                {STORY_STAGES[currentStage - 1].caption}
+              </span>
+              <span className="text-neutral-200 sm:hidden text-[10px]">
+                {STORY_STAGES[currentStage - 1].short} • {STORY_STAGES[currentStage - 1].alt}
+              </span>
+            </div>
+
+            {/* Next & Prev Chapter Controls */}
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={prevStage}
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/5 hover:bg-white/15 active:scale-95 border border-white/15 flex items-center justify-center text-xs text-neutral-300 hover:text-white cursor-pointer transition-all"
+                title="Previous Story Chapter"
+              >
+                ◀
+              </button>
+              <button
+                onClick={nextStage}
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/5 hover:bg-white/15 active:scale-95 border border-white/15 flex items-center justify-center text-xs text-[#00D9FF] hover:text-white cursor-pointer transition-all"
+                title="Next Story Chapter"
+              >
+                ▶
+              </button>
+            </div>
+          </div>
+
+          {/* 4 Interactive Story Chapter Cards / Progress Trackers */}
+          <div className="grid grid-cols-4 gap-1.5 sm:gap-2.5">
+            {STORY_STAGES.map((s) => {
+              const isActive = currentStage === s.stage;
+              return (
+                <button
+                  key={s.stage}
+                  onClick={() => jumpToStage(s.stage)}
+                  className={`group flex flex-col p-1.5 sm:p-2.5 rounded-lg border text-left transition-all duration-200 cursor-pointer ${
+                    isActive
+                      ? "bg-[#00D9FF]/15 border-[#00D9FF] shadow-[0_0_15px_rgba(0,217,255,0.3)]"
+                      : "bg-black/40 hover:bg-white/5 border-white/10 opacity-70 hover:opacity-100"
+                  }`}
+                >
+                  {/* Progress Indicator Bar */}
+                  <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mb-1 sm:mb-1.5">
+                    <div
+                      className={`h-full transition-all duration-300 ${
+                        isActive
+                          ? "w-full bg-[#00D9FF] shadow-[0_0_8px_#00D9FF]"
+                          : currentStage > s.stage
+                          ? "w-full bg-white/40"
+                          : "w-0"
+                      }`}
+                    />
+                  </div>
+
+                  <span
+                    className={`font-mono text-[8px] sm:text-[10px] font-bold tracking-wider truncate ${
+                      isActive ? "text-[#00D9FF]" : "text-neutral-400 group-hover:text-white"
+                    }`}
+                  >
+                    <span className="sm:inline hidden">{s.label}</span>
+                    <span className="sm:hidden">{s.short}</span>
+                  </span>
+
+                  <span className="text-[7px] sm:text-[9px] font-mono text-neutral-400 hidden xs:inline">
+                    {s.alt}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
