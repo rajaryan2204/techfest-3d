@@ -55,20 +55,20 @@ export default function CinematicPortalHero() {
 
     const vid = droneVideoRef.current;
     if (vid) {
-      // Start directly at 3.2s (SLIET Campus Approach) to bypass redundant second Earth video
-      vid.currentTime = 3.2;
+      // Start at 0.0s to play the cinematic hyper-zoom into India
+      vid.currentTime = 0;
       vid.muted = !audioActive;
       vid.play().catch(() => setIsPaused(true));
     }
 
     if (altitudeTextRef.current) {
-      altitudeTextRef.current.textContent = "500 M AGL";
+      altitudeTextRef.current.textContent = "35,786 KM";
     }
     if (stageBadgeRef.current) {
-      stageBadgeRef.current.textContent = "CAMPUS REVEAL";
+      stageBadgeRef.current.textContent = "HYPER-ZOOM TO INDIA";
     }
 
-    showToast("🚀 India Locked: Arriving at SLIET Longowal Campus");
+    showToast("🚀 India Locked: Commencing Hyper-Zoom to SLIET Longowal");
   }, [audioActive, showToast]);
 
   // Auto-initiate zoom to India after 7s of satellite orbit if user hasn't interacted yet
@@ -90,44 +90,49 @@ export default function CinematicPortalHero() {
 
     const t = vid.currentTime;
 
-    // Stage 2: Campus Reveal & Aerial Approach (3.2s - 4.6s)
-    if (t >= 3.2 && t < 4.6) {
+    // Stage 2: Hyper-Zoom to India (0.0s - 2.8s)
+    if (t < 2.8) {
       if (currentStage !== 2) setCurrentStage(2);
       if (altitudeTextRef.current) {
-        const progress = (t - 3.2) / 1.4;
-        const alt = Math.round(500 - progress * 420);
+        const progress = Math.min(1, Math.max(0, t / 2.8));
+        const altKm = Math.round(35786 * Math.pow(1 - progress, 2.5) + (1 - progress) * 1500);
+        if (altKm > 1000) {
+          altitudeTextRef.current.textContent = `${altKm.toLocaleString()} KM`;
+        } else {
+          const altM = Math.round(500 + (1 - progress) * 2000);
+          altitudeTextRef.current.textContent = `${altM.toLocaleString()} M AGL`;
+        }
+      }
+      if (stageBadgeRef.current) {
+        stageBadgeRef.current.textContent = "HYPER-ZOOM TO INDIA";
+      }
+    }
+    // Stage 3: Campus Reveal & Aerial Approach (2.8s - 3.8s)
+    else if (t >= 2.8 && t < 3.8) {
+      if (currentStage !== 3) setCurrentStage(3);
+      if (altitudeTextRef.current) {
+        const progress = (t - 2.8) / 1.0;
+        const alt = Math.round(500 - progress * 400);
         altitudeTextRef.current.textContent = `${alt.toLocaleString()} M AGL`;
       }
       if (stageBadgeRef.current) {
         stageBadgeRef.current.textContent = "CAMPUS REVEAL";
       }
     }
-    // Stage 3: Live Sweeping Campus Airspace / Festival Nexus (4.6s - 6.5s)
-    else if (t >= 4.6) {
-      if (currentStage !== 3) setCurrentStage(3);
+    // Stage 4: Live Sweeping Campus Airspace / Festival Nexus (3.8s - 4.9s)
+    else if (t >= 3.8) {
+      if (currentStage !== 4) setCurrentStage(4);
       if (altitudeTextRef.current) {
         altitudeTextRef.current.textContent = "45M AGL";
       }
       if (stageBadgeRef.current) {
-        stageBadgeRef.current.textContent = "LIVE CAMPUS NEXUS";
-      }
-    }
-    // Stage 4: Cosmic Portal (1.8s - 3.2s)
-    else if (t >= 1.8 && t < 3.2) {
-      if (currentStage !== 4) setCurrentStage(4);
-      if (altitudeTextRef.current) {
-        const progress = (t - 1.8) / 1.4;
-        const alt = Math.round(1286 - progress * 1036);
-        altitudeTextRef.current.textContent = `${alt.toLocaleString()} M`;
-      }
-      if (stageBadgeRef.current) {
-        stageBadgeRef.current.textContent = "COSMIC PORTAL";
+        stageBadgeRef.current.textContent = "LIVE FESTIVAL NEXUS";
       }
     }
 
-    // Seamless campus aerial loop: 6.40s -> 4.60s (smooth continuous campus drone flight)
-    if (t >= 6.4) {
-      vid.currentTime = 4.6;
+    // Seamless campus aerial loop: 4.80s -> 3.00s (smooth continuous campus drone flight)
+    if (t >= 4.8) {
+      vid.currentTime = 3.0;
       vid.play().catch(() => {});
     }
   };
@@ -135,7 +140,7 @@ export default function CinematicPortalHero() {
   const handleDroneEnded = () => {
     const vid = droneVideoRef.current;
     if (!vid) return;
-    vid.currentTime = 4.6;
+    vid.currentTime = 3.0;
     vid.play().catch(() => {});
   };
 
@@ -150,27 +155,27 @@ export default function CinematicPortalHero() {
     },
     {
       stage: 2 as const,
-      time: 3.2,
-      label: "02 // CAMPUS REVEAL",
-      short: "02 CAMPUS",
+      time: 0.1,
+      label: "02 // ZOOM TO INDIA",
+      short: "02 ZOOM",
+      alt: "12,000 KM",
+      caption: "🚀 Hyper-Zoom to India: Atmospheric descent into SLIET Longowal coordinates.",
+    },
+    {
+      stage: 3 as const,
+      time: 2.8,
+      label: "03 // CAMPUS REVEAL",
+      short: "03 CAMPUS",
       alt: "500 M AGL",
       caption: "🏛️ SLIET Longowal: 451-acre national campus of technical excellence.",
     },
     {
-      stage: 3 as const,
-      time: 4.8,
-      label: "03 // FESTIVAL ARENA",
-      short: "03 ARENA",
+      stage: 4 as const,
+      time: 3.8,
+      label: "04 // FESTIVAL ARENA",
+      short: "04 ARENA",
       alt: "45 M AGL",
       caption: "⚡ TechFEST'26 Live: 40+ Competitions, Robowars, Hackathons & Innovation.",
-    },
-    {
-      stage: 4 as const,
-      time: 1.8,
-      label: "04 // COSMIC PORTAL",
-      short: "04 PORTAL",
-      alt: "DIMENSIONAL",
-      caption: "🌀 Cosmic Portal: Where Ideas Become Reality.",
     },
   ];
 
@@ -194,7 +199,7 @@ export default function CinematicPortalHero() {
     const droneVid = droneVideoRef.current;
     if (droneVid) {
       const target = STORY_STAGES.find((s) => s.stage === stageNum);
-      droneVid.currentTime = target ? target.time : 3.2;
+      droneVid.currentTime = target ? target.time : 0;
       droneVid.muted = !audioActive;
       droneVid.play().catch(() => setIsPaused(true));
       showToast(`🎬 Story Chapter ${stageNum}: ${target?.short}`);
@@ -258,7 +263,7 @@ export default function CinematicPortalHero() {
   const handleFocusAuditorium = () => {
     const vid = droneVideoRef.current;
     if (!vid) return;
-    vid.currentTime = 4.6;
+    vid.currentTime = 3.0;
     vid.play().catch(() => {});
     showToast("🎯 Focused Drone Camera on SLIET Auditorium");
   };
@@ -366,16 +371,18 @@ export default function CinematicPortalHero() {
         className="absolute inset-0 w-full h-full origin-center pointer-events-none overflow-hidden"
       >
         {/* Stage 1: 3D Earth Globe Rotating to India & Locking Target */}
-        {currentStage === 1 && (
-          <div className="absolute inset-0 w-full h-full transition-opacity duration-700 opacity-100">
-            <EarthGlobe3D
-              onInitiateZoom={handleInitiateZoom}
-              isZooming={isZooming}
-            />
-          </div>
-        )}
+        <div
+          className={`absolute inset-0 w-full h-full transition-opacity duration-700 ${
+            currentStage === 1 ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
+        >
+          <EarthGlobe3D
+            onInitiateZoom={handleInitiateZoom}
+            isZooming={isZooming}
+          />
+        </div>
 
-        {/* Stages 2-4: Master Story Video (Hyper-Zoom into India -> Cosmic Portal -> SLIET Campus) */}
+        {/* Stages 2-4: Master Story Video (Hyper-Zoom into India -> SLIET Campus) */}
         <video
           ref={droneVideoRef}
           autoPlay={false}
@@ -384,19 +391,19 @@ export default function CinematicPortalHero() {
           preload="auto"
           onTimeUpdate={handleDroneTimeUpdate}
           onEnded={handleDroneEnded}
-          poster="/videos/hero/techfest-story-poster.jpg?v=3"
+          poster="/videos/hero/earth-zoom-drone-poster.jpg"
           className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ${
             currentStage !== 1 ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
         >
-          {/* Mobile receives ultra-lightweight 720p master stream (~1.9 MB) */}
+          {/* Mobile receives ultra-lightweight 720p master stream */}
           <source
-            src="/videos/hero/techfest-story-master-720p.mp4?v=3"
+            src="/videos/hero/earth-zoom-drone.mp4"
             media="(max-width: 768px)"
             type="video/mp4"
           />
-          {/* Desktop receives crisp 1080p master stream (~5.2 MB) */}
-          <source src="/videos/hero/techfest-story-master-1080p.mp4?v=3" type="video/mp4" />
+          {/* Desktop receives crisp 1080p master stream */}
+          <source src="/videos/hero/earth-zoom-drone-1080p.mp4" type="video/mp4" />
         </video>
       </div>
 

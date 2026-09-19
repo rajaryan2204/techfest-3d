@@ -49,6 +49,7 @@ export default function EarthGlobe3D({
     setIsLocked(true);
     setIsActiveZooming(true);
     rotationStateRef.current.isZoomingAnim = true;
+    onInitiateZoom();
   };
 
   useEffect(() => {
@@ -174,6 +175,7 @@ export default function EarthGlobe3D({
               rotationStateRef.current.hasLocked = true;
               setIsLocked(true);
               setIsActiveZooming(true);
+              onInitiateZoom();
             }
           }, 2400);
         }
