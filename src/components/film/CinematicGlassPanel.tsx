@@ -16,7 +16,7 @@ export default function CinematicGlassPanel({ elapsedTime }: CinematicGlassPanel
   // Scene 05: 6.9s - 8.6s (TECHNOLOGY GIVES IT LIFE.)
   // Scene 06: 8.7s - 10.4s (FOR A SUSTAINABLE EARTH. - Single Subtle Glass Panel)
   // Scene 07: 10.5s - 11.8s (Geographic Light Path to SLIET)
-  // Scene 08: 11.9s - 13.0s (SLIET // 09-10 OCTOBER 2026)
+  // Scene 08: 11.9s - 13.0s (SLIET // 16-17 OCTOBER 2026)
   // Scene 09: 13.1s - 14.5s (TECHFEST'26 FINAL REVEAL)
 
   let activeFrame = 0;
@@ -177,7 +177,7 @@ export default function CinematicGlassPanel({ elapsedTime }: CinematicGlassPanel
               SLIET
             </h2>
             <p className="text-xs sm:text-sm font-mono text-neutral-400 tracking-[0.4em] uppercase pt-1">
-              09—10 OCTOBER 2026
+              16—17 OCTOBER 2026
             </p>
           </div>
         )}
@@ -195,7 +195,7 @@ export default function CinematicGlassPanel({ elapsedTime }: CinematicGlassPanel
               Technology and Sciences for Sustainable Earth
             </p>
             <p className="text-[9px] sm:text-[11px] font-mono text-neutral-500 tracking-[0.35em] uppercase pt-2">
-              09—10 OCTOBER 2026 // SLIET
+              16—17 OCTOBER 2026 // SLIET
             </p>
           </div>
         )}

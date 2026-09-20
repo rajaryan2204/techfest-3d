@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import IndiaHeroCanvas from "./IndiaHeroCanvas";
-import HeroClipartBadges from "./HeroClipartBadges";
 import IndiaTargetHUD from "./IndiaTargetHUD";
 import SampleEventsModal from "@/components/prototype/SampleEventsModal";
 import SampleCampusTourModal from "@/components/prototype/SampleCampusTourModal";
@@ -54,12 +55,7 @@ export default function IndiaHeroMain() {
       <IndiaHeroCanvas lockTargetIndia={lockTargetIndia} />
 
       {/* ========================================================================= */}
-      {/* 2. RICH VECTOR CLIPARTS (Satellite, Bharat Chakra, Visor, Stickers)       */}
-      {/* ========================================================================= */}
-      <HeroClipartBadges />
-
-      {/* ========================================================================= */}
-      {/* 3. CINEMATIC GRADIENT LIGHTING & VIGNETTES                                */}
+      {/* 2. CINEMATIC GRADIENT LIGHTING & VIGNETTES                                */}
       {/* ========================================================================= */}
       <div className="absolute inset-y-0 left-0 w-full sm:w-[50%] bg-gradient-to-r from-[#020817]/95 via-[#020817]/60 to-transparent pointer-events-none z-10" />
       <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#020817]/85 to-transparent pointer-events-none z-10" />
@@ -69,22 +65,31 @@ export default function IndiaHeroMain() {
       {/* 4. TOP NAVIGATION HEADER                                                 */}
       {/* ========================================================================= */}
       <header className="relative z-30 w-full flex items-center justify-between pb-3 sm:pb-4 border-b border-white/10">
-        {/* Brand Mark */}
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#00D9FF]/10 border border-[#00D9FF]/40 flex items-center justify-center text-[#00D9FF] shadow-[0_0_20px_rgba(0,217,255,0.3)]">
-            <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L14.5 8.5L21.5 9.5L16.5 14.5L18 21.5L12 17.5L6 21.5L7.5 14.5L2.5 9.5L9.5 8.5L12 2Z" />
-            </svg>
+        {/* Brand Mark with Official TechFest Logo */}
+        <Link
+          href="/"
+          className="flex items-center gap-2.5 sm:gap-3 group cursor-pointer"
+        >
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#00D9FF]/10 border border-[#00D9FF]/40 flex items-center justify-center p-1.5 shadow-[0_0_20px_rgba(0,217,255,0.3)] group-hover:scale-105 transition-transform">
+            <Image
+              src="/logo/techfest-emblem-transparent.webp"
+              alt="TechFest'26 Emblem"
+              width={32}
+              height={32}
+              unoptimized
+              className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(0,217,255,0.6)]"
+              priority
+            />
           </div>
-          <div className="flex flex-col">
-            <span className="text-xs sm:text-sm font-bold tracking-[0.25em] text-white uppercase font-mono">
-              techFEST&apos;26
-            </span>
-            <span className="text-[8px] sm:text-[9px] tracking-[0.3em] text-[#00D9FF] uppercase font-mono">
-              SLIET LONGOWAL • INDIA
-            </span>
-          </div>
-        </div>
+          <Image
+            src="/logo/techfest.webp"
+            alt="TechFest'26"
+            width={180}
+            height={42}
+            className="h-6 sm:h-7 w-auto object-contain drop-shadow-[0_0_12px_rgba(0,217,255,0.4)] group-hover:scale-102 transition-transform"
+            priority
+          />
+        </Link>
 
         {/* Desktop Nav Links */}
         <nav className="hidden lg:flex items-center gap-7 text-xs font-mono tracking-[0.2em] uppercase">
@@ -211,7 +216,7 @@ export default function IndiaHeroMain() {
         {/* Date & Location */}
         <div className="space-y-0.5">
           <p className="text-xs sm:text-sm font-mono tracking-[0.25em] text-[#00D9FF] font-semibold uppercase">
-            09 • 10 OCTOBER 2026
+            16 • 17 OCTOBER 2026
           </p>
           <p className="text-[10px] sm:text-xs font-mono tracking-[0.2em] text-neutral-400 uppercase">
             SLIET LONGOWAL, PUNJAB, INDIA
@@ -299,7 +304,7 @@ export default function IndiaHeroMain() {
                 </div>
               ) : (
                 <p className="text-[11px] sm:text-xs text-neutral-400 font-light leading-relaxed">
-                  Join 10,000+ innovators at SLIET Longowal, Punjab on 09-10 October 2026.
+                  Join 10,000+ innovators at SLIET Longowal, Punjab on 16-17 October 2026.
                 </p>
               )}
             </div>

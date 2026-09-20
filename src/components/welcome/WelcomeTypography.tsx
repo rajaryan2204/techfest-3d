@@ -87,7 +87,7 @@ export default function WelcomeTypography({ progress, onEnter }: WelcomeTypograp
             style={{ opacity }}
           >
             <span className="text-[11px] font-mono tracking-[0.4em] text-neutral-400 uppercase">
-              09—10 OCTOBER 2026
+              16—17 OCTOBER 2026
             </span>
             <span className="text-xs font-mono tracking-[0.5em] text-white uppercase font-light">
               SLIET
@@ -270,7 +270,7 @@ export default function WelcomeTypography({ progress, onEnter }: WelcomeTypograp
                 TECHNOLOGY AND SCIENCES FOR SUSTAINABLE EARTH
               </p>
               <p className="text-[11px] font-mono text-neutral-500 tracking-[0.3em] uppercase pt-1">
-                09—10 OCTOBER 2026 // SLIET
+                16—17 OCTOBER 2026 // SLIET
               </p>
             </div>
 

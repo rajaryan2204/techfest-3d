@@ -17,7 +17,7 @@ export default function AutoplayTypography({ elapsedTime, onEnter }: AutoplayTyp
   // Scene 4: 5.5s - 7.5s (WE BUILD.)
   // Scene 5: 7.5s - 9.5s (WE DISCOVER.)
   // Scene 6: 9.5s - 11.5s (FOR A SUSTAINABLE EARTH. - Floating glass panel)
-  // Scene 7: 11.5s - 13.5s (SLIET // 09-10 OCTOBER 2026)
+  // Scene 7: 11.5s - 13.5s (SLIET // 16-17 OCTOBER 2026)
   // Scene 8: 13.5s - 16.0s (TECHFEST'26 Final Reveal & Enter CTA)
 
   let scene = 1;
@@ -165,7 +165,7 @@ export default function AutoplayTypography({ elapsedTime, onEnter }: AutoplayTyp
               SLIET
             </h2>
             <p className="text-xs sm:text-sm font-mono text-neutral-400 tracking-[0.4em] uppercase pt-1">
-              09—10 OCTOBER 2026
+              16—17 OCTOBER 2026
             </p>
           </div>
         )}
@@ -187,7 +187,7 @@ export default function AutoplayTypography({ elapsedTime, onEnter }: AutoplayTyp
                 TECHNOLOGY AND SCIENCES FOR SUSTAINABLE EARTH
               </p>
               <p className="text-[9px] sm:text-[11px] font-mono text-neutral-500 tracking-[0.3em] uppercase pt-1">
-                09—10 OCTOBER 2026 // SLIET
+                16—17 OCTOBER 2026 // SLIET
               </p>
             </div>
 

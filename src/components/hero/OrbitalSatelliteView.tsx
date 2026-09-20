@@ -49,106 +49,176 @@ export default function OrbitalSatelliteView({
     const cosTilt = Math.cos(tilt);
     const sinTilt = Math.sin(tilt);
 
-    // Target coordinates on Earth (India - SLIET Longowal)
+    // Target coordinates on Earth (India - SLIET Longowal: 77.2°E, 28.6°N)
+    // India is situated in the northern hemisphere above the equator (cy=300)
     const targetX = 500;
-    const targetY = 295;
+    const targetY = 244;
+
+    let hasStartedDive = false;
+    let diveProgress = 0;
+    let startDiveX = 0;
+    let startDiveY = 0;
+    let startDiveScale = 1;
 
     const render = () => {
-      angle += speed;
-      if (angle >= Math.PI * 2) angle -= Math.PI * 2;
+      // If isZooming is active: Satellite breaks orbit and performs a dramatic hyper-dive into India!
+      if (isZooming) {
+        if (!hasStartedDive) {
+          hasStartedDive = true;
+          // Capture satellite's current orbit position as starting point of the dive
+          const x0 = a * Math.cos(angle);
+          const y0 = b * Math.sin(angle);
+          startDiveX = cx + x0 * cosTilt - y0 * sinTilt;
+          startDiveY = cy + x0 * sinTilt + y0 * cosTilt;
+          startDiveScale = 1.1 + 0.28 * Math.sin(angle);
+        }
 
-      // Calculate unrotated elliptical position
-      const x0 = a * Math.cos(angle);
-      const y0 = b * Math.sin(angle);
+        // Progress dive from 0 to 1 over ~1.1s (60 fps)
+        diveProgress = Math.min(1, diveProgress + 0.016);
+        const ease = Math.pow(diveProgress, 2.2);
 
-      // Rotate by orbital tilt angle
-      const x = cx + x0 * cosTilt - y0 * sinTilt;
-      const y = cy + x0 * sinTilt + y0 * cosTilt;
+        // Interpolate position from orbit directly into India coordinates
+        const curX = startDiveX + (targetX - startDiveX) * ease;
+        const curY = startDiveY + (targetY - startDiveY) * ease;
 
-      // z-depth: sin(angle) determines foreground vs background
-      // z > 0: In front of Earth (closer to camera, larger, brighter)
-      // z < 0: Behind Earth (smaller, dimmer, atmospheric occlusion)
-      const z = Math.sin(angle);
+        // Satellite dramatically scales up as it plunges towards India/camera
+        const curScale = startDiveScale * (1 + diveProgress * 3.2);
 
-      // 3D Perspective Scaling: 0.85x in back -> 1.35x in front
-      const scale = 1.1 + 0.28 * z;
+        // Fade out into atmospheric entry at the end of the dive
+        const curOpacity = diveProgress > 0.85 ? Math.max(0, (1 - diveProgress) / 0.15) : 1.0;
 
-      // Realistic opacity: Dims when orbiting the far side of the planet
-      const opacity = z < -0.2 ? Math.max(0.35, 1.0 + z * 0.9) : 1.0;
+        // Orient dish directly towards target coordinates
+        const dx = targetX - curX;
+        const dy = targetY - curY;
+        const diveAngle = Math.atan2(dy, dx) * (180 / Math.PI);
 
-      // Calculate satellite orientation angle so dish points toward Earth center (cx, cy)
-      const dxToEarth = cx - x;
-      const dyToEarth = cy - y;
-      const angleToEarth = Math.atan2(dyToEarth, dxToEarth) * (180 / Math.PI);
+        if (satelliteGroupRef.current) {
+          satelliteGroupRef.current.setAttribute(
+            "transform",
+            `translate(${curX}, ${curY}) scale(${curScale}) rotate(${diveAngle + 90})`
+          );
+          satelliteGroupRef.current.style.opacity = `${curOpacity}`;
+          satelliteGroupRef.current.style.zIndex = "40";
+        }
 
-      // Velocity tangent angle for thruster exhaust orientation
-      const vx = -a * Math.sin(angle);
-      const vy = b * Math.cos(angle);
-      const vxRot = vx * cosTilt - vy * sinTilt;
-      const vyRot = vx * sinTilt + vy * cosTilt;
-      const velocityAngle = Math.atan2(vyRot, vxRot) * (180 / Math.PI);
+        // Radar beam flares into a hyper-descent targeting laser tunnel
+        if (radarBeamRef.current) {
+          const spread = Math.max(12, 50 * (1 - diveProgress));
+          radarBeamRef.current.setAttribute(
+            "points",
+            `${curX},${curY} ${targetX - spread},${targetY} ${targetX + spread},${targetY}`
+          );
+          radarBeamRef.current.style.opacity = `${Math.max(0.3, 1 - diveProgress * 0.7)}`;
+        }
 
-      // Apply 3D Transform to Satellite Group
-      if (satelliteGroupRef.current) {
-        satelliteGroupRef.current.setAttribute(
-          "transform",
-          `translate(${x}, ${y}) scale(${scale})`
-        );
-        satelliteGroupRef.current.style.opacity = `${opacity}`;
-        satelliteGroupRef.current.style.zIndex = z > 0 ? "30" : "10";
-      }
+        if (radarLineRef.current) {
+          radarLineRef.current.setAttribute("x1", `${curX}`);
+          radarLineRef.current.setAttribute("y1", `${curY}`);
+          radarLineRef.current.setAttribute("x2", `${targetX}`);
+          radarLineRef.current.setAttribute("y2", `${targetY}`);
+          radarLineRef.current.style.opacity = "1";
+        }
 
-      // Dynamic Radar Beam connecting Satellite Dish to India
-      if (radarBeamRef.current) {
-        // Calculate beam width at target
-        const beamSpread = 32;
-        radarBeamRef.current.setAttribute(
-          "points",
-          `${x},${y} ${targetX - beamSpread},${targetY} ${targetX + beamSpread},${targetY}`
-        );
-        radarBeamRef.current.style.opacity = z < -0.4 ? "0.15" : `${0.75 * Math.max(0.3, z + 0.5)}`;
-      }
+        // Telemetry updates during dive
+        if (telemetryAltRef.current) {
+          const currentAlt = Math.round(35786 * (1 - diveProgress));
+          telemetryAltRef.current.textContent = `ALT: ${currentAlt.toLocaleString()} KM // HYPER-DESCENT`;
+        }
 
-      if (radarLineRef.current) {
-        radarLineRef.current.setAttribute("x1", `${x}`);
-        radarLineRef.current.setAttribute("y1", `${y}`);
-        radarLineRef.current.setAttribute("x2", `${targetX}`);
-        radarLineRef.current.setAttribute("y2", `${targetY}`);
-        radarLineRef.current.style.opacity = z < -0.4 ? "0.2" : "0.7";
-      }
+        if (telemetryVelRef.current) {
+          const currentVel = (3.074 + diveProgress * 28.0).toFixed(1);
+          telemetryVelRef.current.textContent = `VEL: ${currentVel} KM/S // LOCK: INDIA`;
+        }
 
-      // Dynamic Telemetry HUD Tag position (tracks alongside the satellite)
-      if (telemetryTagRef.current) {
-        // Position tag slightly above-right if on right side, above-left if on left side
-        const tagOffsetX = x > cx ? 28 : -180;
-        const tagOffsetY = -42;
-        telemetryTagRef.current.setAttribute(
-          "transform",
-          `translate(${x + tagOffsetX}, ${y + tagOffsetY})`
-        );
-        telemetryTagRef.current.style.opacity = z < -0.3 ? "0.4" : "1.0";
-      }
+        if (telemetryTagRef.current) {
+          telemetryTagRef.current.setAttribute(
+            "transform",
+            `translate(${curX + 35}, ${curY - 35})`
+          );
+          telemetryTagRef.current.style.opacity = `${curOpacity}`;
+        }
+      } else {
+        // Normal Elliptical Orbit loop
+        angle += speed;
+        if (angle >= Math.PI * 2) angle -= Math.PI * 2;
 
-      // Live Telemetry Numbers
-      if (telemetryAltRef.current) {
-        const alt = Math.round(35786 + z * 180);
-        telemetryAltRef.current.textContent = `ALT: ${alt.toLocaleString()} KM // GEO-SYNC`;
-      }
+        // Calculate unrotated elliptical position
+        const x0 = a * Math.cos(angle);
+        const y0 = b * Math.sin(angle);
 
-      if (telemetryVelRef.current) {
-        const vel = (3.074 + Math.sin(angle * 2) * 0.015).toFixed(3);
-        telemetryVelRef.current.textContent = `VEL: ${vel} KM/S // INCL: 18.4°`;
-      }
+        // Rotate by orbital tilt angle
+        const x = cx + x0 * cosTilt - y0 * sinTilt;
+        const y = cy + x0 * sinTilt + y0 * cosTilt;
 
-      // Orbit particle pulse traveling along trajectory
-      if (orbitParticleRef.current) {
-        const pulseAngle = (angle + 1.2) % (Math.PI * 2);
-        const px0 = a * Math.cos(pulseAngle);
-        const py0 = b * Math.sin(pulseAngle);
-        const px = cx + px0 * cosTilt - py0 * sinTilt;
-        const py = cy + px0 * sinTilt + py0 * cosTilt;
-        orbitParticleRef.current.setAttribute("cx", `${px}`);
-        orbitParticleRef.current.setAttribute("cy", `${py}`);
+        // z-depth: sin(angle) determines foreground vs background
+        const z = Math.sin(angle);
+
+        // 3D Perspective Scaling: 0.85x in back -> 1.35x in front
+        const scale = 1.1 + 0.28 * z;
+
+        // Realistic opacity: Dims when orbiting the far side of the planet
+        const opacity = z < -0.2 ? Math.max(0.35, 1.0 + z * 0.9) : 1.0;
+
+        // Apply 3D Transform to Satellite Group
+        if (satelliteGroupRef.current) {
+          satelliteGroupRef.current.setAttribute(
+            "transform",
+            `translate(${x}, ${y}) scale(${scale})`
+          );
+          satelliteGroupRef.current.style.opacity = `${opacity}`;
+          satelliteGroupRef.current.style.zIndex = z > 0 ? "30" : "10";
+        }
+
+        // Dynamic Radar Beam connecting Satellite Dish to India
+        if (radarBeamRef.current) {
+          const beamSpread = 32;
+          radarBeamRef.current.setAttribute(
+            "points",
+            `${x},${y} ${targetX - beamSpread},${targetY} ${targetX + beamSpread},${targetY}`
+          );
+          radarBeamRef.current.style.opacity = z < -0.4 ? "0.15" : `${0.75 * Math.max(0.3, z + 0.5)}`;
+        }
+
+        if (radarLineRef.current) {
+          radarLineRef.current.setAttribute("x1", `${x}`);
+          radarLineRef.current.setAttribute("y1", `${y}`);
+          radarLineRef.current.setAttribute("x2", `${targetX}`);
+          radarLineRef.current.setAttribute("y2", `${targetY}`);
+          radarLineRef.current.style.opacity = z < -0.4 ? "0.2" : "0.7";
+        }
+
+        // Dynamic Telemetry HUD Tag position
+        if (telemetryTagRef.current) {
+          const tagOffsetX = x > cx ? 28 : -180;
+          const tagOffsetY = -42;
+          telemetryTagRef.current.setAttribute(
+            "transform",
+            `translate(${x + tagOffsetX}, ${y + tagOffsetY})`
+          );
+          telemetryTagRef.current.style.opacity = z < -0.3 ? "0.4" : "1.0";
+        }
+
+        // Live Telemetry Numbers
+        if (telemetryAltRef.current) {
+          const alt = Math.round(35786 + z * 180);
+          telemetryAltRef.current.textContent = `ALT: ${alt.toLocaleString()} KM // GEO-SYNC`;
+        }
+
+        if (telemetryVelRef.current) {
+          const vel = (3.074 + Math.sin(angle * 2) * 0.015).toFixed(3);
+          telemetryVelRef.current.textContent = `VEL: ${vel} KM/S // INCL: 18.4°`;
+        }
+
+        // Orbit particle pulse traveling along trajectory
+        if (orbitParticleRef.current) {
+          const pulseAngle = (angle + 1.2) % (Math.PI * 2);
+          const px0 = a * Math.cos(pulseAngle);
+          const py0 = b * Math.sin(pulseAngle);
+          const px = cx + px0 * cosTilt - py0 * sinTilt;
+          const py = cy + px0 * sinTilt + py0 * cosTilt;
+          orbitParticleRef.current.setAttribute("cx", `${px}`);
+          orbitParticleRef.current.setAttribute("cy", `${py}`);
+        }
       }
 
       animId = requestAnimationFrame(render);
@@ -156,7 +226,7 @@ export default function OrbitalSatelliteView({
 
     animId = requestAnimationFrame(render);
     return () => cancelAnimationFrame(animId);
-  }, []);
+  }, [isZooming]);
 
   return (
     <div
@@ -299,10 +369,62 @@ export default function OrbitalSatelliteView({
         />
 
         {/* ========================================================================= */}
-        {/* TARGETING RETICLE OVER INDIA (Center 500, 295 - SLIET Longowal)          */}
+        {/* HYPER-ZOOM WARP STREAK LINES & ATMOSPHERIC ENTRY SHOCKWAVES               */}
+        {/* ========================================================================= */}
+        {isZooming && (
+          <g className="pointer-events-none">
+            {/* Warp Speed Streak Lines Radiating Outward from India */}
+            {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => {
+              const rad = (deg * Math.PI) / 180;
+              const x1 = 500 + Math.cos(rad) * 45;
+              const y1 = 244 + Math.sin(rad) * 35;
+              const x2 = 500 + Math.cos(rad) * 460;
+              const y2 = 244 + Math.sin(rad) * 320;
+              return (
+                <line
+                  key={deg}
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
+                  stroke="#00D9FF"
+                  strokeWidth="2"
+                  strokeOpacity="0.6"
+                  strokeDasharray="16 20"
+                  className="animate-pulse"
+                />
+              );
+            })}
+
+            {/* Expanding Atmospheric Shockwave Rings */}
+            <circle
+              cx="500"
+              cy="244"
+              r="40"
+              fill="none"
+              stroke="#00D9FF"
+              strokeWidth="3"
+              className="animate-ping"
+              opacity="0.85"
+            />
+            <circle
+              cx="500"
+              cy="244"
+              r="80"
+              fill="none"
+              stroke="#38bdf8"
+              strokeWidth="1.5"
+              className="animate-ping"
+              opacity="0.5"
+            />
+          </g>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TARGETING RETICLE OVER INDIA (Center 500, 244 - SLIET Longowal)          */}
         {/* ========================================================================= */}
         <g
-          transform="translate(500, 295)"
+          transform="translate(500, 244)"
           className="pointer-events-auto cursor-pointer"
           onClick={handleTrigger}
         >
@@ -653,20 +775,20 @@ export default function OrbitalSatelliteView({
       {/* ========================================================================= */}
       {/* 2. PROMINENT & SLEEK SCANNER STATUS HUD CHIP                             */}
       {/* ========================================================================= */}
-      <div className="absolute top-20 sm:top-24 inset-x-0 flex flex-col items-center justify-center gap-1.5 pointer-events-auto px-4 z-20">
+      <div className="absolute top-14 sm:top-24 inset-x-0 flex flex-col items-center justify-center gap-1.5 pointer-events-auto px-3 sm:px-4 z-20">
         <button
           onClick={handleTrigger}
-          className={`inline-flex items-center gap-2.5 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-[#00D9FF]/60 bg-[#020817]/90 backdrop-blur-md text-[10px] sm:text-xs font-mono text-neutral-200 hover:text-white shadow-[0_0_25px_rgba(0,217,255,0.35)] active:scale-95 hover:scale-105 transition-all cursor-pointer ${
+          className={`inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full border border-[#00D9FF]/60 bg-[#020817]/90 backdrop-blur-md text-[9px] sm:text-xs font-mono text-neutral-200 hover:text-white shadow-[0_0_25px_rgba(0,217,255,0.35)] active:scale-95 hover:scale-105 transition-all cursor-pointer max-w-[94vw] ${
             isLocked ? "border-emerald-400 text-emerald-300 bg-emerald-950/90 shadow-[0_0_30px_rgba(16,185,129,0.5)]" : ""
           }`}
         >
-          <span className="w-2 h-2 rounded-full bg-[#00D9FF] animate-ping" />
-          <span className="font-bold tracking-wider uppercase">
+          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#00D9FF] animate-ping shrink-0" />
+          <span className="font-bold tracking-wider uppercase truncate">
             {isLocked
-              ? "🎯 TARGET LOCKED: INDIA // COMMENCING HYPER-DESCENT..."
-              : "🛰️ SATELLITE ORBITING EARTH • TAP TO ZOOM TO INDIA"}
+              ? "🎯 TARGET LOCKED: INDIA // COMMENCING DESCENT..."
+              : "🛰️ SATELLITE ORBITING • TAP TO ZOOM TO INDIA"}
           </span>
-          <span className="text-[#00D9FF] font-bold">→</span>
+          <span className="text-[#00D9FF] font-bold shrink-0">→</span>
         </button>
       </div>
     </div>

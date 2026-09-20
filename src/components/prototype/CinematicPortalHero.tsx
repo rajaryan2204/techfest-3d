@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import gsap from "gsap";
 import SampleEventsModal from "./SampleEventsModal";
 import SampleCampusTourModal from "./SampleCampusTourModal";
 import SampleScheduleModal from "./SampleScheduleModal";
-import HeroClipartBadges from "@/components/hero/HeroClipartBadges";
 import OrbitalSatelliteView from "@/components/hero/OrbitalSatelliteView";
 import EarthGlobe3D from "@/components/hero/EarthGlobe3D";
+import FestCountdownTimer from "@/components/hero/FestCountdownTimer";
 
 type ModalType = "register" | "events" | "tour" | "schedule" | null;
 
@@ -15,7 +17,6 @@ export default function CinematicPortalHero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneWrapRef = useRef<HTMLDivElement>(null);
   const textGroupRef = useRef<HTMLDivElement>(null);
-  const topNavRef = useRef<HTMLElement>(null);
   const scrollIndicatorRef = useRef<HTMLDivElement>(null);
   const telemetryPillRef = useRef<HTMLDivElement>(null);
   const altitudeTextRef = useRef<HTMLSpanElement>(null);
@@ -34,7 +35,6 @@ export default function CinematicPortalHero() {
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedEventForReg, setSelectedEventForReg] = useState<string>("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
   // Toast notification helper
@@ -46,29 +46,30 @@ export default function CinematicPortalHero() {
     return () => clearTimeout(t);
   }, []);
 
-  // Transition from Satellite Orbit to Hyper-Zoom into India
   // Transition from Satellite Orbit to Hyper-Zoom into India and Campus Reveal
   const handleInitiateZoom = useCallback(() => {
     setIsZooming(true);
-    setCurrentStage(2);
     setHasUserInteracted(true);
-
-    const vid = droneVideoRef.current;
-    if (vid) {
-      // Start at 0.0s to play the cinematic hyper-zoom into India
-      vid.currentTime = 0;
-      vid.muted = !audioActive;
-      vid.play().catch(() => setIsPaused(true));
-    }
 
     if (altitudeTextRef.current) {
       altitudeTextRef.current.textContent = "35,786 KM";
     }
     if (stageBadgeRef.current) {
-      stageBadgeRef.current.textContent = "HYPER-ZOOM TO INDIA";
+      stageBadgeRef.current.textContent = "SATELLITE DIVE TO INDIA";
     }
 
-    showToast("🚀 India Locked: Commencing Hyper-Zoom to SLIET Longowal");
+    showToast("🚀 Target Acquired: Satellite diving towards India [SLIET Longowal]");
+
+    // Allow 1.1s for the satellite dive and 3D Earth zoom animation before cutting to atmospheric descent video
+    setTimeout(() => {
+      setCurrentStage(2);
+      const vid = droneVideoRef.current;
+      if (vid) {
+        vid.currentTime = 0;
+        vid.muted = !audioActive;
+        vid.play().catch(() => setIsPaused(true));
+      }
+    }, 1100);
   }, [audioActive, showToast]);
 
   // Auto-initiate zoom to India after 7s of satellite orbit if user hasn't interacted yet
@@ -119,109 +120,47 @@ export default function CinematicPortalHero() {
         stageBadgeRef.current.textContent = "CAMPUS REVEAL";
       }
     }
-    // Stage 4: Live Sweeping Campus Airspace / Festival Nexus (3.8s - 4.9s)
+    // Stage 4: Still Majestic Campus View (Hold still on campus auditorium at 4.8s)
     else if (t >= 3.8) {
       if (currentStage !== 4) setCurrentStage(4);
       if (altitudeTextRef.current) {
         altitudeTextRef.current.textContent = "45M AGL";
       }
       if (stageBadgeRef.current) {
-        stageBadgeRef.current.textContent = "LIVE FESTIVAL NEXUS";
+        stageBadgeRef.current.textContent = "CAMPUS AIRSPACE";
       }
-    }
 
-    // Seamless campus aerial loop: 4.80s -> 3.00s (smooth continuous campus drone flight)
-    if (t >= 4.8) {
-      vid.currentTime = 3.0;
-      vid.play().catch(() => {});
+      // Freeze video still on the majestic campus auditorium frame (NO LOOPING)
+      if (t >= 4.8) {
+        vid.pause();
+        vid.currentTime = 4.8;
+      }
     }
   };
 
   const handleDroneEnded = () => {
     const vid = droneVideoRef.current;
     if (!vid) return;
-    vid.currentTime = 3.0;
-    vid.play().catch(() => {});
-  };
-
-  const STORY_STAGES = [
-    {
-      stage: 1 as const,
-      time: 0,
-      label: "01 // SATELLITE ORBIT",
-      short: "01 ORBIT",
-      alt: "35,786 KM",
-      caption: "🛰️ Satellite Orbit: Scanning continental vector towards India (30.22°N, 75.83°E).",
-    },
-    {
-      stage: 2 as const,
-      time: 0.1,
-      label: "02 // ZOOM TO INDIA",
-      short: "02 ZOOM",
-      alt: "12,000 KM",
-      caption: "🚀 Hyper-Zoom to India: Atmospheric descent into SLIET Longowal coordinates.",
-    },
-    {
-      stage: 3 as const,
-      time: 2.8,
-      label: "03 // CAMPUS REVEAL",
-      short: "03 CAMPUS",
-      alt: "500 M AGL",
-      caption: "🏛️ SLIET Longowal: 451-acre national campus of technical excellence.",
-    },
-    {
-      stage: 4 as const,
-      time: 3.8,
-      label: "04 // FESTIVAL ARENA",
-      short: "04 ARENA",
-      alt: "45 M AGL",
-      caption: "⚡ TechFEST'26 Live: 40+ Competitions, Robowars, Hackathons & Innovation.",
-    },
-  ];
-
-  const jumpToStage = (stageNum: 1 | 2 | 3 | 4) => {
-    setHasUserInteracted(true);
-    if (stageNum === 1) {
-      const droneVid = droneVideoRef.current;
-      if (droneVid) droneVid.pause();
-      setCurrentStage(1);
-      setIsZooming(false);
-      if (altitudeTextRef.current) {
-        altitudeTextRef.current.textContent = "35,786 KM";
-      }
-      if (stageBadgeRef.current) {
-        stageBadgeRef.current.textContent = "SATELLITE ORBIT";
-      }
-      showToast("🛰️ Chapter 1: Earth Orbit & India Lock");
-      return;
-    }
-
-    const droneVid = droneVideoRef.current;
-    if (droneVid) {
-      const target = STORY_STAGES.find((s) => s.stage === stageNum);
-      droneVid.currentTime = target ? target.time : 0;
-      droneVid.muted = !audioActive;
-      droneVid.play().catch(() => setIsPaused(true));
-      showToast(`🎬 Story Chapter ${stageNum}: ${target?.short}`);
-    }
-    setCurrentStage(stageNum);
-    setIsZooming(true);
-    setIsPaused(false);
-  };
-
-  const nextStage = () => {
-    const next = (currentStage === 4 ? 1 : currentStage + 1) as 1 | 2 | 3 | 4;
-    jumpToStage(next);
-  };
-
-  const prevStage = () => {
-    const prev = (currentStage === 1 ? 4 : currentStage - 1) as 1 | 2 | 3 | 4;
-    jumpToStage(prev);
+    vid.pause();
+    vid.currentTime = 4.8;
+    setCurrentStage(4);
   };
 
   const replayZoom = () => {
     setHasUserInteracted(true);
-    jumpToStage(1);
+    const droneVid = droneVideoRef.current;
+    if (droneVid) {
+      droneVid.pause();
+      droneVid.currentTime = 0;
+    }
+    setCurrentStage(1);
+    setIsZooming(false);
+    if (altitudeTextRef.current) {
+      altitudeTextRef.current.textContent = "35,786 KM";
+    }
+    if (stageBadgeRef.current) {
+      stageBadgeRef.current.textContent = "SATELLITE ORBIT";
+    }
     showToast("🛰️ Reset to Orbit: Commencing Satellite Scan & Zoom");
     setTimeout(() => {
       handleInitiateZoom();
@@ -231,6 +170,9 @@ export default function CinematicPortalHero() {
   const handleResumePlayback = () => {
     const vid = droneVideoRef.current;
     if (!vid) return;
+    if (vid.currentTime >= 4.8) {
+      vid.currentTime = 0;
+    }
     vid.play().then(() => setIsPaused(false)).catch(() => {});
   };
 
@@ -322,8 +264,9 @@ export default function CinematicPortalHero() {
       const driftX = Math.sin(clock * 0.6) * 0.12;
       const driftY = Math.cos(clock * 0.45) * 0.09;
 
-      const finalX = targetX + driftX;
-      const finalY = targetY + driftY;
+      // When campus is revealed (currentStage >= 3), keep view STILL without continuous drift
+      const finalX = currentStage >= 3 ? targetX * 0.15 : targetX + driftX;
+      const finalY = currentStage >= 3 ? targetY * 0.15 : targetY + driftY;
 
       currentX += (finalX - currentX) * 0.05;
       currentY += (finalY - currentY) * 0.05;
@@ -423,9 +366,12 @@ export default function CinematicPortalHero() {
       {/* ========================================================================= */}
       {/* 2. CINEMATIC GRADIENT OVERLAYS (Protects Contrast & Typography)             */}
       {/* ========================================================================= */}
-      <div className="absolute inset-y-0 left-0 w-full sm:w-[52%] md:w-[44%] bg-gradient-to-r from-[#020817]/90 via-[#020817]/40 to-transparent pointer-events-none z-10" />
-      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#020817]/80 to-transparent pointer-events-none z-10" />
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#020817]/85 to-transparent pointer-events-none z-10" />
+      {/* Desktop: Left-to-right gradient to protect left-aligned typography */}
+      <div className="hidden sm:block absolute inset-y-0 left-0 sm:w-[52%] md:w-[44%] bg-gradient-to-r from-[#020817]/90 via-[#020817]/40 to-transparent pointer-events-none z-10" />
+      {/* Mobile: Bottom gradient to protect typography while keeping upper half clear for Earth/Drone */}
+      <div className="sm:hidden absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-[#020817] via-[#020817]/85 to-transparent pointer-events-none z-10" />
+      <div className="absolute top-0 left-0 right-0 h-20 sm:h-24 bg-gradient-to-b from-[#020817]/80 to-transparent pointer-events-none z-10" />
+      <div className="hidden sm:block absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#020817]/85 to-transparent pointer-events-none z-10" />
 
       {/* Stage 1: Active Satellite Orbiting Earth & Scanning India */}
       {currentStage === 1 && (
@@ -435,177 +381,43 @@ export default function CinematicPortalHero() {
         />
       )}
 
-      {/* Stages 2-4: Clipart Badges (ISRO Satellite, Bharat Chakra, Tech Badges) */}
-      {currentStage !== 1 && <HeroClipartBadges />}
-
-      {/* ========================================================================= */}
-      {/* 3. MOBILE-OPTIMIZED PROFESSIONAL NAVBAR & DRAWER                          */}
-      {/* ========================================================================= */}
-      <header
-        ref={topNavRef}
-        className="absolute top-0 left-0 right-0 z-30 px-4 sm:px-12 py-3 sm:py-4 flex items-center justify-between border-b border-white/10 bg-[#020817]/60 backdrop-blur-md transition-all duration-700 opacity-100 translate-y-0"
-      >
-        {/* Brand Mark */}
-        <div className="flex items-center gap-2.5 sm:gap-3">
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#00D9FF]/10 border border-[#00D9FF]/30 flex items-center justify-center text-[#00D9FF] shadow-[0_0_15px_rgba(0,217,255,0.2)]">
-            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L14.5 8.5L21.5 9.5L16.5 14.5L18 21.5L12 17.5L6 21.5L7.5 14.5L2.5 9.5L9.5 8.5L12 2Z" />
-            </svg>
+      {/* Floating Audio Control Button with Live Animated Equalizer */}
+      <div className="absolute top-24 right-4 sm:right-8 z-30 pointer-events-auto">
+        <button
+          onClick={toggleAudio}
+          className="flex items-center gap-2 sm:gap-2.5 px-3.5 py-1.5 rounded-full border border-cyan-400/40 bg-[#061226]/85 backdrop-blur-md text-[10px] font-mono tracking-wider text-cyan-300 hover:text-white hover:border-cyan-400 transition-all cursor-pointer shadow-[0_0_20px_rgba(0,217,255,0.25)]"
+          title="Toggle Drone Video Audio"
+        >
+          {/* Animated 4-bar Audio Equalizer */}
+          <div className="flex items-end gap-[2.5px] h-3.5 w-3.5">
+            <span
+              className={`w-[2px] rounded-full bg-cyan-400 transition-all ${
+                audioActive ? "h-3 animate-pulse" : "h-1 opacity-50"
+              }`}
+            />
+            <span
+              className={`w-[2px] rounded-full bg-cyan-400 transition-all ${
+                audioActive ? "h-3.5 animate-bounce" : "h-2 opacity-50"
+              }`}
+            />
+            <span
+              className={`w-[2px] rounded-full bg-cyan-400 transition-all ${
+                audioActive ? "h-2 animate-pulse" : "h-1.5 opacity-50"
+              }`}
+            />
+            <span
+              className={`w-[2px] rounded-full bg-cyan-400 transition-all ${
+                audioActive ? "h-3 animate-bounce" : "h-2.5 opacity-50"
+              }`}
+            />
           </div>
-          <div className="flex flex-col">
-            <span className="text-xs sm:text-sm font-bold tracking-[0.2em] sm:tracking-[0.25em] text-white uppercase font-mono">
-              techFEST&apos;26
-            </span>
-            <span className="text-[8px] sm:text-[9px] tracking-[0.25em] sm:tracking-[0.3em] text-[#00D9FF]/80 uppercase font-mono">
-              SLIET LONGOWAL
-            </span>
-          </div>
-        </div>
+          <span className="hidden xs:inline font-bold">
+            {audioActive ? "AUDIO ACTIVE" : "AUDIO MUTED"}
+          </span>
+          <span className="xs:hidden font-bold">{audioActive ? "ON" : "OFF"}</span>
+        </button>
+      </div>
 
-        {/* Center: Desktop Nav Links (Hidden on Mobile) */}
-        <nav className="hidden lg:flex items-center gap-7 text-xs font-mono tracking-[0.2em] uppercase">
-          <button
-            onClick={() => setActiveModal("events")}
-            className="text-neutral-300 hover:text-[#00D9FF] transition-colors cursor-pointer"
-          >
-            EVENTS
-          </button>
-          <button
-            onClick={() => setActiveModal("schedule")}
-            className="text-neutral-300 hover:text-[#00D9FF] transition-colors cursor-pointer"
-          >
-            SCHEDULE
-          </button>
-          <button
-            onClick={() => setActiveModal("tour")}
-            className="text-neutral-300 hover:text-[#00D9FF] transition-colors cursor-pointer"
-          >
-            CAMPUS TOUR
-          </button>
-          <button
-            onClick={handleDownloadRulebook}
-            className="text-neutral-300 hover:text-[#00D9FF] transition-colors cursor-pointer"
-          >
-            RULEBOOK
-          </button>
-        </nav>
-
-        {/* Right Actions: Audio Toggle, Register CTA, & Mobile Hamburger */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Audio Button */}
-          <button
-            onClick={toggleAudio}
-            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-white/15 bg-white/5 hover:bg-white/10 text-[9px] sm:text-[10px] font-mono tracking-wider text-neutral-300 hover:text-white transition-all cursor-pointer min-h-[36px]"
-            title="Toggle Live Audio"
-          >
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                audioActive ? "bg-emerald-400 animate-pulse" : "bg-neutral-500"
-              }`}
-            />
-            <span className="hidden xs:inline">{audioActive ? "SOUND ON" : "AUDIO"}</span>
-            <span className="xs:hidden">{audioActive ? "🔊" : "🔇"}</span>
-          </button>
-
-          {/* Quick Register CTA */}
-          <button
-            onClick={() => {
-              setSelectedEventForReg("");
-              setActiveModal("register");
-            }}
-            className="px-3.5 sm:px-5 py-1 sm:py-1.5 rounded-full border border-[#00D9FF]/80 bg-[#06152D]/80 hover:bg-[#008CFF]/30 text-[11px] sm:text-xs font-mono tracking-[0.15em] sm:tracking-[0.2em] uppercase text-[#00D9FF] hover:text-white shadow-[0_0_15px_rgba(0,217,255,0.25)] transition-all cursor-pointer min-h-[36px]"
-          >
-            REGISTER ↗
-          </button>
-
-          {/* Mobile Hamburger Drawer Trigger */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="w-9 h-9 rounded-lg border border-white/15 bg-white/5 flex flex-col items-center justify-center gap-1.5 text-white lg:hidden cursor-pointer active:bg-white/10"
-            aria-label="Toggle Navigation Menu"
-          >
-            <span
-              className={`w-4 h-[1.5px] bg-[#00D9FF] transition-all duration-200 ${
-                mobileMenuOpen ? "rotate-45 translate-y-[6px]" : ""
-              }`}
-            />
-            <span
-              className={`w-4 h-[1.5px] bg-white transition-all duration-200 ${
-                mobileMenuOpen ? "opacity-0" : ""
-              }`}
-            />
-            <span
-              className={`w-4 h-[1.5px] bg-[#00D9FF] transition-all duration-200 ${
-                mobileMenuOpen ? "-rotate-45 -translate-y-[6px]" : ""
-              }`}
-            />
-          </button>
-        </div>
-      </header>
-
-      {/* Mobile Slide-out Menu Drawer */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-x-0 top-[52px] sm:top-[60px] z-40 bg-[#020817]/95 backdrop-blur-2xl border-b border-[#00D9FF]/30 p-5 flex flex-col gap-3.5 shadow-2xl lg:hidden animate-in slide-in-from-top-3 duration-200">
-          <div className="flex items-center justify-between pb-2.5 border-b border-white/10 text-[9px] font-mono tracking-widest text-[#00D9FF] uppercase">
-            <span>// TECHFEST QUICK ACCESS</span>
-            <span>09 • 10 OCT 2026</span>
-          </div>
-
-          <nav className="flex flex-col gap-2 font-mono text-xs tracking-wider">
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                setActiveModal("events");
-              }}
-              className="flex items-center justify-between p-3 rounded-lg bg-white/5 active:bg-[#00D9FF]/20 text-left text-neutral-200 hover:text-white"
-            >
-              <span>🏆 COMPETITIONS &amp; EVENTS</span>
-              <span className="text-[#00D9FF]">↗</span>
-            </button>
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                setActiveModal("schedule");
-              }}
-              className="flex items-center justify-between p-3 rounded-lg bg-white/5 active:bg-[#00D9FF]/20 text-left text-neutral-200 hover:text-white"
-            >
-              <span>📅 FESTIVAL SCHEDULE</span>
-              <span className="text-[#00D9FF]">↗</span>
-            </button>
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                setActiveModal("tour");
-              }}
-              className="flex items-center justify-between p-3 rounded-lg bg-white/5 active:bg-[#00D9FF]/20 text-left text-neutral-200 hover:text-white"
-            >
-              <span>🧭 SLIET CAMPUS TOUR</span>
-              <span className="text-[#00D9FF]">↗</span>
-            </button>
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                handleDownloadRulebook();
-              }}
-              className="flex items-center justify-between p-3 rounded-lg bg-white/5 active:bg-[#00D9FF]/20 text-left text-neutral-200 hover:text-white"
-            >
-              <span>📄 OFFICIAL RULEBOOK</span>
-              <span className="text-[10px] text-neutral-400">PDF</span>
-            </button>
-          </nav>
-
-          <button
-            onClick={() => {
-              setMobileMenuOpen(false);
-              setSelectedEventForReg("");
-              setActiveModal("register");
-            }}
-            className="w-full py-3 rounded-full bg-gradient-to-r from-[#00D9FF] to-[#008CFF] text-[#020817] font-mono text-xs font-bold tracking-[0.2em] shadow-[0_0_20px_rgba(0,217,255,0.4)] text-center mt-1"
-          >
-            REGISTER FOR TECHFEST&apos;26 →
-          </button>
-        </div>
-      )}
 
       {/* ========================================================================= */}
       {/* 4. MAIN HERO CONTENT & STREAMLINED TELEMETRY PILL                         */}
@@ -651,7 +463,7 @@ export default function CinematicPortalHero() {
         <div
           ref={textGroupRef}
           style={{ willChange: "transform" }}
-          className="max-w-xl space-y-2.5 sm:space-y-4 my-auto transition-all duration-700 opacity-100 translate-y-0"
+          className="max-w-xl space-y-2 sm:space-y-4 mt-auto sm:my-auto mb-2 sm:mb-0 transition-all duration-700 opacity-100 translate-y-0"
         >
           {/* Eyebrow */}
           <div className="hero-anim-item flex items-center gap-2">
@@ -663,9 +475,8 @@ export default function CinematicPortalHero() {
 
           {/* Headline */}
           <div className="hero-anim-item space-y-0.5">
-            <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1] font-sans drop-shadow-2xl">
-              Where Ideas <br />
-              Become{" "}
+            <h1 className="text-2xl xs:text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.15] sm:leading-[1.1] font-sans drop-shadow-2xl">
+              Where Ideas <span className="hidden sm:inline"><br /></span>Become{" "}
               <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00D9FF] via-[#7dd3fc] to-[#008CFF] drop-shadow-[0_0_25px_rgba(0,217,255,0.7)]">
                 REALITY
               </span>
@@ -702,24 +513,29 @@ export default function CinematicPortalHero() {
           {/* Date & Location */}
           <div className="hero-anim-item space-y-0.5">
             <p className="text-[11px] sm:text-sm font-mono tracking-[0.2em] sm:tracking-[0.3em] text-[#00D9FF] uppercase font-semibold">
-              09 • 10 OCTOBER 2026
+              16 • 17 OCTOBER 2026
             </p>
             <p className="text-[9px] sm:text-xs font-mono tracking-[0.18em] sm:tracking-[0.2em] text-neutral-400 uppercase">
               SLIET LONGOWAL, PUNJAB • 451-ACRE CAMPUS
             </p>
           </div>
 
-          {/* Clean Streamlined CTAs (Full-width on mobile for easy tapping) */}
-          <div className="hero-anim-item pt-1 sm:pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 pointer-events-auto">
+          {/* Live Sci-Fi Countdown to TechFest'26 */}
+          <div className="hero-anim-item pt-1 pointer-events-auto">
+            <FestCountdownTimer />
+          </div>
+
+          {/* Clean Streamlined CTAs: Side-by-side on mobile grid, row on desktop */}
+          <div className="hero-anim-item pt-1 sm:pt-2 grid grid-cols-2 sm:flex sm:flex-row items-center gap-2 sm:gap-3 pointer-events-auto">
             {currentStage === 1 ? (
               <>
                 {/* Primary: Zoom to India Button */}
                 <button
                   onClick={handleInitiateZoom}
-                  className="group inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#00D9FF] to-[#008CFF] active:scale-[0.98] hover:brightness-110 text-[#020817] font-mono text-xs sm:text-sm font-bold tracking-[0.16em] sm:tracking-[0.2em] shadow-[0_0_30px_rgba(0,217,255,0.5)] transition-all duration-200 cursor-pointer min-h-[46px] sm:min-h-[48px] animate-pulse"
+                  className="group inline-flex items-center justify-center gap-1.5 sm:gap-2.5 px-3 sm:px-8 py-2.5 sm:py-3.5 rounded-full bg-gradient-to-r from-[#00D9FF] to-[#008CFF] active:scale-[0.98] hover:brightness-110 text-[#020817] font-mono text-[11px] sm:text-sm font-bold tracking-[0.08em] sm:tracking-[0.2em] shadow-[0_0_30px_rgba(0,217,255,0.5)] transition-all duration-200 cursor-pointer min-h-[40px] sm:min-h-[48px] animate-pulse"
                 >
-                  <span>▶ ZOOM TO INDIA (SLIET)</span>
-                  <span className="group-hover:translate-x-1 transition-transform duration-200 font-extrabold">
+                  <span className="truncate">▶ ZOOM INDIA</span>
+                  <span className="group-hover:translate-x-1 transition-transform duration-200 font-extrabold hidden xs:inline">
                     →
                   </span>
                 </button>
@@ -730,7 +546,7 @@ export default function CinematicPortalHero() {
                     setSelectedEventForReg("");
                     setActiveModal("register");
                   }}
-                  className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-full border border-white/20 bg-white/5 active:scale-[0.98] hover:bg-white/10 text-white font-mono text-xs sm:text-sm tracking-wider transition-all duration-200 cursor-pointer backdrop-blur-sm min-h-[46px] sm:min-h-[48px]"
+                  className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3.5 rounded-full border border-white/20 bg-white/5 active:scale-[0.98] hover:bg-white/10 text-white font-mono text-[11px] sm:text-sm tracking-wider transition-all duration-200 cursor-pointer backdrop-blur-sm min-h-[40px] sm:min-h-[48px]"
                 >
                   <span>REGISTER</span>
                   <span className="text-[#00D9FF]">↗</span>
@@ -744,10 +560,10 @@ export default function CinematicPortalHero() {
                     setSelectedEventForReg("");
                     setActiveModal("register");
                   }}
-                  className="group inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#00D9FF] to-[#008CFF] active:scale-[0.98] hover:brightness-110 text-[#020817] font-mono text-xs sm:text-sm font-bold tracking-[0.16em] sm:tracking-[0.2em] shadow-[0_0_25px_rgba(0,217,255,0.4)] transition-all duration-200 cursor-pointer min-h-[46px] sm:min-h-[48px]"
+                  className="group inline-flex items-center justify-center gap-1.5 sm:gap-2.5 px-3 sm:px-8 py-2.5 sm:py-3.5 rounded-full bg-gradient-to-r from-[#00D9FF] to-[#008CFF] active:scale-[0.98] hover:brightness-110 text-[#020817] font-mono text-[11px] sm:text-sm font-bold tracking-[0.08em] sm:tracking-[0.2em] shadow-[0_0_25px_rgba(0,217,255,0.4)] transition-all duration-200 cursor-pointer min-h-[40px] sm:min-h-[48px]"
                 >
-                  <span>REGISTER FOR TECHFEST&apos;26</span>
-                  <span className="group-hover:translate-x-1 transition-transform duration-200 font-extrabold">
+                  <span className="truncate">REGISTER</span>
+                  <span className="group-hover:translate-x-1 transition-transform duration-200 font-extrabold hidden xs:inline">
                     →
                   </span>
                 </button>
@@ -762,9 +578,9 @@ export default function CinematicPortalHero() {
                       setActiveModal("events");
                     }
                   }}
-                  className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-full border border-white/20 bg-white/5 active:scale-[0.98] hover:bg-white/10 text-white font-mono text-xs sm:text-sm tracking-wider transition-all duration-200 cursor-pointer backdrop-blur-sm min-h-[46px] sm:min-h-[48px]"
+                  className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3.5 rounded-full border border-white/20 bg-white/5 active:scale-[0.98] hover:bg-white/10 text-white font-mono text-[11px] sm:text-sm tracking-wider transition-all duration-200 cursor-pointer backdrop-blur-sm min-h-[40px] sm:min-h-[48px]"
                 >
-                  <span>EXPLORE 40+ EVENTS</span>
+                  <span className="truncate">40+ EVENTS</span>
                   <span className="text-[#00D9FF]">↗</span>
                 </button>
               </>
@@ -783,91 +599,19 @@ export default function CinematicPortalHero() {
           </div>
         </div>
 
-        {/* ========================================================================= */}
-        {/* INTERACTIVE STORY MODE CONTROLLER (Chapters, Navigation & Captions)       */}
-        {/* ========================================================================= */}
-        <div className="w-full flex flex-col gap-1.5 sm:gap-2 pointer-events-auto py-1 sm:py-2">
-          {/* Story Narrative Caption & Current Chapter Status */}
-          <div className="flex items-center justify-between gap-3 text-[10px] sm:text-xs font-mono">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#00D9FF] animate-pulse" />
-              <span className="text-[#00D9FF] font-bold uppercase tracking-wider text-[10px] sm:text-xs">
-                🎬 STORY MODE:
-              </span>
-              <span className="text-neutral-200 hidden sm:inline text-xs">
-                {STORY_STAGES[currentStage - 1].caption}
-              </span>
-              <span className="text-neutral-200 sm:hidden text-[10px]">
-                {STORY_STAGES[currentStage - 1].short} • {STORY_STAGES[currentStage - 1].alt}
-              </span>
-            </div>
-
-            {/* Next & Prev Chapter Controls */}
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={prevStage}
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/5 hover:bg-white/15 active:scale-95 border border-white/15 flex items-center justify-center text-xs text-neutral-300 hover:text-white cursor-pointer transition-all"
-                title="Previous Story Chapter"
-              >
-                ◀
-              </button>
-              <button
-                onClick={nextStage}
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/5 hover:bg-white/15 active:scale-95 border border-white/15 flex items-center justify-center text-xs text-[#00D9FF] hover:text-white cursor-pointer transition-all"
-                title="Next Story Chapter"
-              >
-                ▶
-              </button>
-            </div>
+        {/* Bottom Bar: Clean Aerospace Telemetry & Scroll Prompt */}
+        <div className="w-full flex items-center justify-between pt-2.5 sm:pt-4 border-t border-white/10 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          {/* Left: Tactical Campus Coordinates & System Status */}
+          <div className="flex items-center gap-2 text-[9px] sm:text-[10px] font-mono tracking-wider text-neutral-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-cyan-400 font-bold">SLIET LONGOWAL</span>
+            <span className="text-white/20 hidden sm:inline">•</span>
+            <span className="hidden sm:inline">30.22° N, 75.83° E</span>
+            <span className="text-white/20 hidden md:inline">•</span>
+            <span className="text-emerald-400 hidden md:inline">SYSTEMS NOMINAL</span>
           </div>
 
-          {/* 4 Interactive Story Chapter Cards / Progress Trackers */}
-          <div className="grid grid-cols-4 gap-1.5 sm:gap-2.5">
-            {STORY_STAGES.map((s) => {
-              const isActive = currentStage === s.stage;
-              return (
-                <button
-                  key={s.stage}
-                  onClick={() => jumpToStage(s.stage)}
-                  className={`group flex flex-col p-1.5 sm:p-2.5 rounded-lg border text-left transition-all duration-200 cursor-pointer ${
-                    isActive
-                      ? "bg-[#00D9FF]/15 border-[#00D9FF] shadow-[0_0_15px_rgba(0,217,255,0.3)]"
-                      : "bg-black/40 hover:bg-white/5 border-white/10 opacity-70 hover:opacity-100"
-                  }`}
-                >
-                  {/* Progress Indicator Bar */}
-                  <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mb-1 sm:mb-1.5">
-                    <div
-                      className={`h-full transition-all duration-300 ${
-                        isActive
-                          ? "w-full bg-[#00D9FF] shadow-[0_0_8px_#00D9FF]"
-                          : currentStage > s.stage
-                          ? "w-full bg-white/40"
-                          : "w-0"
-                      }`}
-                    />
-                  </div>
-
-                  <span
-                    className={`font-mono text-[8px] sm:text-[10px] font-bold tracking-wider truncate ${
-                      isActive ? "text-[#00D9FF]" : "text-neutral-400 group-hover:text-white"
-                    }`}
-                  >
-                    <span className="sm:inline hidden">{s.label}</span>
-                    <span className="sm:hidden">{s.short}</span>
-                  </span>
-
-                  <span className="text-[7px] sm:text-[9px] font-mono text-neutral-400 hidden xs:inline">
-                    {s.alt}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Bottom Bar: Clean Scroll Prompt & University Brand */}
-        <div className="w-full flex items-center justify-between pt-2.5 sm:pt-4 border-t border-white/5 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+          {/* Center: Scroll Explore Prompt */}
           <button
             onClick={() => {
               const el = document.getElementById("events-section");
@@ -881,8 +625,10 @@ export default function CinematicPortalHero() {
             <span>SCROLL TO EXPLORE FESTIVAL ↓</span>
           </button>
 
-          <div className="text-[9px] sm:text-[10px] font-mono tracking-[0.2em] text-neutral-400 uppercase hidden sm:block">
-            SANT LONGOWAL INSTITUTE OF ENGINEERING &amp; TECHNOLOGY
+          {/* Right: Fest Prize Pool Telemetry */}
+          <div className="text-[9px] sm:text-[10px] font-mono tracking-[0.2em] text-cyan-300/90 uppercase hidden sm:flex items-center gap-1.5">
+            <span className="text-white/40">PRIZE POOL:</span>
+            <span className="font-bold text-cyan-400">₹5,00,000+</span>
           </div>
         </div>
       </div>
@@ -934,7 +680,7 @@ export default function CinematicPortalHero() {
                 </div>
               ) : (
                 <p className="text-[11px] sm:text-xs text-neutral-400 font-light leading-relaxed">
-                  Join 10,000+ innovators at SLIET Longowal, Punjab on 09-10 October 2026.
+                  Join 10,000+ innovators at SLIET Longowal, Punjab on 16-17 October 2026.
                 </p>
               )}
             </div>
@@ -1012,14 +758,14 @@ export default function CinematicPortalHero() {
       {/* 6. SUBTLE CYBER TOAST NOTIFICATION                                        */}
       {/* ========================================================================= */}
       {toastMessage && (
-        <div className="fixed top-16 sm:top-20 left-4 right-4 sm:left-auto sm:right-6 z-50 flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg border border-[#00D9FF]/70 bg-[#06152D]/95 text-white font-mono text-xs shadow-[0_0_30px_rgba(0,217,255,0.35)] backdrop-blur-xl animate-in slide-in-from-top-2 duration-200 max-w-sm sm:max-w-md ml-auto">
-          <div className="flex items-center gap-2.5">
-            <span className="w-2 h-2 rounded-full bg-[#00D9FF] animate-ping shrink-0" />
-            <span className="tracking-wider">{toastMessage}</span>
+        <div className="fixed top-14 sm:top-20 inset-x-4 sm:inset-x-auto sm:right-6 z-50 flex items-center justify-between gap-3 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full border border-[#00D9FF]/70 bg-[#06152D]/95 text-white font-mono text-[11px] sm:text-xs shadow-[0_0_30px_rgba(0,217,255,0.35)] backdrop-blur-xl animate-in slide-in-from-top-2 duration-200 max-w-sm sm:max-w-md mx-auto sm:mx-0 sm:ml-auto">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#00D9FF] animate-ping shrink-0" />
+            <span className="tracking-wider truncate">{toastMessage}</span>
           </div>
           <button
             onClick={() => setToastMessage(null)}
-            className="text-neutral-400 hover:text-white cursor-pointer ml-2 text-sm"
+            className="text-neutral-400 hover:text-white cursor-pointer ml-1 text-sm shrink-0"
           >
             ✕
           </button>

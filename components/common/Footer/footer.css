@@ -1,0 +1,43 @@
+.logoMain {
+    display: flex;
+    cursor: pointer;
+}
+.logoMain p {
+    margin: 0px;
+    transition: all 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.logoMain .name {
+    display: flex;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    margin-left: 5px;
+    transition: all 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.logoMain .name p {
+    position: relative;
+    transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.logoMain .name p:nth-of-type(2) {
+    padding-left: 4rem;
+}
+.logoMain .name p:nth-of-type(3) {
+    position: absolute;
+    left: 100px;
+    padding-left: 0em;
+}
+.logoMain:hover .copyright {
+    transform: rotate(360deg);
+}
+.logoMain:hover .name {
+    padding-right: 30px;
+}
+.logoMain:hover .name .codeBy {
+    transform: translateX(-100%);
+}
+.logoMain:hover .name .the {
+    transform: translateX(-65px);
+}
+.logoMain:hover .name .bipu {
+    transform: translateX(-65px);
+}

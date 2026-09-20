@@ -137,7 +137,7 @@ export default function SampleScheduleModal({
               TechFEST&apos;26 Schedule
             </h2>
             <p className="text-[11px] sm:text-xs text-neutral-400 font-mono mt-0.5 sm:mt-1">
-              SLIET Longowal • 09 &amp; 10 October 2026
+              SLIET Longowal • 16 &amp; 17 October 2026
             </p>
           </div>
           <button
@@ -158,8 +158,8 @@ export default function SampleScheduleModal({
                 : "bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
             }`}
           >
-            <span className="sm:hidden">DAY 1: 09 OCT</span>
-            <span className="hidden sm:inline">DAY 1: 09 OCTOBER 2026 (INVENT)</span>
+            <span className="sm:hidden">DAY 1: 16 OCT</span>
+            <span className="hidden sm:inline">DAY 1: 16 OCTOBER 2026 (INVENT)</span>
           </button>
           <button
             onClick={() => setSelectedDay(2)}
@@ -169,8 +169,8 @@ export default function SampleScheduleModal({
                 : "bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white"
             }`}
           >
-            <span className="sm:hidden">DAY 2: 10 OCT</span>
-            <span className="hidden sm:inline">DAY 2: 10 OCTOBER 2026 (CONQUER)</span>
+            <span className="sm:hidden">DAY 2: 17 OCT</span>
+            <span className="hidden sm:inline">DAY 2: 17 OCTOBER 2026 (CONQUER)</span>
           </button>
         </div>
 

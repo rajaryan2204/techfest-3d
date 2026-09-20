@@ -1,0 +1,242 @@
+/* ═══════════════════════════════════════════════════════════════════
+   ROBOTIC HUD MOUSE CURSOR & SHOCKWAVE VFX
+═══════════════════════════════════════════════════════════════════ */
+
+@media (pointer: fine) {
+  body, a, button, input, select, textarea, [role="button"], .cursor-pointer {
+    cursor: none !important;
+  }
+}
+
+/* Center Laser Point */
+.robotic-cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  margin-left: -3px;
+  background: #0CC7F8;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 10px #0CC7F8, 0 0 20px #00FFCC;
+  transition: transform 0.05s ease-out, width 0.15s ease, height 0.15s ease, background 0.2s ease;
+  z-index: 10;
+}
+
+.robotic-dot-hover {
+  background: #00FFCC;
+  box-shadow: 0 0 12px #00FFCC, 0 0 25px #0CC7F8;
+  transform: scale(1.4);
+}
+
+.robotic-dot-click {
+  background: #ffffff;
+  box-shadow: 0 0 15px #ffffff, 0 0 30px #0CC7F8;
+  transform: scale(0.7);
+}
+
+/* Lerped Follower Robotic HUD Frame */
+.robotic-cursor-hud {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 42px;
+  height: 42px;
+  margin-top: -21px;
+  margin-left: -21px;
+  pointer-events: none;
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+              height 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+              margin 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.2s ease;
+}
+
+/* 4 Corner Brackets */
+.hud-corner {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-color: rgba(12, 199, 248, 0.7);
+  transition: all 0.2s ease;
+}
+
+.hud-top-left {
+  top: 0;
+  left: 0;
+  border-top: 1.5px solid rgba(12, 199, 248, 0.85);
+  border-left: 1.5px solid rgba(12, 199, 248, 0.85);
+}
+
+.hud-top-right {
+  top: 0;
+  right: 0;
+  border-top: 1.5px solid rgba(12, 199, 248, 0.85);
+  border-right: 1.5px solid rgba(12, 199, 248, 0.85);
+}
+
+.hud-bottom-left {
+  bottom: 0;
+  left: 0;
+  border-bottom: 1.5px solid rgba(12, 199, 248, 0.85);
+  border-left: 1.5px solid rgba(12, 199, 248, 0.85);
+}
+
+.hud-bottom-right {
+  bottom: 0;
+  right: 0;
+  border-bottom: 1.5px solid rgba(12, 199, 248, 0.85);
+  border-right: 1.5px solid rgba(12, 199, 248, 0.85);
+}
+
+/* Rotating HUD Ring */
+.hud-ring {
+  position: absolute;
+  inset: 4px;
+  border: 1px dashed rgba(12, 199, 248, 0.4);
+  border-radius: 50%;
+  animation: hudRotate 10s linear infinite;
+  transition: all 0.2s ease;
+}
+
+@keyframes hudRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Crosshair Ticks */
+.hud-crosshair {
+  position: absolute;
+  background: rgba(12, 199, 248, 0.6);
+}
+
+.hud-cross-top {
+  top: -3px;
+  left: 50%;
+  width: 1px;
+  height: 4px;
+  margin-left: -0.5px;
+}
+
+.hud-cross-bottom {
+  bottom: -3px;
+  left: 50%;
+  width: 1px;
+  height: 4px;
+  margin-left: -0.5px;
+}
+
+.hud-cross-left {
+  left: -3px;
+  top: 50%;
+  width: 4px;
+  height: 1px;
+  margin-top: -0.5px;
+}
+
+.hud-cross-right {
+  right: -3px;
+  top: 50%;
+  width: 4px;
+  height: 1px;
+  margin-top: -0.5px;
+}
+
+/* Telemetry Coordinate Label */
+.hud-telemetry {
+  position: absolute;
+  top: 46px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  font-family: monospace;
+  font-size: 7px;
+  letter-spacing: 0.8px;
+  color: rgba(12, 199, 248, 0.7);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.hud-status {
+  font-weight: bold;
+  color: #0CC7F8;
+}
+
+.hud-coords {
+  opacity: 0.6;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LOCKED / HOVER STATE
+═══════════════════════════════════════════════════════════════════ */
+.robotic-hud-locked {
+  width: 58px;
+  height: 58px;
+  margin-top: -29px;
+  margin-left: -29px;
+}
+
+.robotic-hud-locked .hud-corner {
+  border-color: #00FFCC;
+  width: 9px;
+  height: 9px;
+  filter: drop-shadow(0 0 6px rgba(0, 255, 204, 0.8));
+}
+
+.robotic-hud-locked .hud-ring {
+  border-color: rgba(0, 255, 204, 0.6);
+  border-style: solid;
+  animation: hudRotate 4s linear infinite;
+}
+
+.robotic-hud-locked .hud-status {
+  color: #00FFCC;
+  text-shadow: 0 0 8px rgba(0, 255, 204, 0.8);
+}
+
+/* Click snap contraction */
+.robotic-hud-clicked {
+  transform: scale(0.85);
+  transition: transform 0.08s ease;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ELECTROMAGNETIC CLICK SHOCKWAVE DISTORTION
+═══════════════════════════════════════════════════════════════════ */
+.robotic-shockwave {
+  width: 0px;
+  height: 0px;
+  transform: translate(-50%, -50%);
+  animation: shockwaveExpand 0.65s cubic-bezier(0.1, 0.8, 0.25, 1) forwards;
+  pointer-events: none;
+}
+
+.robotic-shockwave-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid #0CC7F8;
+  box-shadow: 0 0 15px rgba(12, 199, 248, 0.7), inset 0 0 10px rgba(0, 255, 204, 0.5);
+}
+
+@keyframes shockwaveExpand {
+  0% {
+    width: 0px;
+    height: 0px;
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    width: 160px;
+    height: 160px;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}

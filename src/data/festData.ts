@@ -28,6 +28,8 @@ export interface GalleryItem {
 export interface SponsorItem {
   name: string;
   tier: "title" | "partner";
+  image?: string;
+  logo?: string;
 }
 
 export interface FAQItem {
@@ -40,6 +42,12 @@ export interface TeamMember {
   role: string;
   designation?: string;
   phone?: string;
+  image?: string;
+  zoom?: number;
+  x?: number | string;
+  y?: number | string;
+  bgColor?: string;
+  link?: string;
 }
 
 export interface WorkshopItem {
@@ -72,13 +80,13 @@ export const FEST_DATA = {
   campusArea: "451 Acres",
   established: "1989",
   accreditation: "NAAC Grade 'A' | Deemed-to-be-University (MHRD/AICTE)",
-  dates: "09—10 OCT 2026",
-  datesFull: "09—10 OCTOBER 2026",
+  dates: "16—17 OCT 2026",
+  datesFull: "16—17 OCTOBER 2026",
   theme: "Technology and Sciences for Sustainable Earth",
   tagline: "Where Ideas Become Reality",
   links: {
     register: "https://www.techfest26.com/auth/register",
-    brochure: "https://drive.google.com/file/d/10lxQUn9Mk2E3J0Cdxu3oHr0tt9_ubfRb/view?usp=sharing",
+    brochure: "https://drive.google.com/file/d/15HHd58Xfa7bt5Q30lOpNxOSblmwG3KMf/view",
     schedule: "https://drive.google.com/file/d/1k0_-8Mu3UcCOSsbGSMjX6FbSqlxYSRkO/view?usp=sharing",
     officialWeb: "https://www.techfest26.com",
     slietWeb: "https://sliet.ac.in",
@@ -123,7 +131,7 @@ export const EDITORIAL_EVENTS: DetailedEvent[] = [
       "The flagship robotics arena of TechFEST'26. Witness custom-engineered combat machines clash in the electrified RoboWars pit, alongside autonomous SLAM rovers navigating intricate obstacle mazes and precision drone racing.",
     objectType: "character",
     eventCount: 8,
-    date: "09—10 October 2026",
+    date: "16—17 October 2026",
     venue: "Main Robotics Arena & Gymnasium Hall, SLIET",
     teamSize: "1 to 5 Members per Team",
     prizeSummary: "Official SLIET Trophies, Certificates & Cash Prize Pool",
@@ -153,7 +161,7 @@ export const EDITORIAL_EVENTS: DetailedEvent[] = [
       "A 24-hour non-stop hackathon, algorithmic speed battles, spatial WebGL frontend sprints, and high-intensity cyber security capture-the-flag arenas designed for top software engineers and architects.",
     objectType: "plexus",
     eventCount: 6,
-    date: "09—10 October 2026",
+    date: "16—17 October 2026",
     venue: "Computer Center & Software Labs, SLIET",
     teamSize: "1 to 4 Members (Hackathon: 2–4)",
     prizeSummary: "Cash Awards, Sponsor Cloud Credits & Merit Certificates",
@@ -183,7 +191,7 @@ export const EDITORIAL_EVENTS: DetailedEvent[] = [
       "National working model exhibition showcasing physical hardware prototypes, IoT systems, renewable energy converters, and automated mechatronics engineered for real-world environmental sustainability.",
     objectType: "karyarachna",
     eventCount: 3,
-    date: "09—10 October 2026",
+    date: "16—17 October 2026",
     venue: "Central Workshop & Exhibition Hall, SLIET",
     teamSize: "1 to 4 Members per Project",
     prizeSummary: "Innovation Grants, Patent Guidance & SLIET Trophy",
@@ -210,7 +218,7 @@ export const EDITORIAL_EVENTS: DetailedEvent[] = [
       "The competitive battleground for nationwide esports tournaments, tactical problem-solving sprints, tech trivia championships, and speed game prototyping jams on the main festival stage.",
     objectType: "kermis",
     eventCount: 3,
-    date: "09—10 October 2026",
+    date: "16—17 October 2026",
     venue: "Main Auditorium & LAN Gaming Arena, SLIET",
     teamSize: "1 to 5 Members depending on game title",
     prizeSummary: "Esports Trophies, Gaming Peripherals & Cash Prizes",
@@ -237,7 +245,7 @@ export const EDITORIAL_EVENTS: DetailedEvent[] = [
       "Challenges centered on microgrid load optimization, renewable energy converters, high-voltage power simulation, and smart embedded power monitoring circuits for a sustainable global grid.",
     objectType: "electrica",
     eventCount: 4,
-    date: "09—10 October 2026",
+    date: "16—17 October 2026",
     venue: "Electrical Engineering Department Labs, SLIET",
     teamSize: "1 to 3 Members",
     prizeSummary: "Cash Prizes, Industrial Toolkits & Certificates",
@@ -265,7 +273,7 @@ export const EDITORIAL_EVENTS: DetailedEvent[] = [
       "High-precision 3D CAD modeling sprints, finite element structural stress testing, wind-tunnel aerodynamic vehicle simulations, and rapid fabrication challenges.",
     objectType: "mechanica",
     eventCount: 4,
-    date: "09—10 October 2026",
+    date: "16—17 October 2026",
     venue: "Mechanical Engineering CAD Center & Machine Shop, SLIET",
     teamSize: "1 to 3 Members",
     prizeSummary: "CAD Software Licenses, Cash Awards & Trophies",
@@ -290,7 +298,7 @@ export const WORKSHOPS_DATA: WorkshopItem[] = [
     title: "Autonomous Drone Robotics & Spatial LiDAR",
     instructor: "Industry Aerospace Experts & SLIET UAV Lab",
     duration: "6 Hours Hands-on Session",
-    date: "09 October 2026",
+    date: "16 October 2026",
     venue: "Aero Design Labs, SLIET",
     description:
       "Master drone flight avionics, brushless motor ESC calibration, PX4 autopilot configurations, and real-time point-cloud LiDAR reconstruction.",
@@ -301,7 +309,7 @@ export const WORKSHOPS_DATA: WorkshopItem[] = [
     title: "AI Multi-Agent Systems & LLM Architectures",
     instructor: "Leading AI Research Practitioners",
     duration: "5 Hours Deep Dive",
-    date: "09 October 2026",
+    date: "16 October 2026",
     venue: "Central Computing Center, SLIET",
     description:
       "Build production-grade autonomous agent loops, vector memory retrieval augmented generation (RAG), and deterministic function-calling pipelines.",
@@ -312,7 +320,7 @@ export const WORKSHOPS_DATA: WorkshopItem[] = [
     title: "Industrial Cyber Security & CTF Exploitation",
     instructor: "Certified Ethical Hackers & Red Teamers",
     duration: "6 Hours Live Lab",
-    date: "10 October 2026",
+    date: "17 October 2026",
     venue: "Network Security & Cyber Forensics Lab, SLIET",
     description:
       "Hands-on binary exploitation, Web vulnerability discovery, privilege escalation, and zero-day patch analysis.",
@@ -323,7 +331,7 @@ export const WORKSHOPS_DATA: WorkshopItem[] = [
     title: "Smart Grid Micro-Inverters & IoT Mechatronics",
     instructor: "Renewable Energy & Automation Specialists",
     duration: "5 Hours Practical Workshop",
-    date: "10 October 2026",
+    date: "17 October 2026",
     venue: "Power Electronics Department, SLIET",
     description:
       "Hardware prototyping of solar MPPT controllers, power factor monitoring, and real-time MQTT telemetry pipelines.",
@@ -336,7 +344,7 @@ export const PRONITES_DATA: ProniteItem[] = [
     id: "pro-1",
     title: "EDM & DJ NIGHT",
     type: "Electronic Dance Music Spectacle",
-    date: "09 October 2026",
+    date: "16 October 2026",
     time: "07:00 PM Onwards",
     venue: "Main Festival Ground, SLIET",
     description: "High-octane electronic music celebration featuring renowned DJs, laser mapping, and immersive soundscapes.",
@@ -345,7 +353,7 @@ export const PRONITES_DATA: ProniteItem[] = [
     id: "pro-2",
     title: "STAR NIGHT CONCERT",
     type: "Celebrity Live Music Concert",
-    date: "10 October 2026",
+    date: "17 October 2026",
     time: "07:30 PM Onwards",
     venue: "Open Air Theatre, SLIET",
     description: "The grand festival finale concert featuring celebrated national playback artists and live band performances.",
@@ -354,7 +362,7 @@ export const PRONITES_DATA: ProniteItem[] = [
     id: "pro-3",
     title: "ILLUSION & COMEDY GALA",
     type: "Standup Comedy & Stage Illusions",
-    date: "10 October 2026",
+    date: "17 October 2026",
     time: "04:30 PM",
     venue: "Main Auditorium, SLIET",
     description: "An evening of sharp humor, mentalism, and stage magic hosted by leading national stand-up artists.",
@@ -407,67 +415,188 @@ export const ABOUT_STATS = [
 ];
 
 export const SPONSORS_DATA: SponsorItem[] = [
-  { name: "OPPO", tier: "title" },
-  { name: "UNSTOP", tier: "title" },
-  { name: "RRP ELECTRONICS", tier: "title" },
-  { name: "AMY SOUL", tier: "title" },
-  { name: "TECH CADD", tier: "title" },
-  { name: "IOTA WATER", tier: "title" },
-  { name: "BURRAH", tier: "title" },
-  { name: "MICROSOFT", tier: "partner" },
-  { name: "COCA COLA", tier: "partner" },
-  { name: "UNACADEMY", tier: "partner" },
-  { name: "BONN", tier: "partner" },
-  { name: "PROTON", tier: "partner" },
-  { name: "BEYOND SNACK", tier: "partner" },
-  { name: "HERO ELECTRIC", tier: "partner" },
-  { name: "93.5 RED FM", tier: "partner" },
+  { name: "OPPO", tier: "title", image: "/sponsor/current/oppo.svg" },
+  { name: "UNSTOP", tier: "title", image: "/sponsor/current/unstop.svg" },
+  { name: "RRP ELECTRONICS", tier: "title", image: "/sponsor/current/rrp.svg" },
+  { name: "AMY SOUL", tier: "title", image: "/sponsor/current/amysoul.svg" },
+  { name: "TECH CADD", tier: "title", image: "/sponsor/current/techcadd.svg" },
+  { name: "IOTA WATER", tier: "title", image: "/sponsor/current/iotawater.svg" },
+  { name: "BURRAH", tier: "title", image: "/sponsor/current/burrah.svg" },
+  { name: "MICROSOFT", tier: "partner", image: "/sponsor/previous/microsoft.svg" },
+  { name: "COCA COLA", tier: "partner", image: "/sponsor/previous/coca-cola.svg" },
+  { name: "UNACADEMY", tier: "partner", image: "/sponsor/previous/unacademy.svg" },
+  { name: "BONN", tier: "partner", image: "/sponsor/previous/bonn.svg" },
+  { name: "PROTON", tier: "partner", image: "/sponsor/previous/proton.svg" },
+  { name: "BEYOND SNACK", tier: "partner", image: "/sponsor/previous/beyond-snack.svg" },
+  { name: "HERO ELECTRIC", tier: "partner", image: "/sponsor/previous/hero.svg" },
+  { name: "93.5 RED FM", tier: "partner", image: "/sponsor/previous/red-fm.svg" },
 ];
 
 export const FAQ_DATA: FAQItem[] = [
   {
-    q: "Who is eligible to participate in TechFEST'26?",
-    a: "TechFEST'26 is open to all enrolled undergraduate, postgraduate, diploma, and school students from recognized institutions across India.",
+    q: "What is TechFest'26 at SLIET?",
+    a: "TechFest'26 is SLIET Longowal's flagship national-level annual technical festival, bringing together students, innovators, and technology enthusiasts from across the nation to compete, collaborate, and showcase cutting-edge innovations under the theme 'Technology and Sciences for Sustainable Earth'.",
   },
   {
-    q: "How can I register for competitions and tracks?",
-    a: "Registration is online via the official portal at techfest26.com/auth/register or through Unstop. On-spot registrations will also be available at the registration desk.",
+    q: "Who can participate in TechFest'26?",
+    a: "TechFest'26 is open to all enrolled undergraduate, postgraduate, diploma, and school students from recognized institutions across India.",
+  },
+  {
+    q: "How can I register for the events?",
+    a: "Registration is online via the official portal at techfest26.com/auth/register or through Unstop. On-spot registrations will also be available at the campus registration desk during festival days.",
+  },
+  {
+    q: "Are there any participation or registration fees?",
+    a: "Most technical and flagship events are free to enter. Certain specialized workshops or certified competitions may have nominal fees as indicated on their respective registration pages.",
+  },
+  {
+    q: "Will participants get certificates or prizes?",
+    a: "Yes! All verified participants receive official SLIET participation certificates. Winners of competitive tracks receive cash prizes, official SLIET trophies, and merit certificates.",
+  },
+  {
+    q: "When is TechFest 2026 happening, and what's the event lineup?",
+    a: "TechFest'26 is scheduled for 16th and 17th October 2026 at the SLIET Longowal campus. The lineup features 6 major domains (RoboZar, Plexus, Karyarachna, Kermis, Electrica, Mechanica), hands-on technical workshops, and electrifying pronites.",
   },
   {
     q: "Is accommodation provided for outstation participants?",
-    a: "Yes, hostel accommodation on the SLIET Longowal campus is provided for outstation participants along with campus food packages.",
-  },
-  {
-    q: "Are cross-college teams allowed in hackathons & robotics?",
-    a: "Yes, cross-college and multidisciplinary teams are fully permitted in RoboWars, Hackathons, and Project Exhibitions.",
-  },
-  {
-    q: "Will participants receive certificates and prize money?",
-    a: "All verified participants receive official SLIET participation certificates. Track winners receive cash prizes, trophies, and merit certificates.",
+    a: "Yes, hostel accommodation on the SLIET Longowal campus is provided for outstation participants along with campus hospitality and dining facilities.",
   },
   {
     q: "How do we reach the SLIET campus?",
-    a: "SLIET is in Longowal, Sangrur (Punjab). Nearest rail heads are Sangrur (18 km) and Sunam (16 km). Regular bus and shuttle connections run directly to the campus gate.",
+    a: "SLIET is located in Longowal, Sangrur (Punjab). The nearest railway stations are Sangrur (18 km), Sunam (16 km), and Dhuri Junction (32 km). Regular buses and dedicated festival shuttles connect Sangrur & Sunam bus stands directly to the SLIET campus gate.",
   },
 ];
 
 export const FACULTY_LEADERSHIP: TeamMember[] = [
-  { name: "Dr. Mani Kant Paswan", role: "Patron-in-Chief", designation: "Director, SLIET Longowal" },
-  { name: "Dr. Vijay Kumar Kukreja", role: "Patron", designation: "Professor, SLIET Longowal" },
-  { name: "Dr. Sunil Kumar", role: "Chairman", designation: "Associate Professor, SLIET" },
-  { name: "Dr. Barasha Mali", role: "Vice-Chairman", designation: "Assistant Professor, SLIET" },
-  { name: "Dr. Tajinder Singh", role: "Vice-Chairman", designation: "Assistant Professor, SLIET" },
+  {
+    name: "Dr. Mani Kant Paswan",
+    role: "Patron-in-Chief",
+    designation: "Director, SLIET Longowal",
+    image: "/teams/faculty/manikant-sir.webp",
+    zoom: 1,
+    x: 0,
+    y: 0,
+  },
+  {
+    name: "Dr. Vijay Kumar Kukreja",
+    role: "Patron",
+    designation: "Professor, SLIET Longowal",
+    image: "/teams/faculty/Vijay-sir.webp",
+    zoom: 1,
+    x: 0,
+    y: 0,
+  },
+  {
+    name: "Dr. Sunil Kumar",
+    role: "Chairman",
+    designation: "Associate Professor, SLIET",
+    image: "/teams/faculty/sunil-sir.webp",
+    zoom: 1,
+    x: 0,
+    y: 0,
+  },
+  {
+    name: "Dr. Barasha Mali",
+    role: "Vice-Chairman",
+    designation: "Assistant Professor, SLIET",
+    image: "/teams/faculty/barasha-maam.webp",
+    zoom: 1,
+    x: 0,
+    y: 110,
+    bgColor: "#ffffff",
+  },
+  {
+    name: "Dr. Tajinder Singh",
+    role: "Vice-Chairman",
+    designation: "Assistant Professor, SLIET",
+    image: "/teams/faculty/tajinder-sir.webp",
+    zoom: 1,
+    x: 0,
+    y: 0,
+  },
 ];
 
 export const CORE_STUDENT_TEAM: TeamMember[] = [
-  { name: "Shubham Kumar Singh", role: "Overall Coordinator", phone: "+91 97711-74465" },
-  { name: "Naman Kumar Sinha", role: "Overall Coordinator", phone: "+91 78568-93952" },
-  { name: "Kandi Rishitha", role: "Core Coordinator" },
-  { name: "Sagar Kumar", role: "Core Coordinator" },
-  { name: "Gaurav Kumar", role: "Core Coordinator" },
-  { name: "Vishal Kumar", role: "Core Coordinator" },
-  { name: "Adarsh Kumar", role: "Core Coordinator" },
-  { name: "Sahil Sinha", role: "Core Coordinator" },
-  { name: "Balpreet Kaur", role: "Core Coordinator" },
-  { name: "Raju Kumar", role: "Core Coordinator" },
+  {
+    name: "Shubham Kumar Singh",
+    role: "Overall Coordinator",
+    phone: "+91 97711-74465",
+    image: "/teams/core/shubham.webp",
+    zoom: 1,
+    x: 0,
+    y: 0,
+  },
+  {
+    name: "Naman Kumar Sinha",
+    role: "Overall Coordinator",
+    phone: "+91 78568-93952",
+    image: "/teams/core/naman.webp",
+    zoom: 1,
+    x: 0,
+    y: 0,
+  },
+  {
+    name: "Kandi Rishitha",
+    role: "Core Coordinator",
+    image: "/teams/core/kandi.webp",
+    zoom: 1,
+    x: 0,
+    y: 0,
+  },
+  {
+    name: "Sagar Kumar",
+    role: "Core Coordinator",
+    image: "/teams/core/sagar.webp",
+    zoom: 1,
+    x: 0,
+    y: 0,
+  },
+  {
+    name: "Gaurav Kumar",
+    role: "Core Coordinator",
+    image: "/teams/core/gaurav.webp",
+    zoom: 1,
+    x: 0,
+    y: 0,
+  },
+  {
+    name: "Vishal Kumar",
+    role: "Core Coordinator",
+    image: "/teams/core/vishal.webp",
+    zoom: 1,
+    x: 0,
+    y: 0,
+  },
+  {
+    name: "Adarsh Kumar",
+    role: "Core Coordinator",
+    image: "/teams/core/adarsh.webp",
+    zoom: 1,
+    x: 0,
+    y: 0,
+  },
+  {
+    name: "Sahil Sinha",
+    role: "Core Coordinator",
+    image: "/teams/core/sahil.webp",
+    zoom: 1,
+    x: 0,
+    y: 0,
+  },
+  {
+    name: "Balpreet Kaur",
+    role: "Core Coordinator",
+    image: "/teams/core/Balpreet.webp",
+    zoom: 1,
+    x: 0,
+    y: 0,
+  },
+  {
+    name: "Raju Kumar",
+    role: "Core Coordinator",
+    image: "/teams/core/raju.webp",
+    zoom: 1,
+    x: 0,
+    y: 0,
+  },
 ];

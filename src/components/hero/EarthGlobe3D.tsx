@@ -15,6 +15,7 @@ export default function EarthGlobe3D({
   isZooming = false,
 }: EarthGlobe3DProps) {
   const mountRef = useRef<HTMLDivElement>(null);
+  const reticleRef = useRef<HTMLDivElement>(null);
   const [isLocked, setIsLocked] = useState(false);
   const [indiaFacing, setIndiaFacing] = useState(false);
   const [isActiveZooming, setIsActiveZooming] = useState(false);
@@ -49,8 +50,14 @@ export default function EarthGlobe3D({
     const width = container.clientWidth || window.innerWidth;
     const height = container.clientHeight || window.innerHeight;
 
+    const isMobile = width < 768;
     const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 1000);
-    camera.position.set(0, 0.2, 6.8);
+    if (isMobile) {
+      camera.position.set(0, 0, 12.0);
+    } else {
+      camera.position.set(0, 0, 6.8);
+    }
+    camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -123,13 +130,25 @@ export default function EarthGlobe3D({
     // =========================================================================
     // ROTATION MECHANICS: ROTATE TO INDIA & LOCK
     // =========================================================================
-    // Target angle where India (77° E, 25° N) is centered directly facing camera
+    // Target angle where India (77° E, 28.6° N) is centered directly facing camera
     // In equirectangular UV mapping, India is centered at rotation.y approx -2.92 rad
     const targetIndiaY = -2.92;
 
     // Start Earth at -6.0 rad (so it completes about half a rotation showing continents)
     let currentY = -6.0;
     earthMesh.rotation.y = currentY;
+
+    // Local 3D coordinate vector for India (SLIET Longowal, Punjab: 77.2°E, 30.2°N)
+    const uTarget = 1462 / 2048;
+    const vTarget = 1 - (352 / 1024);
+    const phi = uTarget * 2 * Math.PI;
+    const theta = (1 - vTarget) * Math.PI;
+
+    const indiaLocalPos = new THREE.Vector3(
+      - earthRadius * Math.cos(phi) * Math.sin(theta),
+      earthRadius * Math.cos(theta),
+      earthRadius * Math.sin(phi) * Math.sin(theta)
+    );
 
     let animId: number;
     let isDecelerating = false;
@@ -172,6 +191,23 @@ export default function EarthGlobe3D({
         earthMesh.rotation.y = targetIndiaY + Math.sin(Date.now() * 0.0005) * 0.015;
       }
 
+      // Dynamically project India's exact 3D position to 2D screen coordinates
+      const indiaWorldPos = indiaLocalPos.clone().applyMatrix4(earthMesh.matrixWorld);
+      const screenPos = indiaWorldPos.clone().project(camera);
+      const curW = container.clientWidth || window.innerWidth;
+      const curH = container.clientHeight || window.innerHeight;
+      const screenX = (screenPos.x * 0.5 + 0.5) * curW;
+      const screenY = (-screenPos.y * 0.5 + 0.5) * curH;
+
+      if (reticleRef.current) {
+        reticleRef.current.style.transform = `translate3d(${screenX}px, ${screenY}px, 0px) translate(-50%, -50%)`;
+      }
+
+      // Smoothly zoom 3D camera into Earth / India during hyper-zoom
+      if (isActiveZooming) {
+        camera.position.z = Math.max(2.5, camera.position.z - 0.09);
+      }
+
       renderer.render(scene, camera);
       animId = requestAnimationFrame(animate);
     };
@@ -183,7 +219,14 @@ export default function EarthGlobe3D({
       if (!container) return;
       const w = container.clientWidth || window.innerWidth;
       const h = container.clientHeight || window.innerHeight;
+      const mobile = w < 768;
       camera.aspect = w / h;
+      if (mobile) {
+        camera.position.set(0, 0, 12.0);
+      } else {
+        camera.position.set(0, 0, 6.8);
+      }
+      camera.lookAt(0, 0, 0);
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
     };
@@ -218,10 +261,12 @@ export default function EarthGlobe3D({
       />
 
       {/* ========================================================================= */}
-      {/* TARGET RETICLE DIRECTLY ON INDIA (Appears & Locks when India is Front)   */}
+      {/* TARGET RETICLE DIRECTLY ON INDIA (Mathematically Locked to 3D Coordinates)*/}
       {/* ========================================================================= */}
       <div
-        className={`absolute top-[44%] left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto cursor-pointer transition-all duration-700 ${
+        ref={reticleRef}
+        style={{ left: 0, top: 0 }}
+        className={`absolute pointer-events-auto cursor-pointer transition-opacity duration-500 ${
           indiaFacing && !isActiveZooming
             ? "opacity-100 scale-100"
             : "opacity-0 scale-150 pointer-events-none"
@@ -231,46 +276,46 @@ export default function EarthGlobe3D({
         <div className="relative flex items-center justify-center">
           {/* Outer Pulsing Reticle Ring */}
           <div
-            className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full border border-dashed transition-all duration-300 animate-[spin_12s_linear_infinite] ${
+            className={`w-20 h-20 sm:w-28 sm:h-28 rounded-full border border-dashed transition-all duration-300 animate-[spin_12s_linear_infinite] ${
               isLocked ? "border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.5)]" : "border-[#00D9FF]"
             }`}
           />
 
           {/* Inner Corner Brackets */}
-          <div className="absolute inset-2 border border-[#00D9FF]/40 rounded-full" />
+          <div className="absolute inset-1.5 sm:inset-2 border border-[#00D9FF]/40 rounded-full" />
 
           {/* Crosshair Center Point on India */}
           <div
-            className={`absolute w-3 h-3 rounded-full animate-ping ${
+            className={`absolute w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full animate-ping ${
               isLocked ? "bg-emerald-400" : "bg-[#00D9FF]"
             }`}
           />
           <div
-            className={`absolute w-2 h-2 rounded-full ${
+            className={`absolute w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
               isLocked ? "bg-emerald-300" : "bg-white"
             }`}
           />
 
-          {/* India Information HUD Card */}
-          <div className="absolute left-full ml-3 sm:ml-4 top-1/2 -translate-y-1/2 w-48 sm:w-56 p-2.5 rounded-lg bg-[#020817]/90 border border-[#00D9FF]/70 backdrop-blur-md shadow-[0_0_25px_rgba(0,217,255,0.4)] text-left">
-            <div className="flex items-center gap-1.5 mb-1">
+          {/* India Information HUD Card: centered below on mobile, to the right on desktop */}
+          <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 sm:mt-0 sm:left-full sm:ml-4 sm:top-1/2 sm:-translate-y-1/2 sm:translate-x-0 w-44 sm:w-56 p-2 sm:p-2.5 rounded-lg bg-[#020817]/95 border border-[#00D9FF]/70 backdrop-blur-md shadow-[0_0_25px_rgba(0,217,255,0.4)] text-left">
+            <div className="flex items-center gap-1.5 mb-0.5 sm:mb-1">
               <span
                 className={`w-2 h-2 rounded-full ${
                   isLocked ? "bg-emerald-400 animate-ping" : "bg-[#00D9FF] animate-pulse"
                 }`}
               />
               <span
-                className={`font-mono text-[10px] sm:text-xs font-bold tracking-wider ${
+                className={`font-mono text-[9px] sm:text-xs font-bold tracking-wider ${
                   isLocked ? "text-emerald-400" : "text-[#00D9FF]"
                 }`}
               >
                 {isLocked ? "● TARGET LOCKED" : "TARGET ACQUIRED: INDIA"}
               </span>
             </div>
-            <div className="font-mono text-[9px] sm:text-[10px] text-white font-semibold tracking-wider">
+            <div className="font-mono text-[8.5px] sm:text-[10px] text-white font-semibold tracking-wider">
               SLIET LONGOWAL, PUNJAB
             </div>
-            <div className="font-mono text-[8px] sm:text-[9px] text-neutral-400 tracking-widest mt-0.5">
+            <div className="font-mono text-[7.5px] sm:text-[9px] text-neutral-400 tracking-widest mt-0.5">
               30.7391° N, 76.6888° E
             </div>
           </div>

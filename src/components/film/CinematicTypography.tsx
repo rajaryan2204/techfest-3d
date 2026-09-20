@@ -138,7 +138,7 @@ export default function CinematicTypography({ progress, onEnter }: CinematicTypo
                 Technology and Sciences for Sustainable Earth
               </p>
               <p className="text-[11px] font-mono text-neutral-500 tracking-[0.3em] uppercase pt-1">
-                09—10 OCTOBER 2026 // SLIET
+                16—17 OCTOBER 2026 // SLIET
               </p>
             </div>
 

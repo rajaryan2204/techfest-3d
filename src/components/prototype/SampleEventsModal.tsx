@@ -197,7 +197,7 @@ export default function SampleEventsModal({
 
         {/* Footer */}
         <div className="p-3 sm:p-4 border-t border-white/10 bg-black/40 flex items-center justify-between text-[11px] sm:text-xs font-mono text-neutral-400">
-          <span className="truncate mr-2">09 • 10 OCT 2026 // SLIET</span>
+          <span className="truncate mr-2">16 • 17 OCT 2026 // SLIET</span>
           <button
             onClick={onClose}
             className="text-[#00D9FF] hover:underline cursor-pointer shrink-0"

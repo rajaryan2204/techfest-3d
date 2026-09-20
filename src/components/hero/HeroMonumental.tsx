@@ -40,7 +40,7 @@ export default function HeroMonumental() {
 
         {/* Right Dates */}
         <span className="text-[10px] sm:text-xs font-mono tracking-widest text-neutral-400 uppercase hidden sm:block">
-          09—10 OCTOBER 2026
+          16—17 OCTOBER 2026
         </span>
       </div>
 

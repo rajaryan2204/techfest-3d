@@ -24,7 +24,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "TechFEST'26 — SLIET",
   description:
-    "Official website for TechFEST'26 at Sant Longowal Institute of Engineering & Technology (SLIET). Technology and Sciences for Sustainable Earth. 09—10 October 2026.",
+    "Official website for TechFEST'26 at Sant Longowal Institute of Engineering & Technology (SLIET). Technology and Sciences for Sustainable Earth. 16—17 October 2026.",
   keywords: [
     "TechFEST'26",
     "TechFEST 2026",
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "TechFEST'26 — SLIET",
     description:
-      "Welcome to TechFEST'26 at SLIET Longowal. A national-level celebration of technology, innovation, and sustainable engineering. 09—10 October 2026.",
+      "Welcome to TechFEST'26 at SLIET Longowal. A national-level celebration of technology, innovation, and sustainable engineering. 16—17 October 2026.",
     url: "https://www.techfest26.com",
     siteName: "TechFEST'26 SLIET",
     locale: "en_US",
@@ -52,12 +52,17 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "TechFEST'26 — SLIET",
     description:
-      "Join us for TechFEST'26 – the ultimate technical and innovation fest of SLIET. 09—10 October 2026.",
+      "Join us for TechFEST'26 – the ultimate technical and innovation fest of SLIET. 16—17 October 2026.",
   },
   icons: {
     icon: "/favicon.ico",
   },
 };
+
+import RoboticCursor from "~/components/common/RoboticCursor/RoboticCursor";
+import CyberTerminal from "~/components/common/CyberTerminal/CyberTerminal";
+import CyberMatrixBackground from "@/components/common/CyberMatrixBackground";
+import CyberNavbar from "@/components/navigation/CyberNavbar";
 
 export default function RootLayout({
   children,
@@ -65,12 +70,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="bg-[#070709] scroll-smooth">
+    <html lang="en" className="bg-[#01040f] scroll-smooth">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen w-full bg-[#070709] text-white antialiased overflow-x-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} min-h-screen w-full bg-[#01040f] text-white antialiased overflow-x-hidden relative`}
       >
+        {/* Global Viewport-Locked Earth & Space Cosmic Background */}
+        <CyberMatrixBackground
+          opacity={0.95}
+          showAtmosphere={true}
+          showOrbits={true}
+          showStars={true}
+          showSatellites={true}
+          showNebula={true}
+        />
+        {/* Global Unified CyberNavbar (Active on all pages) */}
+        <CyberNavbar />
+        <RoboticCursor />
         {children}
+        <CyberTerminal />
       </body>
     </html>
   );
 }
+
+
