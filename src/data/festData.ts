@@ -23,6 +23,7 @@ export interface GalleryItem {
   sub: string;
   year: string;
   category: string;
+  image?: string;
 }
 
 export interface SponsorItem {
@@ -376,6 +377,7 @@ export const GALLERY_ITEMS: GalleryItem[] = [
     sub: "60kg Heavyweight Combat // Electrified Pit",
     year: "2026",
     category: "ROBOTICS",
+    image: "https://wsrv.nl/?url=https://lh3.googleusercontent.com/d/13Exkjs-Xffc1j3pgkpTz_xW1tIQEWpYo&output=webp",
   },
   {
     id: "gal-2",
@@ -383,6 +385,7 @@ export const GALLERY_ITEMS: GalleryItem[] = [
     sub: "24-Hour Code Sprint // 1,000+ Developers",
     year: "2026",
     category: "SOFTWARE",
+    image: "https://wsrv.nl/?url=https://lh3.googleusercontent.com/d/1BfE4Y6xX8cT_zR9qM5bC2lP9k7rV1aO&output=webp",
   },
   {
     id: "gal-3",
@@ -390,20 +393,23 @@ export const GALLERY_ITEMS: GalleryItem[] = [
     sub: "LiDAR Spatial Flight Obstacle Course",
     year: "2026",
     category: "AEROSPACE",
+    image: "https://wsrv.nl/?url=https://lh3.googleusercontent.com/d/1o9u6CkTdCtGkfgFywojviZvPtKrCukxu&output=webp",
   },
   {
     id: "gal-4",
-    title: "SLIET CAMPUS EXPO",
-    sub: "451-Acre Innovation Showcase",
+    title: "STAR NIGHT CONCERT",
+    sub: "Live Musical Extravaganza & Laser Shows",
     year: "2026",
-    category: "HERITAGE",
+    category: "PRONITES",
+    image: "https://wsrv.nl/?url=https://lh3.googleusercontent.com/d/1K9jP2mN4vL7rX8yQ1bC3lA6k8wF2oI&output=webp",
   },
   {
     id: "gal-5",
-    title: "ESPORTS CHAMPIONSHIP",
-    sub: "Main Stage Tournament Finals",
+    title: "SLIET CAMPUS EXPO",
+    sub: "451-Acre Innovation & Tech Showcase",
     year: "2026",
-    category: "GAMING",
+    category: "CAMPUS",
+    image: "/videos/hero/earth-zoom-drone-poster.jpg",
   },
 ];
 

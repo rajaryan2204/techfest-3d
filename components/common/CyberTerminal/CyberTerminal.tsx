@@ -33,12 +33,12 @@ export default function CyberTerminal() {
                 "README.md": {
                   type: "file",
                   content:
-                    "# SLIET techFEST '26\nTheme: Technology and Sciences for Sustainable Earth\nDates: 09-10 October 2026\nVenue: Sant Longowal Institute of Engineering & Technology, Longowal, Punjab\nWebsite: https://techfestsliet.com",
+                    "# SLIET techFEST '26\nTheme: Technology and Sciences for Sustainable Earth\nDates: 16-17 October 2026\nVenue: Sant Longowal Institute of Engineering & Technology, Longowal, Punjab\nWebsite: https://www.techfest26.com",
                 },
                 "schedule.txt": {
                   type: "file",
                   content:
-                    "techFEST '26 SCHEDULE:\n[DAY 1 - 09 OCT]: Opening Ceremony (09:00), Hackathon Kickoff (11:00), RoboWars Prelims (14:00), CAD Modeling (16:00)\n[DAY 2 - 10 OCT]: Project Expo (10:00), RoboMania Finals (14:00), Chem-e-Car Runs (15:00), Grand Valedictory & DJ Night (18:30)",
+                    "techFEST '26 SCHEDULE:\n[DAY 1 - 16 OCT]: Opening Ceremony (09:00), Hackathon Kickoff (11:00), RoboWars Prelims (14:00), CAD Modeling (16:00)\n[DAY 2 - 17 OCT]: Project Expo (10:00), RoboMania Finals (14:00), Chem-e-Car Runs (15:00), Grand Valedictory & DJ Night (18:30)",
                 },
                 "brochure.url": {
                   type: "file",
@@ -423,7 +423,7 @@ export default function CyberTerminal() {
           "       |||||            Kernel: 6.12.0-tf26-cyber",
           "     .'     '.          Uptime: 2 days, 14 hours",
           "    /  SLIET  \\         Theme: Sustainable Earth (Cyber Cyan)",
-          "   |  TF '26   |        Festival Dates: 09-10 October 2026",
+          "   |  TF '26   |        Festival Dates: 16-17 October 2026",
           "    \\         /         Delegates Registered: 10,000+",
           "     '-------'          Memory: 4096MB / 16384MB"
         );
@@ -453,9 +453,9 @@ export default function CyberTerminal() {
 
       case "schedule":
         newOutput.push(
-          "techFEST '26 SCHEDULE (09—10 OCT 2026):",
-          "  • 09 OCT: Hackathons, Line Follower, CADathon, Keynotes",
-          "  • 10 OCT: RoboWars 30kg, Chem-e-Car Runs, Esports Finals, DJ Night"
+          "techFEST '26 SCHEDULE (16—17 OCT 2026):",
+          "  • 16 OCT: Opening Ceremony, Hackathons, Line Follower, CADathon, Keynotes, Pronite",
+          "  • 17 OCT: RoboWars Finals, Chem-e-Car Runs, Esports Finals, Grand Valedictory, DJ Night"
         );
         break;
 

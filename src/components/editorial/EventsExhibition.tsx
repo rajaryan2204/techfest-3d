@@ -113,7 +113,7 @@ export default function EventsExhibition() {
           </h2>
 
           <p className="text-xs sm:text-sm text-neutral-400 font-light max-w-xl leading-relaxed">
-            Engineering sustainable solutions for planet Earth and the cosmic frontier: battle across 6 flagship domains featuring 40+ national competitions, robotics, aerospace challenges, and certified cash prize pools.
+            Engineering sustainable solutions for planet Earth and the cosmic frontier: battle across 13 domains featuring 61 national competitions, robotics, aerospace challenges, and certified cash prize pools.
           </p>
         </div>
 

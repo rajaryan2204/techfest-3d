@@ -479,7 +479,7 @@ export default function CinematicPortalHero() {
                     🏆 ₹5,00,000+ PRIZES
                   </span>
                   <span className="px-2.5 py-1 rounded-md bg-white/5 border border-white/15 text-[9px] sm:text-[10px] font-mono text-neutral-200">
-                    ⚡ 40+ EVENTS
+                    ⚡ 61 COMPETITIONS
                   </span>
                   <span className="px-2.5 py-1 rounded-md bg-white/5 border border-white/15 text-[9px] sm:text-[10px] font-mono text-neutral-200 hidden xs:inline-block">
                     👥 10,000+ INNOVATORS
@@ -559,7 +559,7 @@ export default function CinematicPortalHero() {
                   }}
                   className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3.5 rounded-full border border-white/20 bg-white/5 active:scale-[0.98] hover:bg-white/10 text-white font-mono text-[11px] sm:text-sm tracking-wider transition-all duration-200 cursor-pointer backdrop-blur-sm min-h-[40px] sm:min-h-[48px]"
                 >
-                  <span className="truncate">40+ EVENTS</span>
+                  <span className="truncate">61 EVENTS</span>
                   <span className="text-[#00D9FF]">↗</span>
                 </button>
               </>
