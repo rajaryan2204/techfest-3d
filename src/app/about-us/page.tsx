@@ -150,7 +150,7 @@ export default function AboutUsPage() {
       </div>
 
       {/* 3. Leadership & Patronage */}
-      <section className="space-y-8">
+      <section className="space-y-10">
         <div className="space-y-2 border-b border-cyan-500/20 pb-4">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#00FFCC] animate-pulse" />
@@ -159,43 +159,93 @@ export default function AboutUsPage() {
             </span>
           </div>
           <h2 className="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight font-sans">
-            INSTITUTIONAL LEADERSHIP
+            INSTITUTIONAL LEADERSHIP & FACULTY ADVISORY
           </h2>
           <p className="text-xs sm:text-sm text-neutral-400 font-mono">
             Distinguished professors and academic administrators guiding TechFEST&apos;26 with institutional vision.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FACULTY_LEADERSHIP.map((lead) => (
-            <div
-              key={lead.name}
-              className="cyber-card p-5 space-y-4 flex flex-col justify-between group"
-            >
-              <div className="cyber-card-glow" />
-              {lead.image && (
-                <div className="w-full overflow-hidden rounded-xl">
-                  <CyberPhotoFrame
-                    image={lead.image}
-                    alt={lead.name}
-                    zoom={lead.zoom}
-                    x={lead.x}
-                    y={lead.y}
-                    bgColor={lead.bgColor}
-                  />
+        {/* Patrons */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00D9FF]"></span>
+            <span className="text-xs font-mono tracking-widest text-[#00D9FF] uppercase font-bold">
+              PATRONAGE & INSTITUTIONAL LEADERSHIP
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto gap-6">
+            {FACULTY_LEADERSHIP.filter((l) => l.role.includes("Patron")).map((lead) => (
+              <div
+                key={lead.name}
+                className="cyber-card p-5 space-y-4 flex flex-col justify-between group"
+              >
+                <div className="cyber-card-glow" />
+                {lead.image && (
+                  <div className="w-full overflow-hidden rounded-xl">
+                    <CyberPhotoFrame
+                      image={lead.image}
+                      alt={lead.name}
+                      zoom={lead.zoom}
+                      x={lead.x}
+                      y={lead.y}
+                      bgColor={lead.bgColor}
+                    />
+                  </div>
+                )}
+                <div className="space-y-1">
+                  <span className="text-[10px] font-mono tracking-widest text-cyan-400 uppercase block font-semibold">
+                    {lead.role}
+                  </span>
+                  <h3 className="text-lg font-bold text-white group-hover:text-cyan-300 transition-colors font-sans">
+                    {lead.name}
+                  </h3>
+                  <p className="text-xs text-neutral-400 font-mono">{lead.designation}</p>
                 </div>
-              )}
-              <div className="space-y-1">
-                <span className="text-[10px] font-mono tracking-widest text-cyan-400 uppercase block font-semibold">
-                  {lead.role}
-                </span>
-                <h3 className="text-lg font-bold text-white group-hover:text-cyan-300 transition-colors font-sans">
-                  {lead.name}
-                </h3>
-                <p className="text-xs text-neutral-400 font-mono">{lead.designation}</p>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        </div>
+
+        {/* Faculty Advisory Committee */}
+        <div className="space-y-4 pt-2">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00FFCC]"></span>
+            <span className="text-xs font-mono tracking-widest text-[#00FFCC] uppercase font-bold">
+              FACULTY ADVISORY & ORGANIZING COMMITTEE
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {FACULTY_LEADERSHIP.filter((l) => !l.role.includes("Patron")).map((lead) => (
+              <div
+                key={lead.name}
+                className="cyber-card p-5 space-y-4 flex flex-col justify-between group"
+              >
+                <div className="cyber-card-glow" />
+                {lead.image && (
+                  <div className="w-full overflow-hidden rounded-xl">
+                    <CyberPhotoFrame
+                      image={lead.image}
+                      alt={lead.name}
+                      zoom={lead.zoom}
+                      x={lead.x}
+                      y={lead.y}
+                      bgColor={lead.bgColor}
+                    />
+                  </div>
+                )}
+                <div className="space-y-1">
+                  <span className="text-[10px] font-mono tracking-widest text-[#00FFCC] uppercase block font-semibold">
+                    {lead.role}
+                  </span>
+                  <h3 className="text-lg font-bold text-white group-hover:text-[#00FFCC] transition-colors font-sans">
+                    {lead.name}
+                  </h3>
+                  <p className="text-xs text-neutral-400 font-mono">{lead.designation}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </CyberPageWrapper>

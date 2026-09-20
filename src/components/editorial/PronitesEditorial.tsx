@@ -6,8 +6,8 @@ import { PRONITES_DATA } from "@/data/festData";
 
 export default function PronitesEditorial() {
   return (
-    <section className="relative z-20 w-full min-h-screen flex items-center py-28 px-6 sm:px-12 md:px-20 max-w-7xl mx-auto text-white font-sans">
-      <div className="w-full space-y-16">
+    <section id="pronites-section" className="relative z-20 w-full min-h-screen flex items-center py-16 sm:py-28 px-4 sm:px-12 md:px-20 max-w-7xl mx-auto text-white font-sans border-b border-white/10">
+      <div className="w-full space-y-10 sm:space-y-16">
         {/* Header with Live Soundwave Equalizer */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-white/10 pb-8">
           <div className="space-y-4">

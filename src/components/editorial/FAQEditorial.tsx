@@ -11,8 +11,8 @@ export default function FAQEditorial() {
   };
 
   return (
-    <section id="faq-section" className="relative z-20 w-full py-24 sm:py-32 px-6 sm:px-12 md:px-20 max-w-7xl mx-auto text-white font-sans select-none border-b border-white/10">
-      <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+    <section id="faq-section" className="relative z-20 w-full py-16 sm:py-28 px-4 sm:px-12 md:px-20 max-w-7xl mx-auto text-white font-sans select-none border-b border-white/10">
+      <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
         {/* Left Column: Heading & Quick Info */}
         <div className="lg:col-span-5 space-y-5 lg:sticky lg:top-28">
           <div className="flex items-center gap-2">

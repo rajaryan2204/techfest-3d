@@ -11,13 +11,13 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative z-20 w-full min-h-screen flex flex-col items-center justify-center pt-24 pb-16 bg-[#000D1A] text-white overflow-hidden select-none border-t border-cyan-500/20">
+    <footer className="relative z-20 w-full min-h-screen flex flex-col items-center justify-center pt-16 sm:pt-24 pb-12 sm:pb-16 bg-[#000D1A] text-white overflow-hidden select-none border-t border-cyan-500/20">
       {/* Cyber Circuit Traces Motherboard Background */}
       <FooterCircuitTraces />
 
-      <div className="w-11/12 max-w-7xl mx-auto flex flex-col lg:flex-row gap-16 lg:gap-24 h-full relative z-10 items-center justify-between">
+      <div className="w-11/12 max-w-7xl mx-auto flex flex-col lg:flex-row gap-10 sm:gap-16 lg:gap-24 h-full relative z-10 items-center justify-between">
         {/* Left Side: Directory Grid + Logos */}
-        <div className="w-full lg:w-3/5 h-full justify-center flex flex-col gap-12 sm:gap-16">
+        <div className="w-full lg:w-3/5 h-full justify-center flex flex-col gap-8 sm:gap-12 sm:gap-16">
           <div className="w-full grid grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10">
             {/* 1. Explore Column */}
             <div className="flex flex-col gap-3 w-full h-full">
@@ -65,7 +65,7 @@ export default function Footer() {
               </div>
               <div className="flex flex-col h-full text-sm sm:text-lg md:text-xl px-4 gap-2.5 border-l-2 border-[#433e38] font-sans">
                 <a
-                  href="https://www.instagram.com/techfestsliet"
+                  href="https://www.instagram.com/techfestsliet_/?hl=en"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="italic text-neutral-300 hover:text-[#00D9FF] hover:underline cursor-pointer transition-colors"
@@ -150,11 +150,11 @@ export default function Footer() {
       </div>
 
       {/* Bottom Sub-bar */}
-      <div className="w-11/12 max-w-7xl mx-auto pt-8 mt-12 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between text-xs font-mono text-neutral-500 tracking-wider">
+      <div className="w-11/12 max-w-7xl mx-auto pt-6 sm:pt-8 mt-8 sm:mt-12 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between text-center sm:text-left text-xs font-mono text-neutral-500 tracking-wider gap-3 sm:gap-0">
         <span>© 2026 SLIET TECHFEST &bull; SANT LONGOWAL INSTITUTE OF ENGINEERING & TECHNOLOGY</span>
         <button
           onClick={scrollToTop}
-          className="text-neutral-400 hover:text-[#00D9FF] transition-colors cursor-pointer flex items-center gap-1 mt-2 sm:mt-0"
+          className="text-neutral-400 hover:text-[#00D9FF] transition-colors cursor-pointer flex items-center gap-1"
         >
           <span>↑ BACK TO TOP</span>
         </button>

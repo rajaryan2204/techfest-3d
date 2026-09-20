@@ -102,7 +102,7 @@ export const FEST_DATA = {
     { type: "Airport", detail: "Chandigarh International Airport (IXC) / Ludhiana Airport" },
   ],
   socials: [
-    { name: "Instagram", url: "https://www.instagram.com" },
+    { name: "Instagram", url: "https://www.instagram.com/techfestsliet_/?hl=en" },
     { name: "LinkedIn", url: "https://www.linkedin.com" },
     { name: "YouTube", url: "https://www.youtube.com" },
     { name: "GitHub", url: "https://github.com" },
@@ -502,8 +502,7 @@ export const FACULTY_LEADERSHIP: TeamMember[] = [
     image: "/teams/faculty/barasha-maam.webp",
     zoom: 1,
     x: 0,
-    y: 110,
-    bgColor: "#ffffff",
+    y: 0,
   },
   {
     name: "Dr. Tajinder Singh",

@@ -200,12 +200,12 @@ export default function WorkshopsEditorial() {
   };
 
   return (
-    <section className="relative z-20 w-full min-h-screen flex items-center py-28 px-4 sm:px-8 md:px-16 max-w-7xl mx-auto text-white font-sans overflow-hidden">
+    <section id="workshops-section" className="relative z-20 w-full min-h-screen flex items-center py-16 sm:py-28 px-4 sm:px-8 md:px-16 max-w-7xl mx-auto text-white font-sans overflow-hidden border-b border-white/10">
       {/* Ambient Section Glows */}
       <div className="absolute top-1/4 -left-32 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-purple-500/10 rounded-full blur-[140px] pointer-events-none" />
 
-      <div className="w-full space-y-16 relative z-10">
+      <div className="w-full space-y-10 sm:space-y-16 relative z-10">
         {/* ========================================================================= */}
         {/* 1. SECTION HEADER WITH LIVE SCI-FI TELEMETRY HUD                          */}
         {/* ========================================================================= */}

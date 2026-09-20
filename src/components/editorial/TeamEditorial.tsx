@@ -10,8 +10,8 @@ export default function TeamEditorial() {
   const coreCoordinators = CORE_STUDENT_TEAM.filter((m) => m.role !== "Overall Coordinator");
 
   return (
-    <section id="team-section" className="relative z-20 w-full py-24 sm:py-32 px-6 sm:px-12 md:px-20 max-w-7xl mx-auto text-white font-sans select-none border-b border-white/10">
-      <div className="w-full space-y-16">
+    <section id="team-section" className="relative z-20 w-full py-16 sm:py-28 px-4 sm:px-12 md:px-20 max-w-7xl mx-auto text-white font-sans select-none border-b border-white/10">
+      <div className="w-full space-y-10 sm:space-y-16">
         {/* Section Header */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
@@ -46,53 +46,112 @@ export default function TeamEditorial() {
         </div>
 
         {/* 1. Faculty Leadership / Advisory */}
-        <div className="space-y-6">
+        <div className="space-y-8">
           <div className="flex items-center gap-3 border-b border-white/10 pb-3">
             <span className="text-[11px] font-mono tracking-widest text-[#00FFCC] uppercase font-semibold">
-              01 // PATRONS & FACULTY ADVISORY
+              01 // PATRONS & FACULTY ADVISORY COUNCIL
             </span>
             <div className="h-px flex-1 bg-gradient-to-r from-[#00FFCC]/40 to-transparent"></div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {FACULTY_LEADERSHIP.map((m) => (
-              <div
-                key={m.name}
-                className="group relative p-5 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/10 hover:border-[#00D9FF]/50 transition-all duration-300 backdrop-blur-xs flex flex-col justify-between space-y-4 shadow-xl"
-              >
-                {m.image && (
-                  <div className="w-full overflow-hidden rounded-xl">
-                    <CyberPhotoFrame
-                      image={m.image}
-                      alt={m.name}
-                      zoom={m.zoom}
-                      x={m.x}
-                      y={m.y}
-                      bgColor={m.bgColor}
-                    />
-                  </div>
-                )}
-
-                <div className="space-y-1.5">
-                  <span className="text-[10px] font-mono tracking-widest text-[#00D9FF] uppercase block font-semibold">
-                    {m.role}
-                  </span>
-                  <h3 className="text-base sm:text-lg font-medium text-white group-hover:text-[#00D9FF] transition-colors">
-                    {m.name}
-                  </h3>
-                  {m.designation && (
-                    <p className="text-xs text-neutral-400 font-light pt-0.5">
-                      {m.designation}
-                    </p>
+          {/* Patrons (Centered 2-card layout) */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00D9FF]"></span>
+              <span className="text-[10px] font-mono tracking-widest text-[#00D9FF] uppercase font-semibold">
+                PATRONAGE & INSTITUTIONAL LEADERSHIP
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 max-w-4xl mx-auto gap-4 sm:gap-6">
+              {FACULTY_LEADERSHIP.filter((m) => m.role.includes("Patron")).map((m) => (
+                <div
+                  key={m.name}
+                  className="group relative p-4 sm:p-6 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] hover:from-[#00D9FF]/10 hover:to-transparent border border-white/15 hover:border-[#00D9FF]/60 transition-all duration-300 shadow-xl flex flex-col justify-between space-y-4"
+                >
+                  {m.image && (
+                    <div className="w-full overflow-hidden rounded-xl">
+                      <CyberPhotoFrame
+                        image={m.image}
+                        alt={m.name}
+                        zoom={m.zoom}
+                        x={m.x}
+                        y={m.y}
+                        bgColor={m.bgColor}
+                      />
+                    </div>
                   )}
-                </div>
 
-                <div className="pt-2 flex items-center justify-between text-[10px] font-mono text-neutral-500 border-t border-white/5">
-                  <span>SLIET LONGOWAL</span>
-                  <span className="group-hover:text-[#00FFCC] transition-colors">ACADEMIC SENATE</span>
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-mono tracking-widest text-[#00D9FF] uppercase block font-semibold">
+                      {m.role}
+                    </span>
+                    <h3 className="text-lg sm:text-xl font-medium text-white group-hover:text-[#00D9FF] transition-colors">
+                      {m.name}
+                    </h3>
+                    {m.designation && (
+                      <p className="text-xs text-neutral-400 font-light pt-0.5">
+                        {m.designation}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-between text-[10px] font-mono text-neutral-500 border-t border-white/5">
+                    <span>SLIET LONGOWAL</span>
+                    <span className="group-hover:text-[#00FFCC] transition-colors">ACADEMIC SENATE</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+
+          {/* Faculty Advisory & Organizing Committee (3 cards) */}
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00FFCC]"></span>
+              <span className="text-[10px] font-mono tracking-widest text-[#00FFCC] uppercase font-semibold">
+                FACULTY ADVISORY & ORGANIZING COMMITTEE
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {FACULTY_LEADERSHIP.filter((m) => !m.role.includes("Patron")).map((m) => (
+                <div
+                  key={m.name}
+                  className="group relative p-4 sm:p-5 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/10 hover:border-[#00D9FF]/50 transition-all duration-300 backdrop-blur-xs flex flex-col justify-between space-y-4 shadow-xl"
+                >
+                  {m.image && (
+                    <div className="w-full overflow-hidden rounded-xl">
+                      <CyberPhotoFrame
+                        image={m.image}
+                        alt={m.name}
+                        zoom={m.zoom}
+                        x={m.x}
+                        y={m.y}
+                        bgColor={m.bgColor}
+                      />
+                    </div>
+                  )}
+
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-mono tracking-widest text-[#00FFCC] uppercase block font-semibold">
+                      {m.role}
+                    </span>
+                    <h3 className="text-base sm:text-lg font-medium text-white group-hover:text-[#00D9FF] transition-colors">
+                      {m.name}
+                    </h3>
+                    {m.designation && (
+                      <p className="text-xs text-neutral-400 font-light pt-0.5">
+                        {m.designation}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-between text-[10px] font-mono text-neutral-500 border-t border-white/5">
+                    <span>SLIET LONGOWAL</span>
+                    <span className="group-hover:text-[#00FFCC] transition-colors">FACULTY ADVISOR</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -105,11 +164,11 @@ export default function TeamEditorial() {
             <div className="h-px flex-1 bg-gradient-to-r from-[#00D9FF]/40 to-transparent"></div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {overallCoordinators.map((m) => (
               <div
                 key={m.name}
-                className="group relative p-6 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] hover:from-[#00D9FF]/10 hover:to-transparent border border-white/15 hover:border-[#00D9FF]/60 transition-all duration-300 shadow-xl flex flex-col justify-between space-y-4"
+                className="group relative p-4 sm:p-6 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] hover:from-[#00D9FF]/10 hover:to-transparent border border-white/15 hover:border-[#00D9FF]/60 transition-all duration-300 shadow-xl flex flex-col justify-between space-y-4"
               >
                 {m.image && (
                   <div className="w-full overflow-hidden rounded-xl">

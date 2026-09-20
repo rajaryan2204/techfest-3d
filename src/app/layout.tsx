@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   },
 };
 
-import RoboticCursor from "~/components/common/RoboticCursor/RoboticCursor";
+import SatelliteCursor from "~/components/common/SatelliteCursor/SatelliteCursor";
 import CyberTerminal from "~/components/common/CyberTerminal/CyberTerminal";
 import CyberMatrixBackground from "@/components/common/CyberMatrixBackground";
 import CyberNavbar from "@/components/navigation/CyberNavbar";
@@ -85,7 +85,7 @@ export default function RootLayout({
         />
         {/* Global Unified CyberNavbar (Active on all pages) */}
         <CyberNavbar />
-        <RoboticCursor />
+        <SatelliteCursor />
         {children}
         <CyberTerminal />
       </body>

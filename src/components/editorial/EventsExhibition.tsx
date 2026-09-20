@@ -94,7 +94,7 @@ export default function EventsExhibition() {
       : EDITORIAL_EVENTS.filter((e) => e.filterTag === activeFilter);
 
   return (
-    <section id="events-section" className="relative py-28 px-6 sm:px-12 md:px-16 max-w-7xl mx-auto space-y-16">
+    <section id="events-section" className="relative py-16 sm:py-28 px-4 sm:px-12 md:px-16 max-w-7xl mx-auto space-y-10 sm:space-y-16">
       {/* Section Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-white/10 pb-8 relative">
         <div className="space-y-3">
@@ -140,7 +140,7 @@ export default function EventsExhibition() {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
         {FILTER_TABS.map((tab) => {
           const isActive = activeFilter === tab.value;
           return (
@@ -160,7 +160,7 @@ export default function EventsExhibition() {
       </div>
 
       {/* 6 Editorial Event Exhibits */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
         {filteredEvents.map((event) => {
           const theme = DOMAIN_THEMES[event.id] || {
             primary: "#00D9FF",
@@ -176,7 +176,7 @@ export default function EventsExhibition() {
             <div
               key={event.id}
               onClick={() => eventStore.setSelectedEvent(event)}
-              className={`group relative bg-[#060c1c]/90 hover:bg-[#09122a]/95 border border-white/10 hover:border-cyan-400/70 p-6 sm:p-7 transition-all duration-500 rounded-2xl flex flex-col justify-between space-y-6 cursor-pointer shadow-xl ${theme.glow} backdrop-blur-md overflow-hidden`}
+              className={`group relative bg-[#060c1c]/90 hover:bg-[#09122a]/95 border border-white/10 hover:border-cyan-400/70 p-4.5 sm:p-7 transition-all duration-500 rounded-2xl flex flex-col justify-between space-y-5 sm:space-y-6 cursor-pointer shadow-xl ${theme.glow} backdrop-blur-md overflow-hidden`}
             >
               {/* Corner Sci-Fi Accent Brackets */}
               <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-white/20 group-hover:border-[#00D9FF] transition-colors pointer-events-none" />

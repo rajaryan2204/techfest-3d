@@ -22,6 +22,7 @@ export default function OrbitalSatelliteView({
   const telemetryAltRef = useRef<SVGTextElement>(null);
   const telemetryVelRef = useRef<SVGTextElement>(null);
   const orbitParticleRef = useRef<SVGCircleElement>(null);
+  const targetReticleRef = useRef<SVGGElement>(null);
 
   const handleTrigger = () => {
     if (isLocked) return;
@@ -54,86 +55,84 @@ export default function OrbitalSatelliteView({
     const targetX = 500;
     const targetY = 244;
 
-    let hasStartedDive = false;
-    let diveProgress = 0;
-    let startDiveX = 0;
-    let startDiveY = 0;
-    let startDiveScale = 1;
+    let zoomProgress = 0;
 
     const render = () => {
-      // If isZooming is active: Satellite breaks orbit and performs a dramatic hyper-dive into India!
+      // If isZooming is active: Satellite locks onto India while camera dives past high orbit into Earth!
       if (isZooming) {
-        if (!hasStartedDive) {
-          hasStartedDive = true;
-          // Capture satellite's current orbit position as starting point of the dive
-          const x0 = a * Math.cos(angle);
-          const y0 = b * Math.sin(angle);
-          startDiveX = cx + x0 * cosTilt - y0 * sinTilt;
-          startDiveY = cy + x0 * sinTilt + y0 * cosTilt;
-          startDiveScale = 1.1 + 0.28 * Math.sin(angle);
-        }
+        // Progress zoom from 0 to 1 over ~1.1s (60 fps)
+        zoomProgress = Math.min(1, zoomProgress + 0.018);
+        const ease = Math.pow(zoomProgress, 1.6);
 
-        // Progress dive from 0 to 1 over ~1.1s (60 fps)
-        diveProgress = Math.min(1, diveProgress + 0.016);
-        const ease = Math.pow(diveProgress, 2.2);
+        // Satellite continues along its natural orbit trajectory, accelerating slightly
+        angle += speed * (1 + ease * 1.2);
+        if (angle >= Math.PI * 2) angle -= Math.PI * 2;
 
-        // Interpolate position from orbit directly into India coordinates
-        const curX = startDiveX + (targetX - startDiveX) * ease;
-        const curY = startDiveY + (targetY - startDiveY) * ease;
+        const x0 = a * Math.cos(angle);
+        const y0 = b * Math.sin(angle);
+        const x = cx + x0 * cosTilt - y0 * sinTilt;
+        const y = cy + x0 * sinTilt + y0 * cosTilt;
+        const z = Math.sin(angle);
 
-        // Satellite dramatically scales up as it plunges towards India/camera
-        const curScale = startDiveScale * (1 + diveProgress * 3.2);
+        // Perspective scale along orbit
+        const scale = 1.1 + 0.28 * z;
 
-        // Fade out into atmospheric entry at the end of the dive
-        const curOpacity = diveProgress > 0.85 ? Math.max(0, (1 - diveProgress) / 0.15) : 1.0;
-
-        // Orient dish directly towards target coordinates
-        const dx = targetX - curX;
-        const dy = targetY - curY;
-        const diveAngle = Math.atan2(dy, dx) * (180 / Math.PI);
+        // Satellite smoothly fades out as camera plunges past orbital altitude into atmosphere
+        const curOpacity = Math.max(0, 1 - zoomProgress * 1.7);
 
         if (satelliteGroupRef.current) {
           satelliteGroupRef.current.setAttribute(
             "transform",
-            `translate(${curX}, ${curY}) scale(${curScale}) rotate(${diveAngle + 90})`
+            `translate(${x}, ${y}) scale(${scale})`
           );
           satelliteGroupRef.current.style.opacity = `${curOpacity}`;
-          satelliteGroupRef.current.style.zIndex = "40";
+          satelliteGroupRef.current.style.zIndex = "30";
         }
 
-        // Radar beam flares into a hyper-descent targeting laser tunnel
+        // Radar beam locks firmly onto India with a glowing laser beam that fades as we enter atmosphere
         if (radarBeamRef.current) {
-          const spread = Math.max(12, 50 * (1 - diveProgress));
+          const spread = Math.max(6, 28 * (1 - zoomProgress));
           radarBeamRef.current.setAttribute(
             "points",
-            `${curX},${curY} ${targetX - spread},${targetY} ${targetX + spread},${targetY}`
+            `${x},${y} ${targetX - spread},${targetY} ${targetX + spread},${targetY}`
           );
-          radarBeamRef.current.style.opacity = `${Math.max(0.3, 1 - diveProgress * 0.7)}`;
+          radarBeamRef.current.style.opacity = `${curOpacity * 0.85}`;
         }
 
         if (radarLineRef.current) {
-          radarLineRef.current.setAttribute("x1", `${curX}`);
-          radarLineRef.current.setAttribute("y1", `${curY}`);
+          radarLineRef.current.setAttribute("x1", `${x}`);
+          radarLineRef.current.setAttribute("y1", `${y}`);
           radarLineRef.current.setAttribute("x2", `${targetX}`);
           radarLineRef.current.setAttribute("y2", `${targetY}`);
-          radarLineRef.current.style.opacity = "1";
+          radarLineRef.current.style.opacity = `${curOpacity}`;
         }
 
-        // Telemetry updates during dive
+        // Expand target reticle as we approach Earth
+        if (targetReticleRef.current) {
+          const reticleScale = 1 + ease * 0.5;
+          targetReticleRef.current.setAttribute(
+            "transform",
+            `translate(${targetX}, ${targetY}) scale(${reticleScale})`
+          );
+        }
+
+        // Telemetry updates during zoom
         if (telemetryAltRef.current) {
-          const currentAlt = Math.round(35786 * (1 - diveProgress));
+          const currentAlt = Math.round(35786 * (1 - ease));
           telemetryAltRef.current.textContent = `ALT: ${currentAlt.toLocaleString()} KM // HYPER-DESCENT`;
         }
 
         if (telemetryVelRef.current) {
-          const currentVel = (3.074 + diveProgress * 28.0).toFixed(1);
+          const currentVel = (3.074 + ease * 25.0).toFixed(1);
           telemetryVelRef.current.textContent = `VEL: ${currentVel} KM/S // LOCK: INDIA`;
         }
 
         if (telemetryTagRef.current) {
+          const tagOffsetX = x > cx ? 28 : -180;
+          const tagOffsetY = -42;
           telemetryTagRef.current.setAttribute(
             "transform",
-            `translate(${curX + 35}, ${curY - 35})`
+            `translate(${x + tagOffsetX}, ${y + tagOffsetY})`
           );
           telemetryTagRef.current.style.opacity = `${curOpacity}`;
         }
@@ -424,6 +423,7 @@ export default function OrbitalSatelliteView({
         {/* TARGETING RETICLE OVER INDIA (Center 500, 244 - SLIET Longowal)          */}
         {/* ========================================================================= */}
         <g
+          ref={targetReticleRef}
           transform="translate(500, 244)"
           className="pointer-events-auto cursor-pointer"
           onClick={handleTrigger}
@@ -775,7 +775,7 @@ export default function OrbitalSatelliteView({
       {/* ========================================================================= */}
       {/* 2. PROMINENT & SLEEK SCANNER STATUS HUD CHIP                             */}
       {/* ========================================================================= */}
-      <div className="absolute top-14 sm:top-24 inset-x-0 flex flex-col items-center justify-center gap-1.5 pointer-events-auto px-3 sm:px-4 z-20">
+      <div className="absolute top-[4.75rem] sm:top-24 inset-x-0 flex flex-col items-center justify-center gap-1.5 pointer-events-auto px-3 sm:px-4 z-20">
         <button
           onClick={handleTrigger}
           className={`inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full border border-[#00D9FF]/60 bg-[#020817]/90 backdrop-blur-md text-[9px] sm:text-xs font-mono text-neutral-200 hover:text-white shadow-[0_0_25px_rgba(0,217,255,0.35)] active:scale-95 hover:scale-105 transition-all cursor-pointer max-w-[94vw] ${
@@ -784,9 +784,17 @@ export default function OrbitalSatelliteView({
         >
           <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#00D9FF] animate-ping shrink-0" />
           <span className="font-bold tracking-wider uppercase truncate">
-            {isLocked
-              ? "🎯 TARGET LOCKED: INDIA // COMMENCING DESCENT..."
-              : "🛰️ SATELLITE ORBITING • TAP TO ZOOM TO INDIA"}
+            {isLocked ? (
+              <>
+                <span className="hidden sm:inline">🎯 TARGET LOCKED: INDIA // COMMENCING DESCENT...</span>
+                <span className="sm:hidden">🎯 LOCKED: INDIA // DESCENT...</span>
+              </>
+            ) : (
+              <>
+                <span className="hidden sm:inline">🛰️ SATELLITE ORBITING • TAP TO ZOOM TO INDIA</span>
+                <span className="sm:hidden">🛰️ TAP TO ZOOM TO INDIA</span>
+              </>
+            )}
           </span>
           <span className="text-[#00D9FF] font-bold shrink-0">→</span>
         </button>

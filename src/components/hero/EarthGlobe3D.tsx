@@ -153,6 +153,7 @@ export default function EarthGlobe3D({
     let animId: number;
     let isDecelerating = false;
     let hasReachedTarget = false;
+    let globeZoomProgress = 0;
 
     const animate = () => {
       if (!hasReachedTarget) {
@@ -205,7 +206,12 @@ export default function EarthGlobe3D({
 
       // Smoothly zoom 3D camera into Earth / India during hyper-zoom
       if (isActiveZooming) {
-        camera.position.z = Math.max(2.5, camera.position.z - 0.09);
+        globeZoomProgress = Math.min(1, globeZoomProgress + 0.018);
+        const ease = Math.pow(globeZoomProgress, 1.8);
+        const startZ = isMobile ? 12.0 : 6.8;
+        const targetZ = isMobile ? 3.2 : 2.3;
+        camera.position.z = startZ - (startZ - targetZ) * ease;
+        camera.position.y = 0.35 * ease;
       }
 
       renderer.render(scene, camera);

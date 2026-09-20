@@ -1,0 +1,126 @@
+/* ═══════════════════════════════════════════════════════════════════
+   ISRO SPACE SATELLITE & MICRO-DRONE CURSOR WITH ION PROPULSION
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (pointer: fine) {
+  body, a, button, input, select, textarea, [role="button"], .cursor-pointer {
+    cursor: none !important;
+  }
+}
+
+/* Satellite Main Container */
+.satellite-cursor-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 44px;
+  height: 44px;
+  margin-top: -12px;
+  margin-left: -22px;
+  pointer-events: none;
+  z-index: 1000000;
+  will-change: transform;
+  transform-origin: 22px 12px;
+}
+
+/* Vector SVG */
+.satellite-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 6px rgba(0, 217, 255, 0.6));
+  position: relative;
+  z-index: 2;
+}
+
+/* Forward Optical Sensor Scanning Cone */
+.satellite-scan-beam {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  width: 24px;
+  height: 26px;
+  margin-left: -12px;
+  transform-origin: bottom center;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.satellite-scan-beam.scanning {
+  opacity: 0.85;
+  animation: scanPulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes scanPulse {
+  0% {
+    transform: scaleX(0.85) scaleY(0.9);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scaleX(1.15) scaleY(1.1);
+    opacity: 0.95;
+  }
+}
+
+/* Rear Ion Propulsion Thruster Flame */
+.satellite-ion-thruster {
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  width: 10px;
+  height: 20px;
+  margin-left: -5px;
+  transform-origin: top center;
+  pointer-events: none;
+  z-index: 1;
+  transition: transform 0.08s ease-out, opacity 0.1s ease-out;
+}
+
+/* Ion Plasma Flame Jet */
+.ion-flame-core {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 3px;
+  height: 60%;
+  margin-left: -1.5px;
+  background: #ffffff;
+  border-radius: 0 0 50% 50%;
+  box-shadow: 0 0 4px #ffffff;
+}
+
+.ion-flame-outer {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 8px;
+  height: 100%;
+  margin-left: -4px;
+  background: linear-gradient(to bottom, #00FFCC 0%, #00D9FF 50%, rgba(0, 217, 255, 0) 100%);
+  border-radius: 0 0 50% 50%;
+  box-shadow: 0 0 8px #00D9FF;
+  animation: ionFlicker 0.1s infinite alternate;
+}
+
+.ion-flame-glow {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  width: 18px;
+  height: 26px;
+  margin-left: -9px;
+  background: radial-gradient(circle, rgba(0, 217, 255, 0.7) 0%, rgba(0, 255, 204, 0.25) 60%, transparent 100%);
+  filter: blur(4px);
+}
+
+@keyframes ionFlicker {
+  0% {
+    transform: scaleX(0.9) scaleY(0.95);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scaleX(1.1) scaleY(1.05);
+    opacity: 1;
+  }
+}

@@ -55,10 +55,10 @@ export default function CinematicPortalHero() {
       altitudeTextRef.current.textContent = "35,786 KM";
     }
     if (stageBadgeRef.current) {
-      stageBadgeRef.current.textContent = "SATELLITE DIVE TO INDIA";
+      stageBadgeRef.current.textContent = "HYPER-DESCENT TO INDIA";
     }
 
-    showToast("🚀 Target Acquired: Satellite diving towards India [SLIET Longowal]");
+    showToast("🚀 Target Locked: Descending into India [SLIET Longowal]");
 
     // Allow 1.1s for the satellite dive and 3D Earth zoom animation before cutting to atmospheric descent video
     setTimeout(() => {
@@ -249,7 +249,7 @@ export default function CinematicPortalHero() {
     };
 
     window.addEventListener("mousemove", onMouseMove, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    // Note: touchmove is not attached to avoid interfering with mobile vertical scrolling
     window.addEventListener("touchend", onTouchEnd, { passive: true });
     window.addEventListener("deviceorientation", onDeviceOrientation, { passive: true });
 
@@ -381,61 +381,40 @@ export default function CinematicPortalHero() {
         />
       )}
 
-      {/* Floating Audio Control Button with Live Animated Equalizer */}
-      <div className="absolute top-24 right-4 sm:right-8 z-30 pointer-events-auto">
-        <button
-          onClick={toggleAudio}
-          className="flex items-center gap-2 sm:gap-2.5 px-3.5 py-1.5 rounded-full border border-cyan-400/40 bg-[#061226]/85 backdrop-blur-md text-[10px] font-mono tracking-wider text-cyan-300 hover:text-white hover:border-cyan-400 transition-all cursor-pointer shadow-[0_0_20px_rgba(0,217,255,0.25)]"
-          title="Toggle Drone Video Audio"
-        >
-          {/* Animated 4-bar Audio Equalizer */}
-          <div className="flex items-end gap-[2.5px] h-3.5 w-3.5">
-            <span
-              className={`w-[2px] rounded-full bg-cyan-400 transition-all ${
-                audioActive ? "h-3 animate-pulse" : "h-1 opacity-50"
-              }`}
-            />
-            <span
-              className={`w-[2px] rounded-full bg-cyan-400 transition-all ${
-                audioActive ? "h-3.5 animate-bounce" : "h-2 opacity-50"
-              }`}
-            />
-            <span
-              className={`w-[2px] rounded-full bg-cyan-400 transition-all ${
-                audioActive ? "h-2 animate-pulse" : "h-1.5 opacity-50"
-              }`}
-            />
-            <span
-              className={`w-[2px] rounded-full bg-cyan-400 transition-all ${
-                audioActive ? "h-3 animate-bounce" : "h-2.5 opacity-50"
-              }`}
-            />
-          </div>
-          <span className="hidden xs:inline font-bold">
-            {audioActive ? "AUDIO ACTIVE" : "AUDIO MUTED"}
-          </span>
-          <span className="xs:hidden font-bold">{audioActive ? "ON" : "OFF"}</span>
-        </button>
-      </div>
-
-
       {/* ========================================================================= */}
       {/* 4. MAIN HERO CONTENT & STREAMLINED TELEMETRY PILL                         */}
       {/* ========================================================================= */}
       <div className="relative z-20 w-full h-full flex flex-col justify-between pt-[max(4.5rem,env(safe-area-inset-top))] sm:pt-24 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-7 px-4 sm:px-12 pointer-events-none">
-        {/* Top Floating Telemetry Pill (Minimalist Aerospace Status) */}
-        <div className="w-full flex justify-end pointer-events-auto mt-1 sm:mt-0">
+        {/* Top Control Bar: Audio Toggle + Aerospace Status Telemetry */}
+        <div className="w-full flex items-center justify-between gap-2 pointer-events-auto mt-1 sm:mt-0">
+          {/* Audio Button */}
+          <button
+            onClick={toggleAudio}
+            className="flex items-center gap-1.5 sm:gap-2.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-cyan-400/40 bg-[#061226]/85 backdrop-blur-md text-[9px] sm:text-[10px] font-mono tracking-wider text-cyan-300 hover:text-white hover:border-cyan-400 transition-all cursor-pointer shadow-[0_0_20px_rgba(0,217,255,0.25)] shrink-0"
+            title="Toggle Drone Video Audio"
+          >
+            <div className="flex items-end gap-[2px] h-3 w-3">
+              <span className={`w-[2px] rounded-full bg-cyan-400 transition-all ${audioActive ? "h-3 animate-pulse" : "h-1 opacity-50"}`} />
+              <span className={`w-[2px] rounded-full bg-cyan-400 transition-all ${audioActive ? "h-3.5 animate-bounce" : "h-2 opacity-50"}`} />
+              <span className={`w-[2px] rounded-full bg-cyan-400 transition-all ${audioActive ? "h-2 animate-pulse" : "h-1.5 opacity-50"}`} />
+              <span className={`w-[2px] rounded-full bg-cyan-400 transition-all ${audioActive ? "h-3 animate-bounce" : "h-2.5 opacity-50"}`} />
+            </div>
+            <span className="hidden xs:inline font-bold">{audioActive ? "AUDIO ACTIVE" : "AUDIO MUTED"}</span>
+            <span className="xs:hidden font-bold">{audioActive ? "ON" : "OFF"}</span>
+          </button>
+
+          {/* Telemetry Pill */}
           <div
             ref={telemetryPillRef}
-            className="inline-flex items-center gap-1.5 sm:gap-2.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-white/10 bg-[#020817]/80 backdrop-blur-md text-[8px] sm:text-[10px] font-mono text-neutral-300 shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all duration-700 opacity-100 translate-y-0"
+            className="inline-flex items-center gap-1.5 sm:gap-2.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-white/10 bg-[#020817]/80 backdrop-blur-md text-[8px] sm:text-[10px] font-mono text-neutral-300 shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all duration-700 opacity-100 translate-y-0 max-w-[70%] sm:max-w-none"
           >
-            <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
+            <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-emerald-500" />
             </span>
             <span
               ref={stageBadgeRef}
-              className="text-emerald-400 font-bold tracking-wider"
+              className="text-emerald-400 font-bold tracking-wider truncate"
             >
               {currentStage === 1
                 ? "SATELLITE ORBIT"
@@ -452,7 +431,7 @@ export default function CinematicPortalHero() {
             <span className="text-white/20 hidden sm:inline">•</span>
             <span
               ref={altitudeTextRef}
-              className="text-[#00D9FF] font-semibold tracking-wider"
+              className="text-[#00D9FF] font-semibold tracking-wider shrink-0"
             >
               {currentStage === 1 ? "35,786 KM" : "1,286 M"}
             </span>
@@ -600,11 +579,14 @@ export default function CinematicPortalHero() {
         </div>
 
         {/* Bottom Bar: Clean Aerospace Telemetry & Scroll Prompt */}
-        <div className="w-full flex items-center justify-between pt-2.5 sm:pt-4 border-t border-white/10 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div className="w-full flex items-center justify-between pt-2 sm:pt-4 border-t border-white/10 pb-[max(0.75rem,env(safe-area-inset-bottom))] gap-2">
           {/* Left: Tactical Campus Coordinates & System Status */}
-          <div className="flex items-center gap-2 text-[9px] sm:text-[10px] font-mono tracking-wider text-neutral-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-cyan-400 font-bold">SLIET LONGOWAL</span>
+          <div className="flex items-center gap-1.5 sm:gap-2 text-[9px] sm:text-[10px] font-mono tracking-wider text-neutral-400 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            <span className="text-cyan-400 font-bold">
+              <span className="hidden xs:inline">SLIET LONGOWAL</span>
+              <span className="xs:hidden">SLIET &apos;26</span>
+            </span>
             <span className="text-white/20 hidden sm:inline">•</span>
             <span className="hidden sm:inline">30.22° N, 75.83° E</span>
             <span className="text-white/20 hidden md:inline">•</span>
@@ -619,10 +601,11 @@ export default function CinematicPortalHero() {
                 el.scrollIntoView({ behavior: "smooth" });
               }
             }}
-            className="flex items-center gap-2 sm:gap-3 text-[9px] sm:text-[10px] font-mono tracking-[0.25em] sm:tracking-[0.3em] text-neutral-300 hover:text-[#00D9FF] uppercase transition-all duration-300 cursor-pointer pointer-events-auto group"
+            className="flex items-center gap-1.5 sm:gap-3 text-[9px] sm:text-[10px] font-mono tracking-[0.2em] sm:tracking-[0.3em] text-neutral-300 hover:text-[#00D9FF] uppercase transition-all duration-300 cursor-pointer pointer-events-auto group truncate"
           >
-            <span className="w-3 sm:w-4 h-[1px] bg-[#00D9FF]/60 group-hover:w-6 transition-all" />
-            <span>SCROLL TO EXPLORE FESTIVAL ↓</span>
+            <span className="w-2.5 sm:w-4 h-[1px] bg-[#00D9FF]/60 group-hover:w-6 transition-all shrink-0" />
+            <span className="hidden sm:inline">SCROLL TO EXPLORE FESTIVAL ↓</span>
+            <span className="sm:hidden">EXPLORE FEST ↓</span>
           </button>
 
           {/* Right: Fest Prize Pool Telemetry */}

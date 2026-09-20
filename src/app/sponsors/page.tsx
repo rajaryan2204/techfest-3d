@@ -71,6 +71,25 @@ export default function SponsorsPage() {
               </div>
             </div>
           ))}
+
+          {/* 8th Slot: Partner with Us */}
+          <Link
+            href="/reach-us"
+            className="cyber-card p-6 flex flex-col items-center justify-center text-center group min-h-[220px] border-dashed border-cyan-400/40 hover:border-cyan-400 hover:bg-cyan-950/20 transition-all"
+          >
+            <div className="cyber-card-glow" />
+            <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-400/40 flex items-center justify-center text-cyan-300 text-2xl font-bold group-hover:scale-110 group-hover:bg-cyan-500/20 transition-all mb-3">
+              +
+            </div>
+            <div className="space-y-1">
+              <span className="text-sm font-black font-sans tracking-wide text-white group-hover:text-cyan-300 uppercase block">
+                PARTNER WITH US
+              </span>
+              <span className="text-[10px] font-mono text-cyan-400/80 uppercase block">
+                BECOME A SPONSOR &rarr;
+              </span>
+            </div>
+          </Link>
         </div>
       </section>
 

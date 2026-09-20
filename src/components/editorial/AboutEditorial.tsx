@@ -16,7 +16,7 @@ export default function AboutEditorial() {
   ];
 
   return (
-    <section id="about-section" className="relative w-full py-28 px-6 sm:px-12 md:px-16 max-w-7xl mx-auto text-white select-none space-y-20 border-b border-white/10">
+    <section id="about-section" className="relative w-full py-16 sm:py-28 px-4 sm:px-12 md:px-16 max-w-7xl mx-auto text-white select-none space-y-12 sm:space-y-20 border-b border-white/10">
       {/* 1. SECTION HEADER */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-white/10 pb-8 relative">
         <div className="space-y-3">
@@ -57,7 +57,7 @@ export default function AboutEditorial() {
       {/* 2. CAMPUS SHOWCASE + 3D CHARACTER SPLIT FEATURE */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
         {/* Left 7 Columns: SLIET Campus Photo Card with Cyber Frame */}
-        <div className="lg:col-span-7 flex flex-col justify-between p-6 sm:p-8 rounded-3xl border border-white/15 bg-gradient-to-b from-[#060e22]/90 to-[#030713]/95 shadow-2xl relative overflow-hidden space-y-6">
+        <div className="lg:col-span-7 flex flex-col justify-between p-4 sm:p-8 rounded-2xl sm:rounded-3xl border border-white/15 bg-gradient-to-b from-[#060e22]/90 to-[#030713]/95 shadow-2xl relative overflow-hidden space-y-5 sm:space-y-6">
           {/* Corner Brackets */}
           <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-cyan-400 pointer-events-none" />
           <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-cyan-400 pointer-events-none" />
@@ -131,7 +131,7 @@ export default function AboutEditorial() {
         </div>
 
         {/* Right 5 Columns: 3D Robot Mascot + Innovation Highlights Card */}
-        <div className="lg:col-span-5 flex flex-col justify-between p-6 sm:p-8 rounded-3xl border border-cyan-500/30 bg-gradient-to-b from-[#08152e] to-[#040813] shadow-2xl relative overflow-hidden space-y-6">
+        <div className="lg:col-span-5 flex flex-col justify-between p-4 sm:p-8 rounded-2xl sm:rounded-3xl border border-cyan-500/30 bg-gradient-to-b from-[#08152e] to-[#040813] shadow-2xl relative overflow-hidden space-y-5 sm:space-y-6">
           <div className="absolute top-0 right-0 w-48 h-48 bg-[#00FFCC]/10 rounded-full blur-3xl pointer-events-none" />
 
           {/* TechFest'26 Official Emblem Showcase */}
@@ -192,7 +192,7 @@ export default function AboutEditorial() {
       </div>
 
       {/* 3. VERIFIED FACTUAL METRICS CARDS (4-Grid with Glow & Borders) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 pt-4">
         {ABOUT_STATS.map((stat, i) => {
           const colors = [
             "border-cyan-500/30 hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(0,217,255,0.2)] text-[#00D9FF]",
@@ -204,7 +204,7 @@ export default function AboutEditorial() {
           return (
             <div
               key={i}
-              className={`group relative p-6 sm:p-7 rounded-2xl border bg-gradient-to-b from-[#081226]/80 to-[#040814]/90 transition-all duration-300 space-y-3 shadow-xl backdrop-blur-md ${colors[i % 4]}`}
+              className={`group relative p-4 sm:p-7 rounded-xl sm:rounded-2xl border bg-gradient-to-b from-[#081226]/80 to-[#040814]/90 transition-all duration-300 space-y-2 sm:space-y-3 shadow-xl backdrop-blur-md ${colors[i % 4]}`}
             >
               {/* Telemetry Corner Cross */}
               <div className="flex items-center justify-between">

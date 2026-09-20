@@ -146,7 +146,7 @@ export default function EventDetailsModal() {
       />
 
       {/* Futuristic Earth & Space Holographic Mission Window */}
-      <div className="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto bg-[#030919]/95 border border-cyan-500/35 p-5 sm:p-8 md:p-10 shadow-[0_0_60px_rgba(0,217,255,0.25)] z-10 space-y-6 text-white rounded-3xl backdrop-blur-2xl scrollbar-thin scrollbar-thumb-cyan-500/30">
+      <div className="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto bg-[#030919]/95 border border-cyan-500/35 p-4 sm:p-8 md:p-10 shadow-[0_0_60px_rgba(0,217,255,0.25)] z-10 space-y-5 sm:space-y-6 text-white rounded-2xl sm:rounded-3xl backdrop-blur-2xl scrollbar-thin scrollbar-thumb-cyan-500/30">
         
         {/* Ambient Top Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
@@ -158,25 +158,25 @@ export default function EventDetailsModal() {
         <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-cyan-400 pointer-events-none" />
 
         {/* 1. Header Bar with Mission Telemetry & Close */}
-        <div className="flex items-center justify-between border-b border-cyan-500/20 pb-4 relative z-10">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-950/50 border border-cyan-400/40 text-[10px] font-mono text-cyan-300">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-cyan-500/20 pb-3 sm:pb-4 relative z-10">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <div className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-md bg-cyan-950/50 border border-cyan-400/40 text-[9px] sm:text-[10px] font-mono text-cyan-300">
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
               <span>MISSION CODEX // {event.num}</span>
             </div>
 
             {event.filterTag && (
-              <span className={`text-[9px] font-mono tracking-widest px-2.5 py-0.5 rounded-md border uppercase font-bold ${theme.badge}`}>
+              <span className={`text-[8px] sm:text-[9px] font-mono tracking-widest px-2 sm:px-2.5 py-0.5 rounded-md border uppercase font-bold ${theme.badge}`}>
                 {event.filterTag}
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Direct Share Link */}
             <button
               onClick={copyShareLink}
-              className="text-[10px] font-mono tracking-widest text-cyan-400 hover:text-white uppercase px-2.5 py-1 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 transition-colors cursor-pointer flex items-center gap-1"
+              className="text-[9px] sm:text-[10px] font-mono tracking-widest text-cyan-400 hover:text-white uppercase px-2 sm:px-2.5 py-1 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 transition-colors cursor-pointer flex items-center gap-1"
               aria-label="Copy share link"
             >
               <span>{copied ? "COPIED ✓" : "SHARE ↗"}</span>
@@ -186,7 +186,7 @@ export default function EventDetailsModal() {
             <button
               ref={closeButtonRef}
               onClick={() => eventStore.setSelectedEvent(null)}
-              className="text-xs font-mono tracking-widest text-white hover:text-cyan-300 uppercase px-3 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 transition-all cursor-pointer shadow-[0_0_15px_rgba(0,217,255,0.3)]"
+              className="text-[11px] sm:text-xs font-mono tracking-widest text-white hover:text-cyan-300 uppercase px-2.5 sm:px-3 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 transition-all cursor-pointer shadow-[0_0_15px_rgba(0,217,255,0.3)]"
               aria-label="Close event details"
             >
               CLOSE ×
@@ -195,7 +195,7 @@ export default function EventDetailsModal() {
         </div>
 
         {/* 2. 3D Domain Banner Artwork with CRT Scanlines & Badges */}
-        <div className="relative w-full aspect-[21/9] sm:aspect-[24/9] rounded-2xl overflow-hidden border border-cyan-500/30 bg-[#020614] shadow-xl group">
+        <div className="relative w-full aspect-[16/9] sm:aspect-[24/9] rounded-xl sm:rounded-2xl overflow-hidden border border-cyan-500/30 bg-[#020614] shadow-xl group">
           <Image
             src={theme.image}
             alt={event.name}

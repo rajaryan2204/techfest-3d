@@ -20,7 +20,7 @@ export default function TeamsPage() {
       subtitle="Meet the distinguished faculty leadership, student overall coordinators, and operational pillars powering TechFEST'26 at Sant Longowal Institute of Engineering & Technology."
     >
       {/* 1. Faculty Leadership */}
-      <section className="mb-20 space-y-8">
+      <section className="mb-20 space-y-10">
         <div className="space-y-2 border-b border-cyan-500/20 pb-4">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#00FFCC] animate-pulse" />
@@ -29,62 +29,127 @@ export default function TeamsPage() {
             </span>
           </div>
           <h2 className="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight font-sans">
-            FACULTY LEADERSHIP
+            FACULTY LEADERSHIP & ADVISORY
           </h2>
           <p className="text-xs sm:text-sm text-neutral-400 font-mono">
             Distinguished professors and academic administrators guiding TechFEST&apos;26 with institutional vision and excellence.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {FACULTY_LEADERSHIP.map((leader) => (
-            <div
-              key={leader.name}
-              className="cyber-card p-5 flex flex-col justify-between space-y-4 group"
-            >
-              <div className="cyber-card-glow" />
+        {/* Patrons */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00D9FF]"></span>
+            <span className="text-xs font-mono tracking-widest text-[#00D9FF] uppercase font-bold">
+              PATRONAGE & INSTITUTIONAL LEADERSHIP
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto gap-8">
+            {FACULTY_LEADERSHIP.filter((l) => l.role.includes("Patron")).map((leader) => (
+              <div
+                key={leader.name}
+                className="cyber-card p-6 flex flex-col justify-between space-y-4 group"
+              >
+                <div className="cyber-card-glow" />
 
-              {/* Circuit photo frame */}
-              {leader.image && (
-                <div className="w-full overflow-hidden rounded-xl">
-                  <CyberPhotoFrame
-                    image={leader.image}
-                    alt={leader.name}
-                    zoom={leader.zoom}
-                    x={leader.x}
-                    y={leader.y}
-                    bgColor={leader.bgColor}
-                  />
+                {leader.image && (
+                  <div className="w-full overflow-hidden rounded-xl">
+                    <CyberPhotoFrame
+                      image={leader.image}
+                      alt={leader.name}
+                      zoom={leader.zoom}
+                      x={leader.x}
+                      y={leader.y}
+                      bgColor={leader.bgColor}
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-2 pt-1">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2.5 py-0.5 rounded-md bg-[#00D9FF]/15 border border-[#00D9FF]/30 text-[#00D9FF] font-mono text-[10px] uppercase font-bold tracking-wider">
+                      {leader.role}
+                    </span>
+                    <span className="text-[10px] font-mono text-neutral-500">SLIET LONGOWAL</span>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-bold text-white group-hover:text-[#00D9FF] transition-colors font-sans">
+                      {leader.name}
+                    </h3>
+                    {leader.designation && (
+                      <p className="text-xs text-neutral-400 font-mono pt-0.5">
+                        {leader.designation}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              )}
 
-              {/* Details */}
-              <div className="space-y-2 pt-1">
-                <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-0.5 rounded-md bg-[#00D9FF]/15 border border-[#00D9FF]/30 text-[#00D9FF] font-mono text-[10px] uppercase font-bold tracking-wider">
-                    {leader.role}
-                  </span>
-                  <span className="text-[10px] font-mono text-neutral-500">SLIET LONGOWAL</span>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-bold text-white group-hover:text-[#00D9FF] transition-colors font-sans">
-                    {leader.name}
-                  </h3>
-                  {leader.designation && (
-                    <p className="text-xs text-neutral-400 font-mono pt-0.5">
-                      {leader.designation}
-                    </p>
-                  )}
+                <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[10px] font-mono text-neutral-500">
+                  <span>ACADEMIC SENATE</span>
+                  <span className="text-[#00FFCC]/70">SANCTIONED</span>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
 
-              <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[10px] font-mono text-neutral-500">
-                <span>ACADEMIC SENATE</span>
-                <span className="text-[#00FFCC]/70">SANCTIONED</span>
+        {/* Faculty Advisory & Organizing Committee */}
+        <div className="space-y-4 pt-4">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00FFCC]"></span>
+            <span className="text-xs font-mono tracking-widest text-[#00FFCC] uppercase font-bold">
+              FACULTY ADVISORY & ORGANIZING COMMITTEE
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {FACULTY_LEADERSHIP.filter((l) => !l.role.includes("Patron")).map((leader) => (
+              <div
+                key={leader.name}
+                className="cyber-card p-5 flex flex-col justify-between space-y-4 group"
+              >
+                <div className="cyber-card-glow" />
+
+                {leader.image && (
+                  <div className="w-full overflow-hidden rounded-xl">
+                    <CyberPhotoFrame
+                      image={leader.image}
+                      alt={leader.name}
+                      zoom={leader.zoom}
+                      x={leader.x}
+                      y={leader.y}
+                      bgColor={leader.bgColor}
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-2 pt-1">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2.5 py-0.5 rounded-md bg-[#00FFCC]/15 border border-[#00FFCC]/30 text-[#00FFCC] font-mono text-[10px] uppercase font-bold tracking-wider">
+                      {leader.role}
+                    </span>
+                    <span className="text-[10px] font-mono text-neutral-500">SLIET LONGOWAL</span>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-bold text-white group-hover:text-[#00FFCC] transition-colors font-sans">
+                      {leader.name}
+                    </h3>
+                    {leader.designation && (
+                      <p className="text-xs text-neutral-400 font-mono pt-0.5">
+                        {leader.designation}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[10px] font-mono text-neutral-500">
+                  <span>FACULTY ADVISOR</span>
+                  <span className="text-[#00FFCC]/70">SANCTIONED</span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
