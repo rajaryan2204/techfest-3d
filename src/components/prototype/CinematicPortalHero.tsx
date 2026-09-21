@@ -326,28 +326,47 @@ export default function CinematicPortalHero() {
         </div>
 
         {/* Stages 2-4: Master Story Video (Hyper-Zoom into India -> SLIET Campus) */}
-        <video
-          ref={droneVideoRef}
-          autoPlay={false}
-          muted={!audioActive}
-          playsInline
-          preload="auto"
-          onTimeUpdate={handleDroneTimeUpdate}
-          onEnded={handleDroneEnded}
-          poster="/videos/hero/earth-zoom-drone-poster.jpg"
-          className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-500 ${
+        <div
+          className={`absolute inset-0 w-full h-full transition-opacity duration-500 ${
             currentStage !== 1 ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
         >
-          {/* Mobile receives ultra-lightweight 720p master stream */}
-          <source
-            src="/videos/hero/earth-zoom-drone.mp4"
-            media="(max-width: 768px)"
-            type="video/mp4"
+          <video
+            ref={droneVideoRef}
+            autoPlay={false}
+            muted={!audioActive}
+            playsInline
+            preload="auto"
+            onTimeUpdate={handleDroneTimeUpdate}
+            onEnded={handleDroneEnded}
+            poster="/videos/hero/earth-zoom-drone-poster.jpg"
+            className="w-full h-full object-cover object-center brightness-[0.72] contrast-105 saturate-[0.9]"
+          >
+            {/* Mobile receives ultra-lightweight 720p master stream */}
+            <source
+              src="/videos/hero/earth-zoom-drone.mp4"
+              media="(max-width: 768px)"
+              type="video/mp4"
+            />
+            {/* Desktop receives crisp 1080p master stream */}
+            <source src="/videos/hero/earth-zoom-drone-1080p.mp4" type="video/mp4" />
+          </video>
+
+          {/* Cinematic Dark Film Overlay - Preserves drone view while fixing daylight washout */}
+          <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+
+          {/* Top and Bottom Vignette */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#020817]/80 via-transparent to-[#020817] pointer-events-none" />
+
+          {/* Soft Radial Vignette */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(circle at center, transparent 35%, rgba(2,8,23,0.7) 100%)",
+            }}
           />
-          {/* Desktop receives crisp 1080p master stream */}
-          <source src="/videos/hero/earth-zoom-drone-1080p.mp4" type="video/mp4" />
-        </video>
+        </div>
       </div>
 
       {/* Low-Power Mode / Autoplay Blocked Fallback Tap-To-Play Button */}
@@ -367,11 +386,9 @@ export default function CinematicPortalHero() {
       {/* 2. CINEMATIC GRADIENT OVERLAYS (Protects Contrast & Typography)             */}
       {/* ========================================================================= */}
       {/* Desktop: Left-to-right gradient to protect left-aligned typography */}
-      <div className="hidden sm:block absolute inset-y-0 left-0 sm:w-[52%] md:w-[44%] bg-gradient-to-r from-[#020817]/90 via-[#020817]/40 to-transparent pointer-events-none z-10" />
+      <div className="hidden sm:block absolute inset-y-0 left-0 sm:w-[60%] md:w-[50%] bg-gradient-to-r from-[#020817]/95 via-[#020817]/60 to-transparent pointer-events-none z-10" />
       {/* Mobile: Bottom gradient to protect typography while keeping upper half clear for Earth/Drone */}
-      <div className="sm:hidden absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-[#020817] via-[#020817]/85 to-transparent pointer-events-none z-10" />
-      <div className="absolute top-0 left-0 right-0 h-20 sm:h-24 bg-gradient-to-b from-[#020817]/80 to-transparent pointer-events-none z-10" />
-      <div className="hidden sm:block absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#020817]/85 to-transparent pointer-events-none z-10" />
+      <div className="sm:hidden absolute inset-0 bg-gradient-to-t from-[#020817] via-[#020817]/85 to-[#020817]/30 pointer-events-none z-10" />
 
       {/* Stage 1: Active Satellite Orbiting Earth & Scanning India */}
       {currentStage === 1 && (
@@ -390,23 +407,17 @@ export default function CinematicPortalHero() {
           {/* Audio Button */}
           <button
             onClick={toggleAudio}
-            className="flex items-center gap-1.5 sm:gap-2.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-cyan-400/40 bg-[#061226]/85 backdrop-blur-md text-[9px] sm:text-[10px] font-mono tracking-wider text-cyan-300 hover:text-white hover:border-cyan-400 transition-all cursor-pointer shadow-[0_0_20px_rgba(0,217,255,0.25)] shrink-0"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/15 bg-[#020817]/75 backdrop-blur-md text-[10px] font-mono tracking-wider text-neutral-300 hover:text-white hover:border-[#00D9FF] transition-all cursor-pointer shadow-lg shrink-0"
             title="Toggle Drone Video Audio"
           >
-            <div className="flex items-end gap-[2px] h-3 w-3">
-              <span className={`w-[2px] rounded-full bg-cyan-400 transition-all ${audioActive ? "h-3 animate-pulse" : "h-1 opacity-50"}`} />
-              <span className={`w-[2px] rounded-full bg-cyan-400 transition-all ${audioActive ? "h-3.5 animate-bounce" : "h-2 opacity-50"}`} />
-              <span className={`w-[2px] rounded-full bg-cyan-400 transition-all ${audioActive ? "h-2 animate-pulse" : "h-1.5 opacity-50"}`} />
-              <span className={`w-[2px] rounded-full bg-cyan-400 transition-all ${audioActive ? "h-3 animate-bounce" : "h-2.5 opacity-50"}`} />
-            </div>
-            <span className="hidden xs:inline font-bold">{audioActive ? "AUDIO ACTIVE" : "AUDIO MUTED"}</span>
-            <span className="xs:hidden font-bold">{audioActive ? "ON" : "OFF"}</span>
+            <span>{audioActive ? "🔊" : "🔇"}</span>
+            <span className="font-semibold">{audioActive ? "AUDIO ON" : "AUDIO MUTED"}</span>
           </button>
 
           {/* Telemetry Pill */}
           <div
             ref={telemetryPillRef}
-            className="inline-flex items-center gap-1.5 sm:gap-2.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-white/10 bg-[#020817]/80 backdrop-blur-md text-[8px] sm:text-[10px] font-mono text-neutral-300 shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all duration-700 opacity-100 translate-y-0 max-w-[70%] sm:max-w-none"
+            className="inline-flex items-center gap-1.5 sm:gap-2.5 px-3 py-1.5 rounded-full border border-white/10 bg-[#020817]/80 backdrop-blur-md text-[9px] sm:text-[10px] font-mono text-neutral-300 shadow-[0_4px_20px_rgba(0,0,0,0.5)] transition-all duration-700 opacity-100 translate-y-0"
           >
             <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -426,7 +437,7 @@ export default function CinematicPortalHero() {
             </span>
             <span className="text-white/20 hidden sm:inline">•</span>
             <span className="text-neutral-400 hidden md:inline">
-              30.7391° N, 76.6888° E
+              30.22° N, 75.83° E
             </span>
             <span className="text-white/20 hidden sm:inline">•</span>
             <span
@@ -438,143 +449,149 @@ export default function CinematicPortalHero() {
           </div>
         </div>
 
-        {/* Hero Left Column Typography & Primary Action */}
+        {/* Hero Middle Content: Balanced Desktop Grid / Mobile Stack */}
         <div
           ref={textGroupRef}
           style={{ willChange: "transform" }}
-          className="max-w-xl space-y-2 sm:space-y-4 mt-auto sm:my-auto mb-2 sm:mb-0 transition-all duration-700 opacity-100 translate-y-0"
+          className="w-full my-auto py-4 md:grid md:grid-cols-12 md:gap-8 items-center transition-all duration-700 opacity-100 translate-y-0"
         >
-          {/* Eyebrow */}
-          <div className="hero-anim-item flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00D9FF] shadow-[0_0_8px_#00D9FF]" />
-            <span className="text-[9px] sm:text-xs font-mono tracking-[0.2em] sm:tracking-[0.3em] text-neutral-300 uppercase">
-              {currentStage === 1 ? "🛰️ SATELLITE ORBIT // TECHFEST'26" : "SLIET PRESENTS // TECHFEST'26"}
-            </span>
-          </div>
+          {/* Left Column: Monumental Typography & Primary Action */}
+          <div className="md:col-span-7 lg:col-span-8 space-y-3 sm:space-y-4">
+            {/* Intro Eyebrow */}
+            <p className="hero-anim-item text-xs sm:text-sm uppercase tracking-[0.35em] text-white/70 font-mono">
+              SLIET PRESENTS
+            </p>
 
-          {/* Headline */}
-          <div className="hero-anim-item space-y-0.5">
-            <h1 className="text-2xl xs:text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.15] sm:leading-[1.1] font-sans drop-shadow-2xl">
-              Where Ideas <span className="hidden sm:inline"><br /></span>Become{" "}
-              <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00D9FF] via-[#7dd3fc] to-[#008CFF] drop-shadow-[0_0_25px_rgba(0,217,255,0.7)]">
-                REALITY
-              </span>
-            </h1>
-          </div>
+            {/* Monumental Headline */}
+            <div className="hero-anim-item">
+              <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-white leading-[0.98] drop-shadow-2xl font-sans">
+                Where Ideas <br />
+                <span className="text-white">Become </span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00D9FF] to-[#38bdf8] drop-shadow-[0_0_30px_rgba(0,217,255,0.6)]">
+                  Reality
+                </span>
+              </h1>
+            </div>
 
-          {/* Subtitle / Dynamic Fest Stats */}
-          <div className="hero-anim-item">
-            {currentStage === 1 ? (
-              <p className="text-xs sm:text-sm md:text-base font-light text-neutral-300 max-w-sm sm:max-w-md leading-relaxed drop-shadow-md">
-                Technology and Sciences for a Sustainable Earth.
+            {/* Official Theme with Animated Energy Accent */}
+            <div className="hero-anim-item space-y-2 pt-1">
+              <p className="text-sm sm:text-lg md:text-xl font-medium leading-relaxed text-white/90">
+                Technology and Sciences for{" "}
+                <span className="text-[#00D9FF] font-semibold">
+                  Sustainable Earth
+                </span>
               </p>
-            ) : (
-              <div className="space-y-2 max-w-md">
-                <p className="text-xs sm:text-sm font-light text-neutral-300 leading-relaxed drop-shadow-md">
-                  Northern India&apos;s Largest Technical Festival at SLIET Longowal.
-                </p>
-                {/* Key Fest Stat Badges */}
-                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-0.5">
-                  <span className="px-2.5 py-1 rounded-md bg-[#00D9FF]/10 border border-[#00D9FF]/30 text-[9px] sm:text-[10px] font-mono text-[#00D9FF] font-semibold">
-                    🏆 ₹5,00,000+ PRIZES
-                  </span>
-                  <span className="px-2.5 py-1 rounded-md bg-white/5 border border-white/15 text-[9px] sm:text-[10px] font-mono text-neutral-200">
-                    ⚡ 61 COMPETITIONS
-                  </span>
-                  <span className="px-2.5 py-1 rounded-md bg-white/5 border border-white/15 text-[9px] sm:text-[10px] font-mono text-neutral-200 hidden xs:inline-block">
-                    👥 10,000+ INNOVATORS
-                  </span>
+              {/* Animated Accent Bar */}
+              <div className="relative h-1.5 w-60 sm:w-80 overflow-hidden rounded-full bg-[#00D9FF]/20">
+                <div className="absolute inset-0 rounded-full bg-[#00D9FF] blur-xs opacity-60" />
+                <div className="absolute left-0 top-1/2 h-2 w-16 -translate-y-1/2 rounded-full bg-[#00D9FF] blur-sm animate-pulse" />
+              </div>
+            </div>
+
+            {/* Date & Location */}
+            <div className="hero-anim-item pt-1">
+              <p className="text-xs sm:text-sm md:text-base tracking-[0.18em] sm:tracking-[0.25em] font-mono uppercase text-[#00D9FF] font-semibold">
+                16 • 17 OCTOBER 2026 <span className="hidden sm:inline">// </span><span className="sm:hidden"><br /></span>SLIET LONGOWAL, PUNJAB
+              </p>
+            </div>
+
+            {/* Primary Action Buttons */}
+            <div className="hero-anim-item pt-2 flex flex-wrap items-center gap-3 pointer-events-auto">
+              {currentStage === 1 ? (
+                <>
+                  <button
+                    onClick={handleInitiateZoom}
+                    className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 rounded-full bg-gradient-to-r from-[#00D9FF] to-[#008CFF] hover:brightness-110 text-[#020817] font-mono text-xs sm:text-sm font-bold tracking-wider shadow-[0_0_30px_rgba(0,217,255,0.4)] transition-all cursor-pointer active:scale-95"
+                  >
+                    <span>▶ DIVE TO CAMPUS</span>
+                    <span>→</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedEventForReg("");
+                      setActiveModal("register");
+                    }}
+                    className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-white font-mono text-xs sm:text-sm tracking-wider backdrop-blur-sm transition-all cursor-pointer active:scale-95"
+                  >
+                    <span>REGISTER NOW</span>
+                    <span className="text-[#00D9FF]">↗</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      setSelectedEventForReg("");
+                      setActiveModal("register");
+                    }}
+                    className="inline-flex items-center justify-center gap-2 px-7 sm:px-9 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#00D9FF] to-[#008CFF] hover:brightness-110 text-[#020817] font-mono text-xs sm:text-sm font-bold tracking-wider shadow-[0_0_30px_rgba(0,217,255,0.4)] transition-all cursor-pointer active:scale-95"
+                  >
+                    <span>REGISTER NOW</span>
+                    <span>→</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      const el = document.getElementById("events-section");
+                      if (el) {
+                        el.scrollIntoView({ behavior: "smooth" });
+                      } else {
+                        setActiveModal("events");
+                      }
+                    }}
+                    className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-white font-mono text-xs sm:text-sm tracking-wider backdrop-blur-sm transition-all cursor-pointer active:scale-95"
+                  >
+                    <span>EXPLORE 61 EVENTS</span>
+                    <span className="text-[#00D9FF]">↗</span>
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Space Zoom Replay Link */}
+            <div className="hero-anim-item pt-1 pointer-events-auto">
+              <button
+                onClick={replayZoom}
+                className="text-[11px] font-mono text-neutral-400 hover:text-[#00D9FF] transition-colors cursor-pointer flex items-center gap-1.5 py-0.5"
+              >
+                <span>↺</span>
+                <span className="hover:underline">Replay Satellite Orbit &amp; Drone Descent</span>
+              </button>
+            </div>
+
+            {/* Mobile Countdown Timer (Under Buttons) */}
+            <div className="md:hidden pt-3 pointer-events-auto">
+              <FestCountdownTimer />
+            </div>
+          </div>
+
+          {/* Right Column: Floating Glass Countdown & Highlights (Desktop) */}
+          <div className="hidden md:flex md:col-span-5 lg:col-span-4 flex-col items-end justify-center gap-4 pointer-events-auto">
+            <FestCountdownTimer />
+
+            {/* Highlights Card */}
+            <div className="p-4 rounded-2xl bg-[#020817]/60 backdrop-blur-xl border border-white/10 shadow-2xl space-y-3 w-full max-w-[290px]">
+              <div className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider pb-1 border-b border-white/10">
+                // FESTIVAL HIGHLIGHTS
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <div className="text-lg font-bold text-[#00D9FF] font-mono">₹5,00,000+</div>
+                  <div className="text-[9px] text-neutral-400 font-mono uppercase">Prize Pool</div>
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-white font-mono">61</div>
+                  <div className="text-[9px] text-neutral-400 font-mono uppercase">Competitions</div>
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-white font-mono">10,000+</div>
+                  <div className="text-[9px] text-neutral-400 font-mono uppercase">Innovators</div>
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-[#00D9FF] font-mono">451 ACRES</div>
+                  <div className="text-[9px] text-neutral-400 font-mono uppercase">SLIET Campus</div>
                 </div>
               </div>
-            )}
-          </div>
-
-          {/* Date & Location */}
-          <div className="hero-anim-item space-y-0.5">
-            <p className="text-[11px] sm:text-sm font-mono tracking-[0.2em] sm:tracking-[0.3em] text-[#00D9FF] uppercase font-semibold">
-              16 • 17 OCTOBER 2026
-            </p>
-            <p className="text-[9px] sm:text-xs font-mono tracking-[0.18em] sm:tracking-[0.2em] text-neutral-400 uppercase">
-              SLIET LONGOWAL, PUNJAB • 451-ACRE CAMPUS
-            </p>
-          </div>
-
-          {/* Live Sci-Fi Countdown to TechFest'26 */}
-          <div className="hero-anim-item pt-1 pointer-events-auto">
-            <FestCountdownTimer />
-          </div>
-
-          {/* Clean Streamlined CTAs: Side-by-side on mobile grid, row on desktop */}
-          <div className="hero-anim-item pt-1 sm:pt-2 grid grid-cols-2 sm:flex sm:flex-row items-center gap-2 sm:gap-3 pointer-events-auto">
-            {currentStage === 1 ? (
-              <>
-                {/* Primary: Zoom to India Button */}
-                <button
-                  onClick={handleInitiateZoom}
-                  className="group inline-flex items-center justify-center gap-1.5 sm:gap-2.5 px-3 sm:px-8 py-2.5 sm:py-3.5 rounded-full bg-gradient-to-r from-[#00D9FF] to-[#008CFF] active:scale-[0.98] hover:brightness-110 text-[#020817] font-mono text-[11px] sm:text-sm font-bold tracking-[0.08em] sm:tracking-[0.2em] shadow-[0_0_30px_rgba(0,217,255,0.5)] transition-all duration-200 cursor-pointer min-h-[40px] sm:min-h-[48px] animate-pulse"
-                >
-                  <span className="truncate">▶ ZOOM INDIA</span>
-                  <span className="group-hover:translate-x-1 transition-transform duration-200 font-extrabold hidden xs:inline">
-                    →
-                  </span>
-                </button>
-
-                {/* Secondary: Register */}
-                <button
-                  onClick={() => {
-                    setSelectedEventForReg("");
-                    setActiveModal("register");
-                  }}
-                  className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3.5 rounded-full border border-white/20 bg-white/5 active:scale-[0.98] hover:bg-white/10 text-white font-mono text-[11px] sm:text-sm tracking-wider transition-all duration-200 cursor-pointer backdrop-blur-sm min-h-[40px] sm:min-h-[48px]"
-                >
-                  <span>REGISTER</span>
-                  <span className="text-[#00D9FF]">↗</span>
-                </button>
-              </>
-            ) : (
-              <>
-                {/* Primary Action Button */}
-                <button
-                  onClick={() => {
-                    setSelectedEventForReg("");
-                    setActiveModal("register");
-                  }}
-                  className="group inline-flex items-center justify-center gap-1.5 sm:gap-2.5 px-3 sm:px-8 py-2.5 sm:py-3.5 rounded-full bg-gradient-to-r from-[#00D9FF] to-[#008CFF] active:scale-[0.98] hover:brightness-110 text-[#020817] font-mono text-[11px] sm:text-sm font-bold tracking-[0.08em] sm:tracking-[0.2em] shadow-[0_0_25px_rgba(0,217,255,0.4)] transition-all duration-200 cursor-pointer min-h-[40px] sm:min-h-[48px]"
-                >
-                  <span className="truncate">REGISTER</span>
-                  <span className="group-hover:translate-x-1 transition-transform duration-200 font-extrabold hidden xs:inline">
-                    →
-                  </span>
-                </button>
-
-                {/* Secondary Action Button */}
-                <button
-                  onClick={() => {
-                    const el = document.getElementById("events-section");
-                    if (el) {
-                      el.scrollIntoView({ behavior: "smooth" });
-                    } else {
-                      setActiveModal("events");
-                    }
-                  }}
-                  className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3.5 rounded-full border border-white/20 bg-white/5 active:scale-[0.98] hover:bg-white/10 text-white font-mono text-[11px] sm:text-sm tracking-wider transition-all duration-200 cursor-pointer backdrop-blur-sm min-h-[40px] sm:min-h-[48px]"
-                >
-                  <span className="truncate">61 EVENTS</span>
-                  <span className="text-[#00D9FF]">↗</span>
-                </button>
-              </>
-            )}
-          </div>
-
-          {/* Space Zoom Replay Link */}
-          <div className="hero-anim-item pt-0.5 pointer-events-auto">
-            <button
-              onClick={replayZoom}
-              className="text-[10px] sm:text-[11px] font-mono text-neutral-400 hover:text-[#00D9FF] transition-colors cursor-pointer flex items-center gap-1.5 py-1"
-            >
-              <span>↺</span>
-              <span className="hover:underline">Replay Satellite Orbit &amp; Hyper-Descent</span>
-            </button>
+            </div>
           </div>
         </div>
 
@@ -741,7 +758,7 @@ export default function CinematicPortalHero() {
       {/* 6. SUBTLE CYBER TOAST NOTIFICATION                                        */}
       {/* ========================================================================= */}
       {toastMessage && (
-        <div className="fixed top-14 sm:top-20 inset-x-4 sm:inset-x-auto sm:right-6 z-50 flex items-center justify-between gap-3 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full border border-[#00D9FF]/70 bg-[#06152D]/95 text-white font-mono text-[11px] sm:text-xs shadow-[0_0_30px_rgba(0,217,255,0.35)] backdrop-blur-xl animate-in slide-in-from-top-2 duration-200 max-w-sm sm:max-w-md mx-auto sm:mx-0 sm:ml-auto">
+        <div className="fixed top-20 sm:top-24 inset-x-4 sm:inset-x-auto sm:right-6 z-50 flex items-center justify-between gap-3 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full border border-[#00D9FF]/70 bg-[#06152D]/95 text-white font-mono text-[11px] sm:text-xs shadow-[0_0_30px_rgba(0,217,255,0.35)] backdrop-blur-xl animate-in slide-in-from-top-2 duration-200 max-w-sm sm:max-w-md mx-auto sm:mx-0 sm:ml-auto">
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#00D9FF] animate-ping shrink-0" />
             <span className="tracking-wider truncate">{toastMessage}</span>

@@ -48,75 +48,72 @@ export default function FestCountdownTimer() {
 
   if (!mounted) {
     return (
-      <div className="relative inline-flex flex-col gap-1.5 p-2 sm:p-3 rounded-xl bg-[#030919]/85 backdrop-blur-md border border-cyan-500/30 min-h-[70px] min-w-[240px]" />
+      <div className="inline-flex items-center gap-2 p-3 rounded-2xl bg-[#020817]/60 backdrop-blur-xl border border-white/10 min-h-[64px] min-w-[260px]" />
     );
   }
 
   return (
-    <div className="relative inline-flex flex-col gap-1.5 p-2 sm:p-3 rounded-xl bg-[#030919]/90 backdrop-blur-md border border-cyan-500/35 shadow-[0_0_25px_rgba(0,217,255,0.2)] select-none">
-      {/* Sci-Fi Corner Brackets */}
-      <span className="absolute top-1 left-1 text-[8px] text-cyan-400 font-mono leading-none">⌜</span>
-      <span className="absolute top-1 right-1 text-[8px] text-cyan-400 font-mono leading-none">⌝</span>
-      <span className="absolute bottom-1 left-1 text-[8px] text-cyan-400 font-mono leading-none">⌞</span>
-      <span className="absolute bottom-1 right-1 text-[8px] text-cyan-400 font-mono leading-none">⌟</span>
-
-      {/* Header Telemetry Line: Real Live Status */}
-      <div className="flex items-center justify-between gap-3 text-[9px] font-mono text-neutral-300 px-0.5">
-        <div className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-          <span className="text-cyan-300 font-bold tracking-widest uppercase">
-            {timeLeft.isLive ? "● FEST IS LIVE" : "LIVE T-MINUS COUNTDOWN"}
+    <div className="inline-flex flex-col gap-2 p-3.5 sm:p-4 rounded-2xl bg-[#020817]/60 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] select-none">
+      {/* Header: Status */}
+      <div className="flex items-center justify-between gap-4 text-[10px] font-mono text-neutral-300">
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+          </span>
+          <span className="font-semibold tracking-wider uppercase text-neutral-200">
+            {timeLeft.isLive ? "Fest In Progress" : "Countdown to TechFEST'26"}
           </span>
         </div>
-        <span className="text-[8px] text-neutral-400 tracking-wider">
-          TARGET: 16 OCT 2026 // IST
+        <span className="text-neutral-400 tracking-wider">
+          16-17 OCT 2026
         </span>
       </div>
 
-      {/* Countdown Grid with live second pulse */}
-      <div className="flex items-center gap-1.5 sm:gap-2 font-mono">
+      {/* Countdown Grid */}
+      <div className="flex items-center gap-2 font-mono">
         {/* DAYS */}
-        <div className="flex flex-col items-center px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg bg-cyan-950/40 border border-cyan-500/25 min-w-[44px] sm:min-w-[50px]">
-          <span className="text-sm sm:text-lg md:text-xl font-black text-white tracking-wider drop-shadow-[0_0_8px_rgba(0,217,255,0.6)]">
+        <div className="flex flex-col items-center px-3 py-1.5 rounded-xl bg-white/[0.05] border border-white/10 min-w-[52px]">
+          <span className="text-lg sm:text-xl font-bold text-white tracking-wider">
             {timeLeft.days.toString().padStart(2, "0")}
           </span>
-          <span className="text-[7px] sm:text-[8px] text-cyan-400 font-semibold tracking-wider uppercase">
+          <span className="text-[8px] text-neutral-400 font-medium tracking-wider uppercase">
             DAYS
           </span>
         </div>
 
-        <span className="text-cyan-400/80 font-bold text-xs sm:text-sm animate-pulse">:</span>
+        <span className="text-neutral-500 font-bold text-sm">:</span>
 
         {/* HOURS */}
-        <div className="flex flex-col items-center px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg bg-cyan-950/40 border border-cyan-500/25 min-w-[44px] sm:min-w-[50px]">
-          <span className="text-sm sm:text-lg md:text-xl font-black text-white tracking-wider drop-shadow-[0_0_8px_rgba(0,217,255,0.6)]">
+        <div className="flex flex-col items-center px-3 py-1.5 rounded-xl bg-white/[0.05] border border-white/10 min-w-[52px]">
+          <span className="text-lg sm:text-xl font-bold text-white tracking-wider">
             {timeLeft.hours.toString().padStart(2, "0")}
           </span>
-          <span className="text-[7px] sm:text-[8px] text-cyan-400 font-semibold tracking-wider uppercase">
+          <span className="text-[8px] text-neutral-400 font-medium tracking-wider uppercase">
             HOURS
           </span>
         </div>
 
-        <span className="text-cyan-400/80 font-bold text-xs sm:text-sm animate-pulse">:</span>
+        <span className="text-neutral-500 font-bold text-sm">:</span>
 
         {/* MINS */}
-        <div className="flex flex-col items-center px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg bg-cyan-950/40 border border-cyan-500/25 min-w-[44px] sm:min-w-[50px]">
-          <span className="text-sm sm:text-lg md:text-xl font-black text-white tracking-wider drop-shadow-[0_0_8px_rgba(0,217,255,0.6)]">
+        <div className="flex flex-col items-center px-3 py-1.5 rounded-xl bg-white/[0.05] border border-white/10 min-w-[52px]">
+          <span className="text-lg sm:text-xl font-bold text-white tracking-wider">
             {timeLeft.minutes.toString().padStart(2, "0")}
           </span>
-          <span className="text-[7px] sm:text-[8px] text-cyan-400 font-semibold tracking-wider uppercase">
+          <span className="text-[8px] text-neutral-400 font-medium tracking-wider uppercase">
             MINS
           </span>
         </div>
 
-        <span className="text-cyan-400/80 font-bold text-xs sm:text-sm animate-pulse">:</span>
+        <span className="text-neutral-500 font-bold text-sm">:</span>
 
-        {/* SECS with live heartbeat glow */}
-        <div className="flex flex-col items-center px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg bg-cyan-950/50 border border-cyan-400/40 min-w-[44px] sm:min-w-[50px] relative overflow-hidden">
-          <span className="text-sm sm:text-lg md:text-xl font-black text-cyan-300 tracking-wider drop-shadow-[0_0_12px_rgba(0,217,255,0.9)]">
+        {/* SECS */}
+        <div className="flex flex-col items-center px-3 py-1.5 rounded-xl bg-[#00D9FF]/10 border border-[#00D9FF]/30 min-w-[52px]">
+          <span className="text-lg sm:text-xl font-bold text-[#00D9FF] tracking-wider">
             {timeLeft.seconds.toString().padStart(2, "0")}
           </span>
-          <span className="text-[7px] sm:text-[8px] text-cyan-400 font-semibold tracking-wider uppercase">
+          <span className="text-[8px] text-[#00D9FF]/80 font-medium tracking-wider uppercase">
             SECS
           </span>
         </div>
